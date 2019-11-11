@@ -147,9 +147,9 @@ def define_sets_with_no_shared_genes(images_info_df):
     validation_df = validation_df.sort_values(by=['image_id'])
     test_df = test_df.sort_values(by=['image_id'])
 
-    training_df.to_csv(os.path.join(MAIN_DIR, STUDY, "sets", "training.csv"), index=None)
-    validation_df.to_csv(os.path.join(MAIN_DIR, STUDY, "sets", "validation.csv"), index=None)
-    test_df.to_csv(os.path.join(MAIN_DIR, STUDY, "sets", "test.csv"), index=None)
+    training_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training.csv"), index=None)
+    validation_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "validation.csv"), index=None)
+    test_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "test.csv"), index=None)
 
     return training_df, validation_df, test_df
 
@@ -249,9 +249,9 @@ def define_sets_with_no_shared_donors(images_info_df):
     validation_df = validation_df.sort_values(by=['image_id'])
     test_df = test_df.sort_values(by=['image_id'])
 
-    training_df.to_csv(os.path.join(MAIN_DIR, STUDY, "sets", "training.csv"), index=None)
-    validation_df.to_csv(os.path.join(MAIN_DIR, STUDY, "sets", "validation.csv"), index=None)
-    test_df.to_csv(os.path.join(MAIN_DIR, STUDY, "sets", "test.csv"), index=None)
+    training_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training.csv"), index=None)
+    validation_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "validation.csv"), index=None)
+    test_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "test.csv"), index=None)
 
 
     return training_df, validation_df, test_df
@@ -450,14 +450,14 @@ def make_triplet_csv(df, out_file):
 
 def make_triplet_csvs(dfs):
 
-    out_base = os.path.join(MAIN_DIR, STUDY, "sets") + "/triplet"
+    out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
     return tuple((make_triplet_csv(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
                  for df, ext in zip(dfs, ("training", "validation", "test")))
 
 
 def run():
 
-    images_info_df = pd.read_csv(os.path.join(MAIN_DIR, STUDY, "human_ISH_info.csv"))
+    images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
 
     stats_dict = get_stats(images_info_df)
 

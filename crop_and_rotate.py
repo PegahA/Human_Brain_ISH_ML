@@ -18,9 +18,9 @@ from human_ISH_config import *
 
 RANDOM_SELECT_COUNT = 1000
 
-images_path = os.path.join(MAIN_DIR, STUDY, "sample_images")
-per_image_r_patches_path = os.path.join(MAIN_DIR, STUDY, "per_image_r_patches")
-overall_r_patches_path = os.path.join(MAIN_DIR, STUDY, "overall_r_patches")
+images_path = os.path.join(DATA_DIR, STUDY, "sample_images")
+per_image_r_patches_path = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
+overall_r_patches_path = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
 
 if not os.path.exists(per_image_r_patches_path):
     os.mkdir(per_image_r_patches_path)
@@ -347,7 +347,7 @@ def get_average_height_width(select_random=False):
     If select_random == True, we randomly choose a RANDOM_SELECT_COUNT number of images to load and use.
     :return: average height and average width values of all the images.
     """
-    images_path = os.path.join(MAIN_DIR, STUDY, "images")
+    images_path = os.path.join(DATA_DIR, STUDY, "images")
     image_list = os.listdir(images_path)
     image_count = len(image_list)
     print (image_count)
@@ -391,7 +391,7 @@ def get_min_height_width(select_random=False):
     :return: minimum height and minimum width values of all the images.
     """
 
-    images_path = os.path.join(MAIN_DIR, STUDY, "images")
+    images_path = os.path.join(DATA_DIR, STUDY, "images")
     image_list = os.listdir(images_path)
     image_count = len(image_list)
     print("finding the minimum height and minimum width within {} images" .format(image_count))
