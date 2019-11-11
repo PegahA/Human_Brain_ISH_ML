@@ -1,5 +1,5 @@
 import os
-
+import shutil
 
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
@@ -21,14 +21,14 @@ NUMBER_OF_CIRCLES_IN_WIDTH = 1
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
-    if (not os.path.exists(EXPERIMENT_ROOT)):
-        os.mkdir(EXPERIMENT_ROOT)
+    if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
+        shutil.rmtree(EXPERIMENT_ROOT)
 
 elif  PATCH_TYPE == 'r_overall' :
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
-    if (not os.path.exists(EXPERIMENT_ROOT)):
-        os.mkdir(EXPERIMENT_ROOT)
+    if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
+        shutil.rmtree(EXPERIMENT_ROOT)
 
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
