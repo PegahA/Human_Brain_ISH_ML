@@ -125,6 +125,7 @@ parser.add_argument(
          ' Everything can be re-constructed and analyzed that way.')
 
 
+
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.run()
@@ -164,7 +165,7 @@ if __name__ == "__main__":
                           " --experiment_root=" + "'" + args.experiment_root + "'" + \
                           " --train_set=" + "'" + args.train_set + "'" \
                           " --image_root=" + "'" + args.image_root + "'" + \
-                          " --resume=" + str(args.resume) + \
+                          (" --resume" if args.resume else "") + \
                           " --model_name=" + "'" + args.model_name + "'" + \
                           " --head_name=" + "'" + args.head_name + "'" + \
                           " --embedding_dim=" + str(args.embedding_dim) + \
@@ -182,14 +183,23 @@ if __name__ == "__main__":
                           " --learning_rate="  + str(args.learning_rate) + \
                           " --train_iterations=" + str(args.train_iterations) + \
                           " --decay_start_iteration=" + str(args.decay_start_iteration) + \
-                          " --checkpoint_frequency=" + str(args.checkpoint_frequency) +\
-                          " --flip_augment=" + str(args.flip_augment) + \
-                          " --crop_augment=" + str(args.crop_augment) + \
-                          " --detailed_logs=" + str(args.detailed_logs)
+                          " --checkpoint_frequency=" + str(args.checkpoint_frequency) + \
+                          (" --flip_augment" if args.flip_augment else "") + \
+                          (" --crop_augment" if args.crop_augment else "") + \
+                          (" --detailed_logs" if args.detailed_logs else "")
 
 
     print (command_line_string)
     os.system(command_line_string)
+    
+
+
+
+
+
+
+
+>>>>>>> 37c55c33daac1fc0edeb7c74cfd567e9f191d0f3
 
 
 
