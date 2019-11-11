@@ -6,6 +6,10 @@ from human_ISH_config import *
 
 random.seed(1)
 
+if (not os.path.exists(os.path.join(DATA_DIR, STUDY, "sets"))):
+    os.mkdir(os.path.join(DATA_DIR, STUDY, "sets"))
+
+
 def get_stats(images_info_df):
     """
     Uses the images_info_df and calculates some stats.
