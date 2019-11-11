@@ -32,7 +32,7 @@ elif  PATCH_TYPE == 'r_overall' :
 
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
-EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_training_validation.csv")
+EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_validation.csv")
 INITIAL_CHECKPOINT = os.path.join(CODE_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
