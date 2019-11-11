@@ -4,7 +4,7 @@
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
 STUDY = "cortex"
-MAIN_DIR = "/Users/pegah_abed/Documents/Human_ISH"
+MAIN_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 
 
 PATCH_HEIGHT = 256
