@@ -108,17 +108,17 @@ parser.add_argument(
          'checkpoint.')
 
 parser.add_argument(
-    '--flip_augment', action='store_true', default=FLIP_AUGMENT,
+    '--flip_augment', default=FLIP_AUGMENT,
     help='When this flag is provided, flip augmentation is performed.')
 
 parser.add_argument(
-    '--crop_augment', action='store_true', default=CROP_AUGMENT,
+    '--crop_augment', default=CROP_AUGMENT,
     help='When this flag is provided, crop augmentation is performed. Based on'
          'The `crop_height` and `crop_width` parameters. Changing this flag '
          'thus likely changes the network input size!')
 
 parser.add_argument(
-    '--detailed_logs', action='store_true', default=DETAILED_LOGS,
+    '--detailed_logs', default=DETAILED_LOGS,
     help='Store very detailed logs of the training in addition to TensorBoard'
          ' summaries. These are mem-mapped numpy files containing the'
          ' embeddings, losses and FIDs seen in each batch during training.'
