@@ -24,7 +24,7 @@ parser.add_argument(
 
 
 parser.add_argument(
-    '--resume', action='store_true', default=False,
+    '--resume',default=False,
     help='When this flag is provided, all other arguments apart from the '
          'experiment_root are ignored and a previously saved set of arguments '
          'is loaded.')
