@@ -442,7 +442,7 @@ def make_triplet_csv(df, out_file):
         patch_image_list = [(id.split(".")[0]+"_"+str(patch_index)+".jpg",gene) for id, gene in zip(temp_df['image'],temp_df['gene_symbol'])]
         new_image_info += patch_image_list
 
-    new_df = pd.DataFrame()
+    new_df = pd.DataFrame(columns=['gene_symbol','image'])
     new_df['image'] = [item[0] for item in new_image_info]
     new_df['gene_symbol'] = [item[1] for item in new_image_info]
 
