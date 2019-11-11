@@ -130,7 +130,7 @@ parser.add_argument(
 # ------ for embedding ------
 
 parser.add_argument(
-    '--embed_dataset', required=True, default=EMBED_SET,
+    '--embed_dataset', default=EMBED_SET,
     help='Path to the dataset csv file to be embedded.')
 
 parser.add_argument(
@@ -239,11 +239,12 @@ if __name__ == "__main__":
                                 " --loading_threads=" + str(args.loading_threads) + \
                                 " --batch_size=" + str(args.embed_batch_size) + \
                                 (" --flip_augment" if args.embed_flip_augment else "") + \
-                                " --crop_augment=" + args.embed_crop_augment + \
-                                " --aggregator=" + args.embed_aggregator
+                                (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
+                                (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
 
     os.system(train_command_line_string)
+    os.system(embed_command_line_string)
     
 
 
