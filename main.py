@@ -169,7 +169,7 @@ if __name__ == "__main__":
                           " --model_name=" + "'" + args.model_name + "'" + \
                           " --head_name=" + "'" + args.head_name + "'" + \
                           " --embedding_dim=" + str(args.embedding_dim) + \
-                          " --initial_checkpoint= " + "'" + args.initial_checkpoint + "'" \
+                          " --initial_checkpoint=" + "'" + args.initial_checkpoint + "'" \
                           " --batch_p=" + str(args.batch_p) + \
                           " --batch_k=" + str(args.batch_k) + \
                           " --net_input_height=" + str(args.net_input_height) + \
@@ -192,14 +192,6 @@ if __name__ == "__main__":
     print (command_line_string)
     os.system(command_line_string)
     
-
-
-
-
-
-
-
->>>>>>> 37c55c33daac1fc0edeb7c74cfd567e9f191d0f3
 
 
 
