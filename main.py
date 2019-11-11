@@ -24,7 +24,7 @@ parser.add_argument(
 
 
 parser.add_argument(
-    '--resume', action='store_true', default=False,
+    '--resume', default=False,
     help='When this flag is provided, all other arguments apart from the '
          'experiment_root are ignored and a previously saved set of arguments '
          'is loaded.')
@@ -108,17 +108,17 @@ parser.add_argument(
          'checkpoint.')
 
 parser.add_argument(
-    '--flip_augment', action='store_true', default=FLIP_AUGMENT,
+    '--flip_augment', default=FLIP_AUGMENT,
     help='When this flag is provided, flip augmentation is performed.')
 
 parser.add_argument(
-    '--crop_augment', action='store_true', default=CROP_AUGMENT,
+    '--crop_augment', default=CROP_AUGMENT,
     help='When this flag is provided, crop augmentation is performed. Based on'
          'The `crop_height` and `crop_width` parameters. Changing this flag '
          'thus likely changes the network input size!')
 
 parser.add_argument(
-    '--detailed_logs', action='store_true', default=DETAILED_LOGS,
+    '--detailed_logs', default=DETAILED_LOGS,
     help='Store very detailed logs of the training in addition to TensorBoard'
          ' summaries. These are mem-mapped numpy files containing the'
          ' embeddings, losses and FIDs seen in each batch during training.'
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     
 
 
-    command_line_string = "python train.py" + \
+    command_line_string = "python triplet-reid/train.py" + \
                           " --experiment_root=" + "'" + args.experiment_root + "'" + \
                           " --train_set=" + "'" + args.train_set + "'" \
                           " --image_root=" + "'" + args.image_root + "'" + \
@@ -189,13 +189,7 @@ if __name__ == "__main__":
 
 
     print (command_line_string)
-
-
-
-
-
-
-
+    os.system(command_line_string)
 
 
 
