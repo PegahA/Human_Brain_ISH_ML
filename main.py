@@ -160,6 +160,38 @@ if __name__ == "__main__":
 
 
 
+    command_line_string = "python train.py" + \
+                          " --experiment_root=" + "'" + args.experiment_root + "'" + \
+                          " --train_set=" + "'" + args.train_set + "'" \
+                          " --image_root=" + "'" + args.image_root + "'" + \
+                          " --resume=" + str(args.resume) + \
+                          " --model_name=" + "'" + args.model_name + "'" + \
+                          " --head_name=" + "'" + args.head_name + "'" + \
+                          " --embedding_dim=" + str(args.embedding_dim) + \
+                          " --initial_checkpoint= " + "'" + args.initial_checkpoint + "'" \
+                          " --batch_p=" + str(args.batch_p) + \
+                          " --batch_k=" + str(args.batch_k) + \
+                          " --net_input_height=" + str(args.net_input_height) + \
+                          " --net_input_width=" + str(args.net_input_width) + \
+                          " --pre_crop_height=" + str(args.pre_crop_height) + \
+                          " --pre_crop_width=" + str(args.pre_crop_width) + \
+                          " --loading_threads=" + str(args.loading_threads) + \
+                          " --margin=" + "'" + args.margin + "'" + \
+                          " --metric=" + "'" + args.metric + "'" +\
+                          " --loss=" + "'" + args.loss + "'" +\
+                          " --learning_rate="  + str(args.learning_rate) + \
+                          " --train_iterations=" + str(args.train_iterations) + \
+                          " --decay_start_iteration=" + str(args.decay_start_iteration) + \
+                          " --checkpoint_frequency=" + str(args.checkpoint_frequency) +\
+                          " --flip_augment=" + str(args.flip_augment) + \
+                          " --crop_augment=" + str(args.crop_augment) + \
+                          " --detailed_logs=" + str(args.detailed_logs)
+
+
+    print (command_line_string)
+
+
+
 
 
 
