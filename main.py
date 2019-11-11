@@ -6,9 +6,12 @@ from argparse import ArgumentParser
 import os
 
 
+TRAIN = True
+
+
 parser = ArgumentParser(description='Train a ReID network.')
 
-
+# ------ for training ------
 parser.add_argument(
     '--experiment_root', default=EXPERIMENT_ROOT, type= str,
     help='Location used to store checkpoints and dumped data.')
@@ -24,7 +27,7 @@ parser.add_argument(
 
 
 parser.add_argument(
-    '--resume',default=False,
+    '--train_resume',default=False,
     help='When this flag is provided, all other arguments apart from the '
          'experiment_root are ignored and a previously saved set of arguments '
          'is loaded.')
@@ -38,7 +41,7 @@ parser.add_argument(
     help='Name of the head to use.')
 
 parser.add_argument(
-    '--embedding_dim', default=EMBEDDING_DIM,
+    '--train_embedding_dim', default=TRAIN_EMBEDDING_DIM,
     help='Dimensionality of the embedding space.')
 
 parser.add_argument(
@@ -46,11 +49,11 @@ parser.add_argument(
     help='Path to the checkpoint file of the pretrained network.')
 
 parser.add_argument(
-    '--batch_p', default=BATCH_P,
+    '--train_batch_p', default=TRAIN_BATCH_P,
     help='The number P used in the PK-batches')
 
 parser.add_argument(
-    '--batch_k', default=BATCH_K,
+    '--train_batch_k', default=TRAIN_BATCH_K,
     help='The numberK used in the PK-batches')
 
 parser.add_argument(
@@ -108,11 +111,11 @@ parser.add_argument(
          'checkpoint.')
 
 parser.add_argument(
-    '--flip_augment', default=FLIP_AUGMENT,
+    '--train_flip_augment', default=TRAIN_FLIP_AUGMENT,
     help='When this flag is provided, flip augmentation is performed.')
 
 parser.add_argument(
-    '--crop_augment', default=CROP_AUGMENT,
+    '--train_crop_augment', default=TRAIN_CROP_AUGMENT,
     help='When this flag is provided, crop augmentation is performed. Based on'
          'The `crop_height` and `crop_width` parameters. Changing this flag '
          'thus likely changes the network input size!')
@@ -124,6 +127,37 @@ parser.add_argument(
          ' embeddings, losses and FIDs seen in each batch during training.'
          ' Everything can be re-constructed and analyzed that way.')
 
+# ------ for embedding ------
+
+parser.add_argument(
+    '--embed_dataset', required=True, default=EMBED_SET,
+    help='Path to the dataset csv file to be embedded.')
+
+parser.add_argument(
+    '--embed_batch_size', default=EMBED_BATCH_SIZE,
+    help='Batch size used during evaluation, adapt based on available memory.')
+
+
+parser.add_argument(
+    '--embed_flip_augment', default=EMBED_FLIP_AUGMENT,
+    help='When this flag is provided, flip augmentation is performed.')
+
+parser.add_argument(
+    '--embed_crop_augment', choices=['center', 'avgpool', 'five'], default=EMBED_CROP_AUGMENT,
+    help='When this flag is provided, crop augmentation is performed.'
+         '`avgpool` means the full image at the precrop size is used and '
+         'the augmentation is performed by the average pooling. `center` means'
+         'only the center crop is used and `five` means the four corner and '
+         'center crops are used. When not provided, by default the image is '
+         'resized to network input size.')
+
+parser.add_argument(
+    '--embed_aggregator',  default=EMBED_AGGREGATOR,
+    help='The type of aggregation used to combine the different embeddings '
+         'after augmentation.')
+
+
+# --------------
 
 
 if __name__ == "__main__":
@@ -132,17 +166,17 @@ if __name__ == "__main__":
     # process.run()
     
     args = parser.parse_args()
-    print ("\n------- Starting training with:")
+    print ("\n------- Arguments:")
     print ("experiment root: ", args.experiment_root)
     print ("train set: ", args.train_set)
     print ("image root: ", args.image_root)
-    print ("resume: ", args.resume)
+    print ("train resume: ", args.train_resume)
     print ("model name: ", args.model_name)
     print ("head name: ", args.head_name)
-    print ("embedding dim: ", args.embedding_dim)
+    print ("train embedding dim: ", args.train_embedding_dim)
     print ("initial checkpoint: ", args.initial_checkpoint)
-    print ("batch p: ", args.batch_p)
-    print ("batch k: ", args.batch_k)
+    print ("train batch p: ", args.train_batch_p)
+    print ("train batch k: ", args.train_batch_k)
     print ("net input height: ", args.net_input_height)
     print ("net input width: ", args.net_input_width)
     print ("pre crop height: ", args.pre_crop_height)
@@ -155,23 +189,31 @@ if __name__ == "__main__":
     print ("train iterations: ", args.train_iterations)
     print ("decay start iteration: ", args.decay_start_iteration)
     print ("checkpoint frequency: ", args.checkpoint_frequency)
-    print ("flip augment: ", args.flip_augment)
-    print ("crop augment: ", args.crop_augment)
+    print ("train flip augment: ", args.train_flip_augment)
+    print ("train crop augment: ", args.train_crop_augment)
     print ("detailed logs: ", args.detailed_logs)
+
+
+    print ("embed dataset: ", args.embed_dataset)
+    print ("embed_batch_size: ", args.embed_batch_size)
+    print ("embed flip augment: ", args.embed_flip_augment)
+    print ("embed crop augment: ", args.embed_crop_augment)
+    print ('embed aggregator: ', args.embed_aggregator)
+
     
 
 
-    command_line_string = "python triplet-reid/train.py" + \
+    train_command_line_string = "python triplet-reid/train.py" + \
                           " --experiment_root=" + "'" + args.experiment_root + "'" + \
                           " --train_set=" + "'" + args.train_set + "'" \
                           " --image_root=" + "'" + args.image_root + "'" + \
-                          (" --resume" if args.resume else "") + \
+                          (" --resume" if args.train_resume else "") + \
                           " --model_name=" + "'" + args.model_name + "'" + \
                           " --head_name=" + "'" + args.head_name + "'" + \
-                          " --embedding_dim=" + str(args.embedding_dim) + \
+                          " --embedding_dim=" + str(args.train_embedding_dim) + \
                           " --initial_checkpoint=" + "'" + args.initial_checkpoint + "'" \
-                          " --batch_p=" + str(args.batch_p) + \
-                          " --batch_k=" + str(args.batch_k) + \
+                          " --batch_p=" + str(args.train_batch_p) + \
+                          " --batch_k=" + str(args.train_batch_k) + \
                           " --net_input_height=" + str(args.net_input_height) + \
                           " --net_input_width=" + str(args.net_input_width) + \
                           " --pre_crop_height=" + str(args.pre_crop_height) + \
@@ -184,13 +226,24 @@ if __name__ == "__main__":
                           " --train_iterations=" + str(args.train_iterations) + \
                           " --decay_start_iteration=" + str(args.decay_start_iteration) + \
                           " --checkpoint_frequency=" + str(args.checkpoint_frequency) + \
-                          (" --flip_augment" if args.flip_augment else "") + \
-                          (" --crop_augment" if args.crop_augment else "") + \
+                          (" --flip_augment" if args.train_flip_augment else "") + \
+                          (" --crop_augment" if args.train_crop_augment else "") + \
                           (" --detailed_logs" if args.detailed_logs else "")
 
 
-    print (command_line_string)
-    os.system(command_line_string)
+
+    embed_command_line_string = "python triplet-reid/embed.py" + \
+                                " --experiment_root=" + "'" + args.experiment_root + "'" + \
+                                " --dataset=" + "'" + args.embed_dataset + "'" +\
+                                " --image_root=" + "'" + args.image_root + "'" + \
+                                " --loading_threads=" + str(args.loading_threads) + \
+                                " --batch_size=" + str(args.embed_batch_size) + \
+                                (" --flip_augment" if args.embed_flip_augment else "") + \
+                                " --crop_augment=" + args.embed_crop_augment + \
+                                " --aggregator=" + args.embed_aggregator
+
+
+    os.system(train_command_line_string)
     
 
 
