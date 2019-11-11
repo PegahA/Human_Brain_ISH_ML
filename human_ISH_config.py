@@ -4,8 +4,8 @@ import os
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
 STUDY = "cortex"
-DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
-CODE_DIR = "/Users/pegah_abed/Documents/Human_Brain_ISH"
+DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
+CODE_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_brain_ish"
 PATCH_TYPE = 'r_per_image'    # other option: 'r_overall'
 
 TEST_SPLIT = 10
