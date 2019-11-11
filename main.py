@@ -128,8 +128,8 @@ parser.add_argument(
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.run()
-    #process.run()
-
+    # process.run()
+    
     args = parser.parse_args()
     print ("\n------- Starting training with:")
     print ("experiment root: ", args.experiment_root)
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     print ("flip augment: ", args.flip_augment)
     print ("crop augment: ", args.crop_augment)
     print ("detailed logs: ", args.detailed_logs)
-
+    
 
 
 
