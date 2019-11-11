@@ -14,24 +14,24 @@ import pandas as pd
 from human_ISH_config import *
 
 
-if (not os.path.exists(os.path.join(MAIN_DIR , STUDY))):
-    os.mkdir(os.path.join(MAIN_DIR , STUDY))
+if (not os.path.exists(os.path.join(DATA_DIR , STUDY))):
+    os.mkdir(os.path.join(DATA_DIR , STUDY))
 
 
-if (os.path.exists(os.path.join(MAIN_DIR , STUDY , "xml_files"))):
+if (os.path.exists(os.path.join(DATA_DIR , STUDY , "xml_files"))):
     print ("xml_files folder already exists.")
 else:
-    os.mkdir(os.path.join(MAIN_DIR , STUDY , "xml_files"))
+    os.mkdir(os.path.join(DATA_DIR , STUDY , "xml_files"))
 
-XML_DIR = os.path.join(MAIN_DIR , STUDY , "xml_files")
+XML_DIR = os.path.join(DATA_DIR , STUDY , "xml_files")
 
 
 
-if (os.path.exists(os.path.join(MAIN_DIR, STUDY, "images"))):
+if (os.path.exists(os.path.join(DATA_DIR, STUDY, "images"))):
     print ("images folder already exists.")
 else:
-    os.mkdir(os.path.join(MAIN_DIR, STUDY, "images"))
-IMAGES_DIR = os.path.join(MAIN_DIR, STUDY, 'human_ish_images_subcortex') #"images")
+    os.mkdir(os.path.join(DATA_DIR, STUDY, "images"))
+IMAGES_DIR = os.path.join(DATA_DIR, STUDY, 'human_ish_images_subcortex') #"images")
 
 
 #IMAGES_DIR = "/genome/scratch/Neuroinformatics/pabed/human_ish_images"
@@ -387,7 +387,7 @@ def run():
         # redownload_small_images()
 
         # image_info_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "human_ISH_info.csv"), index=None)
-        image_info_df.to_csv(os.path.join(MAIN_DIR, STUDY, "human_ISH_info.csv"), index=None)
+        image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"), index=None)
         print("finished creating image_info csv file ...")
 
         """
@@ -399,7 +399,7 @@ def run():
                 invalids_df = invalids_df.append(new_row, ignore_index=True)
 
         #invalids_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "invalids.csv"), index=None)
-        invalids_df.to_csv(os.path.join(MAIN_DIR, STUDY, "invalids.csv"), index=None)
+        invalids_df.to_csv(os.path.join(DATA_DIR, STUDY, "invalids.csv"), index=None)
         print ("finished creating invalid images csv file ...")
         """
 
