@@ -442,7 +442,6 @@ def make_triplet_csv(df, out_file):
     for patch_index in range(1, total_number_of_circles+1):
         patch_image_list = [(id.split(".")[0]+"_"+str(patch_index)+".jpg",gene) for id, gene in zip(temp_df['image'],temp_df['gene_symbol'])]
         new_image_info += patch_image_list
-
     new_df = pd.DataFrame(columns=['gene_symbol','image'])
     new_df['image'] = [item[0] for item in new_image_info]
     new_df['gene_symbol'] = [item[1] for item in new_image_info]
@@ -467,12 +466,13 @@ def convert_h5_to_csv():
     for item in exp_root_contents:
         if item.endswith(".h5"):
             embedding_csv_name = item.split(".")[0] + ".csv"
-            set_csv_file_name = item.replace("_embedding", "")
+            set_csv_file_name = embedding_csv_name.replace("_embeddings", "")
             print ("set csv file name is: ", set_csv_file_name)
+            print ("item is: ", item)
 
             set_csv_file = os.path.join(DATA_DIR, STUDY, "sets", set_csv_file_name)
             df = pd.read_csv(set_csv_file, names=['gene', 'image_id'])
-            f = h5py.File(item, 'r')['emb']
+            f = h5py.File(os.path.join(EXPERIMENT_ROOT, item), 'r')['emb']
             df['image_id']= df.apply(lambda x: x['image_id'].split('.')[0], axis =  1)
             pd.DataFrame(np.array(f), index=df.image_id).to_csv(os.path.join(EXPERIMENT_ROOT, embedding_csv_name))
 
