@@ -163,7 +163,7 @@ parser.add_argument(
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.run()
-    # process.run()
+    #process.run()
     
     args = parser.parse_args()
     print ("\n------- Arguments:")
@@ -243,8 +243,13 @@ if __name__ == "__main__":
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
 
+    if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
+        shutil.rmtree(EXPERIMENT_ROOT)
+
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
+
+    #process.convert_h5_to_csv()
     
 
 
