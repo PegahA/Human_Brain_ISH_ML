@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
+import h5py
 
 random.seed(1)
 
@@ -457,6 +458,23 @@ def make_triplet_csvs(dfs):
     out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
     return tuple((make_triplet_csv(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
                  for df, ext in zip(dfs, ("training", "validation", "test")))
+
+
+
+def convert_h5_to_csv():
+
+    exp_root_contents = os.listdir(EXPERIMENT_ROOT)
+    for item in exp_root_contents:
+        if item.endswith(".h5"):
+            embedding_csv_name = item.split(".")[0] + ".csv"
+            set_csv_file_name = item.replace("_embedding", "")
+            print ("set csv file name is: ", set_csv_file_name)
+
+            set_csv_file = os.path.join(DATA_DIR, STUDY, "sets", set_csv_file_name)
+            df = pd.read_csv(set_csv_file, names=['gene', 'image_id'])
+            f = h5py.File(item, 'r')['emb']
+            df['image_id']= df.apply(lambda x: x['image_id'].split('.')[0], axis =  1)
+            pd.DataFrame(np.array(f), index=df.image_id).to_csv(os.path.join(EXPERIMENT_ROOT, embedding_csv_name))
 
 
 def run():
