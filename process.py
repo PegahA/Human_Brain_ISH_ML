@@ -4,6 +4,8 @@ import numpy as np
 import random
 from human_ISH_config import *
 import h5py
+import time
+from shutil import copyfile
 
 random.seed(1)
 
@@ -477,6 +479,32 @@ def convert_h5_to_csv():
             pd.DataFrame(np.array(f), index=df.image_id).to_csv(os.path.join(EXPERIMENT_ROOT, embedding_csv_name))
 
 
+
+
+def save_embedding_info_into_file():
+
+
+    if (not os.path.exists(EMBEDDING_DEST)):
+        os.mkdir(EMBEDDING_DEST)
+
+    current_time  = int(time.time())
+    filename = str(current_time)
+    os.mkdir(os.path.join(EMBEDDING_DEST, filename))
+    embed_info_dir = os.path.join(EMBEDDING_DEST, filename)
+
+    exp_root_contents = os.listdir(EXPERIMENT_ROOT)
+    for item in exp_root_contents:
+        if item.endswith(".csv"):
+            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+        elif item.endswith(".json"):
+            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+        elif item.endswith(".log"):
+            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+
+
+
+
+
 def run():
 
     images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
@@ -504,6 +532,7 @@ def run():
 if __name__ == '__main__':
 
     run()
+
 
 
 
