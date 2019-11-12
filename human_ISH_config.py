@@ -20,12 +20,14 @@ NUMBER_OF_CIRCLES_IN_WIDTH = 1
 
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
+    EMBEDDING_DEST =  os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
 
 
 elif  PATCH_TYPE == 'r_overall' :
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
+    EXPERIMENT_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
 EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_validation.csv")
