@@ -30,7 +30,7 @@ elif  PATCH_TYPE == 'r_overall' :
     EXPERIMENT_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
-EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_validation.csv")
+EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_training_validation.csv")
 INITIAL_CHECKPOINT = os.path.join(CODE_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
@@ -53,9 +53,9 @@ CHECKPOINT_FREQUENCY = 10
 TRAIN_FLIP_AUGMENT = False
 EMBED_FLIP_AUGMENT = False
 TRAIN_CROP_AUGMENT = False
-EMBED_CROP_AUGMENT = None
+EMBED_CROP_AUGMENT = 'five'
 DETAILED_LOGS = False
-EMBED_AGGREGATOR = None
+EMBED_AGGREGATOR = 'mean'
 
 
 
