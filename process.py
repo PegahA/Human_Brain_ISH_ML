@@ -154,11 +154,15 @@ def define_sets_with_no_shared_genes(images_info_df):
     validation_df = validation_df.sort_values(by=['image_id'])
     test_df = test_df.sort_values(by=['image_id'])
 
+    train_val_df = pd.concat([training_df, validation_df], ignore_index=True)
+    train_val_df = train_val_df.sort_values(by=['image_id'])
+
     training_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training.csv"), index=None)
     validation_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "validation.csv"), index=None)
     test_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "test.csv"), index=None)
+    train_val_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training_validation.csv"), index=None)
 
-    return training_df, validation_df, test_df
+    return training_df, validation_df, test_df, train_val_df
 
 
 def define_sets_with_no_shared_donors(images_info_df):
@@ -458,7 +462,7 @@ def make_triplet_csvs(dfs):
 
     out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
     return tuple((make_triplet_csv(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
-                 for df, ext in zip(dfs, ("training", "validation", "test")))
+                 for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
 
 
 
@@ -511,10 +515,10 @@ def run():
 
     stats_dict = get_stats(images_info_df)
 
-    training_df, validation_df, test_df = define_sets_with_no_shared_genes(images_info_df)
+    training_df, validation_df, test_df, train_val_df = define_sets_with_no_shared_genes(images_info_df)
     get_stats_on_sets(stats_dict, training_df, validation_df, test_df)
 
-    make_triplet_csvs((training_df, validation_df, test_df))
+    make_triplet_csvs((training_df, validation_df, test_df, train_val_df))
 
     """
     training_df, validation_df, test_df = define_sets_with_no_shared_donors(images_info_df)
