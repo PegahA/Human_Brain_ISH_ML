@@ -619,10 +619,9 @@ def create_patches_info_csv_file(patches_path, all_images_parameters_list):
 
 
 
-def add_general_info_to_patches_info():
+def create_valid_patches_info_file(patches_path):
 
-    patches_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/"
-    image_info_df = pd.read_csv(os.path.join(patches_path ,"human_ISH_info.csv"))
+    image_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY ,"human_ISH_info.csv"))
     patches_info_df = pd.read_csv(os.path.join(os.path.join(patches_path, "patches_info.csv")))
 
 
@@ -716,7 +715,8 @@ def run():
 if __name__ == "__main__":
 
     #run()
-    add_general_info_to_patches_info()
+    create_valid_patches_info_file(per_image_r_patches_path)
+    create_valid_patches_info_file(overall_r_patches_path)
 
 
 
