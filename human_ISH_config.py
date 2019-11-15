@@ -6,7 +6,7 @@ LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", 
 STUDY = "cortex"
 DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 CODE_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_brain_ish"
-PATCH_TYPE = 'r_overall'    # other option: 'r_overall'
+PATCH_TYPE = 'r_per_image'    # options: 'r_per_image' and 'r_overall'
 
 TEST_SPLIT = 10
 VALIDATION_SPLIT = 10
