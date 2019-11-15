@@ -541,7 +541,7 @@ def merge_embeddings_to_gene_level(filename):
 
             # and then I want to save this file as gene_embddings in the same folder.
             item_name = item.split(".")[0]
-            save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_embeddings.csv")
+            save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_level.csv")
             grouped_df.to_csv(save_to_path)
 
 def run():
@@ -570,8 +570,7 @@ def run():
 
 if __name__ == '__main__':
 
-    #run()
-    merge_embeddings_to_gene_level("1573850230")
+    run()
 
 
 
