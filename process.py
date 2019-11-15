@@ -522,7 +522,7 @@ def merge_embeddings_to_gene_level(filename):
             patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
 
             # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
-            merged_df = embeddings_file.merge(patches_info[["image_id", "gene_symbol"]], how = "left" , on = "image_id")
+            merged_df = embeddings_file.merge(patches_info[["patch_id", "gene_symbol"]], how = "left" , on = "patch_id")
 
             # reorder the dataframe columns
             merged_columns = list(merged_df)
@@ -530,7 +530,7 @@ def merge_embeddings_to_gene_level(filename):
             merged_df = merged_df[merged_columns]
 
             # drop the image_id column
-            merged_df = merged_df.drop(columns=["image_id"])
+            merged_df = merged_df.drop(columns=["patch_id"])
 
             # group by gene_symbol and average over the embedding values
             grouped_df = merged_df.groupby(['gene_symbol']).mean()
@@ -570,7 +570,8 @@ def run():
 
 if __name__ == '__main__':
 
-    run()
+    #run()
+    merge_embeddings_to_gene_level("1573850230")
 
 
 
