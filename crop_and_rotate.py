@@ -643,7 +643,7 @@ def create_valid_patches_info_csv_file(patches_path):
     valid_patches_df = valid_patches_df.rename(columns={'image_id': 'patch_id'})
     valid_patches_df= valid_patches_df.drop(columns = ['patch_index'])
 
-    valid_patches_df.to_csv(os.path.join(patches_path, "valid_patches_info.csv"))
+    valid_patches_df.to_csv(os.path.join(patches_path, "valid_patches_info.csv"), index=None)
 
 
 
