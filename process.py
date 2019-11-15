@@ -505,9 +505,44 @@ def save_embedding_info_into_file():
         elif item.endswith(".log"):
             copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
 
+    return filename
 
 
 
+def merge_embeddings_to_gene_level(filename):
+    """
+    We have an embedding for every image in the dataset. However, each gene may have more than one image associated to it.
+    This function will take all the images that correspond to an image, and average over the values of the embedding vector to generate a final embedding for that gene.
+    """
+
+    embed_file_contents = os.listdir(os.path.join(EMBEDDING_DEST, filename))
+    for item in embed_file_contents:
+        if item.endswith(".csv"):
+            embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
+            patches_info = pd.read_csv(os.path.join(EMBEDDING_DEST, "valid_patches_info.csv"))
+
+            # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
+            merged_df = embeddings_file.merge(patches_info[["image_id", "gene_symbol"]], how = "left" , on = "image_id")
+
+            # reorder the dataframe columns
+            merged_columns = list(merged_df)
+            merged_columns = [merged_columns[0]] + [merged_columns [-1]] + merged_columns[1:-1]
+            merged_df = merged_df[merged_columns]
+
+            # drop the image_id column
+            merged_df = merged_df.drop(columns=["image_id"])
+
+            # group by gene_symbol and average over the embedding values
+            grouped_df = merged_df.groupby(['gene_symbol']).mean()
+
+            print (grouped_df.head())
+
+            print ("the number of genes is: {}".format(len(grouped_df)))
+
+            # and then I want to save this file as gene_embddings in the same folder.
+            item_name = item.split(".")[0]
+            save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_embeddings.csv")
+            grouped_df.to_csv(save_to_path)
 
 def run():
 
