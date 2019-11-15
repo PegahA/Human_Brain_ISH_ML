@@ -619,7 +619,7 @@ def create_patches_info_csv_file(patches_path, all_images_parameters_list):
 
 
 
-def create_valid_patches_info_file(patches_path):
+def create_valid_patches_info_csv_file(patches_path):
 
     image_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY ,"human_ISH_info.csv"))
     patches_info_df = pd.read_csv(os.path.join(os.path.join(patches_path, "patches_info.csv")))
@@ -678,6 +678,7 @@ def run():
         all_images_parameters_list = all_images_parameters_list + parameters_list
 
     create_patches_info_csv_file(overall_r_patches_path, all_images_parameters_list)
+    create_valid_patches_info_csv_file(per_image_r_patches_path)
 
     # -----------------------------------------------------------------------------------
 
@@ -707,6 +708,7 @@ def run():
         all_images_parameters_list = all_images_parameters_list + parameters_list
 
     create_patches_info_csv_file(per_image_r_patches_path, all_images_parameters_list)
+    create_valid_patches_info_csv_file(overall_r_patches_path)
 
     # -----------------------------------------------------------------------------------
     """
@@ -714,10 +716,7 @@ def run():
 
 if __name__ == "__main__":
 
-    #run()
-    create_valid_patches_info_file(per_image_r_patches_path)
-    create_valid_patches_info_file(overall_r_patches_path)
-
+    run()
 
 
 
