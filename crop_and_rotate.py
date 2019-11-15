@@ -561,8 +561,12 @@ def create_patches_info_csv_file(patches_path, all_images_parameters_list):
     #                   top_left_x, top_left_y, bottom_right_x, bottom_right_y]
 
 
+
+
     columns = ['patch_id', 'original_image_height', 'original_image_width', 'radius', 'rotation_angle',
                'top_left_x', 'top_left_y', 'bottom_right_x', 'bottom_right_y']
+
+
     patches_info_df = pd.DataFrame(columns=columns)
 
     patch_id_list = []
@@ -614,6 +618,33 @@ def create_patches_info_csv_file(patches_path, all_images_parameters_list):
     patches_info_df.to_csv(df_path, index=None)
 
 
+
+def add_general_info_to_patches_info():
+
+    patches_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/"
+    image_info_df = pd.read_csv(os.path.join(patches_path ,"human_ISH_info.csv"))
+    patches_info_df = pd.read_csv(os.path.join(os.path.join(patches_path, "patches_info.csv")))
+
+
+    patch_id_list = patches_info_df['patch_id']
+    patch_index_list = [patch_id.split('_')[1].split(".")[0] for patch_id in patch_id_list]
+    patch_id_list = [int(patch_id.split("_")[0]) for patch_id in patch_id_list]
+
+    patches_info_df['patch_id'] = patch_id_list
+    patches_info_df['patch_index'] = patch_index_list
+
+    patches_info_df = patches_info_df.rename(columns={'patch_id': 'image_id'})
+    valid_patches_df = pd.merge(patches_info_df, image_info_df,  on='image_id')
+
+    old_patch_id_list = [str(patch_id) + "_" + str(patch_index) for patch_id, patch_index in
+                    zip(valid_patches_df['image_id'], valid_patches_df['patch_index'] )]
+
+
+    valid_patches_df['image_id'] = old_patch_id_list
+    valid_patches_df = valid_patches_df.rename(columns={'image_id': 'patch_id'})
+    valid_patches_df= valid_patches_df.drop(columns = ['patch_index'])
+
+    valid_patches_df.to_csv(os.path.join(patches_path, "valid_patches_info.csv"))
 
 
 
@@ -684,7 +715,8 @@ def run():
 
 if __name__ == "__main__":
 
-    run()
+    #run()
+    add_general_info_to_patches_info()
 
 
 
