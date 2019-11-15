@@ -6,7 +6,7 @@ LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", 
 STUDY = "cortex"
 DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 CODE_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_brain_ish"
-PATCH_TYPE = 'r_per_image'    # other option: 'r_overall'
+PATCH_TYPE = 'r_overall'    # other option: 'r_overall'
 
 TEST_SPLIT = 10
 VALIDATION_SPLIT = 10
@@ -27,7 +27,7 @@ if PATCH_TYPE == 'r_per_image':
 elif  PATCH_TYPE == 'r_overall' :
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
-    EXPERIMENT_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
+    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
 EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_training_validation.csv")
@@ -47,9 +47,9 @@ MARGIN = 'soft'
 METRIC = 'euclidean'
 LOSS = 'batch_hard'
 LEARNING_RATE = 3e-4
-TRAIN_ITERATIONS = 30
+TRAIN_ITERATIONS = 25000
 DECAY_START_ITERATION = 15000
-CHECKPOINT_FREQUENCY = 10
+CHECKPOINT_FREQUENCY = 1000
 TRAIN_FLIP_AUGMENT = False
 EMBED_FLIP_AUGMENT = False
 TRAIN_CROP_AUGMENT = False
