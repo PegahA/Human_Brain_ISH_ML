@@ -12,8 +12,9 @@ def build_distance_matrix(filename):
     :return: pandas DataFrame. A distance matrix that has the euclidean distance between all the possible pairs of embedding vectors
     """
 
-    # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
-    # embeddings_csv_file = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
+
+    #embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
+    #embeddings_csv_file = os.path.join(embedding_dest, filename, embedding_file_name)
     embeddings_csv_file = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
 
 
@@ -70,7 +71,7 @@ def find_closest_image(distances_df):
     # find the closest image
     min_indexes = distances_df.idxmin(axis=1, skipna=True)
     min_indexes_df = pd.DataFrame(min_indexes).reset_index()
-    min_indexes_df.columns = ["image_id1", "image_id2"]
+    min_indexes_df.columns = ["id1", "id2"]
     min_indexes_df = min_indexes_df.applymap(str)
 
     return min_indexes_df
@@ -83,7 +84,7 @@ def level_1_evaluation(min_indexes_df):
     Which means the same gene, and the same donor, and the same brain tissue slice.
     :param min_indexes_df: pandas DataFrame. Has 2 columns. The first column is an image_id, the second column is the image_id of
     the corresponding closest image.
-    :return:
+    :return: float. The proportion of matches.
     """
 
     total_count = len(min_indexes_df)
@@ -93,25 +94,16 @@ def level_1_evaluation(min_indexes_df):
     info_csv = pd.read_csv(info_csv_path, index_col=None)
 
     gene_donor_mapping = info_csv[['patch_id', 'image_id']]
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id1', right_on='patch_id')
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id2', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
 
     same_image = min_indexes_df.query('image_id_x == image_id_y')
     match_count = len(same_image)
     proportion = (match_count / total_count) * 100.0
 
 
-    min_indexes_df['image_id1'] = [id.split("_")[0] for id in min_indexes_df['image_id1']]
-    min_indexes_df['image_id2'] = [id.split("_")[0] for id in min_indexes_df['image_id2']]
-
-
-    # patches that come from a certain image are named with the following format:
-    # the actual brain image id _ patch index
-    # therefore, if two patches are coming from the same image, when we remove the patch index, the remaining which is the
-    # image_id must be the same
-    match_count = len(min_indexes_df[min_indexes_df['image_id1']==min_indexes_df['image_id2']])
-
-    proportion = (match_count / total_count) * 100.0
+    min_indexes_df['id1'] = [id.split("_")[0] for id in min_indexes_df['id1']]
+    min_indexes_df['id2'] = [id.split("_")[0] for id in min_indexes_df['id2']]
 
     return  proportion
 
@@ -123,7 +115,7 @@ def level_2_evaluation(min_indexes_df):
     but is the same gene and comes from the same donor.
     :param min_indexes_df: pandas DataFrame. Has 2 columns. The first column is an image_id, the second column is the image_id of
     the corresponding closest image.
-    :return:
+    :return: float. The proportion of matches.
     """
 
     total_count = len(min_indexes_df)
@@ -133,8 +125,8 @@ def level_2_evaluation(min_indexes_df):
     info_csv = pd.read_csv(info_csv_path, index_col=None)
 
     gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id1', right_on='patch_id')
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id2', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
 
     not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
     same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
@@ -145,11 +137,47 @@ def level_2_evaluation(min_indexes_df):
     return proportion
 
 
+def level_3_evaluation(min_indexes_df):
+    """
+    The level 3 evaluation checks to see for how many of the patches, the closest patch is from the same gene
+    but not from the same donor.
+    :param min_indexes_df: pandas DataFrame. Has 2 columns. The first column is an image_id, the second column is the image_id of
+    the corresponding closest image.
+    :return: float. The proportion of matches.
+    """
+
+    total_count = len(min_indexes_df)
+
+    # info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
+    info_csv = pd.read_csv(info_csv_path, index_col=None)
+
+    gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
+
+    not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+    not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
+    same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
+
+    match_count = len(same_gene)
+    proportion = (match_count / total_count) * 100.0
+
+    return proportion
+
 
 def evaluate(filename):
     dist_df = build_distance_matrix(filename)
     min_indexes_df = find_closest_image(dist_df)
     level_1_proportion = level_1_evaluation(min_indexes_df)
     level_2_proportion = level_2_evaluation(min_indexes_df)
+    level_3_proportion = level_3_evaluation(min_indexes_df)
+
+    print (level_1_proportion)
+    print (level_2_proportion)
+    print (level_3_proportion)
+
+
+evaluate("")
 
 
