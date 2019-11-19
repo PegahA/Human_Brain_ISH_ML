@@ -87,6 +87,20 @@ def level_1_evaluation(min_indexes_df):
     """
 
     total_count = len(min_indexes_df)
+
+    # info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
+    info_csv = pd.read_csv(info_csv_path, index_col=None)
+
+    gene_donor_mapping = info_csv[['patch_id', 'image_id']]
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id1', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id2', right_on='patch_id')
+
+    same_image = min_indexes_df.query('image_id_x == image_id_y')
+    match_count = len(same_image)
+    proportion = (match_count / total_count) * 100.0
+
+
     min_indexes_df['image_id1'] = [id.split("_")[0] for id in min_indexes_df['image_id1']]
     min_indexes_df['image_id2'] = [id.split("_")[0] for id in min_indexes_df['image_id2']]
 
@@ -117,16 +131,13 @@ def level_2_evaluation(min_indexes_df):
     # info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
     info_csv = pd.read_csv(info_csv_path, index_col=None)
-    id_column_name = info_csv.columns[0]
 
-    if id_column_name != 'image_id':
-        info_csv = info_csv.rename(columns={id_column_name: 'image_id'})
+    gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id1', right_on='patch_id')
+    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id2', right_on='patch_id')
 
-    gene_donor_mapping = info_csv[['image_id', 'gene_symbol', 'donor_id']]
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id1', right_on='image_id')
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='image_id2', right_on='image_id')
-
-    same_gene = min_indexes_df.query('gene_symbol_x == gene_symbol_y')
+    not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+    same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
     same_donor = same_gene.query('donor_id_x == donor_id_y')
     match_count = len(same_donor)
     proportion = (match_count / total_count) * 100.0
@@ -140,3 +151,5 @@ def evaluate(filename):
     min_indexes_df = find_closest_image(dist_df)
     level_1_proportion = level_1_evaluation(min_indexes_df)
     level_2_proportion = level_2_evaluation(min_indexes_df)
+
+
