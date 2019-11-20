@@ -520,7 +520,7 @@ def merge_embeddings_to_gene_level(filename):
         if item.endswith(".csv"):
             embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
             patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
-            patches_info = patches_info.rename(columns={'patch_id': 'image_id'})
+            
             # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
             merged_df = embeddings_file.merge(patches_info[["image_id", "gene_symbol"]], how = "left" , on = "image_id")
 
