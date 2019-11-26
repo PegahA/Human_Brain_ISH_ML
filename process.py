@@ -504,6 +504,8 @@ def save_embedding_info_into_file():
             copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
         elif item.endswith(".log"):
             copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+        elif item.startswith("events."):
+            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
 
     return filename
 
