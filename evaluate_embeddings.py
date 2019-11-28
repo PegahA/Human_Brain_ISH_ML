@@ -23,7 +23,7 @@ def build_distance_matrix(path_to_embeddings):
 
     # dist_df_file_name = EMBED_SET.split(".csv")[0] + "_dist.csv"
     # dist_df.to_csv(os.path.join(EMBEDDING_DEST, filename, dist_df_file_name))
-
+    distances_df.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist.csv")
     return distances_df
 
 
@@ -67,6 +67,67 @@ def find_closest_image(distances_df):
     return min_indexes_df
 
 
+def filter_dist_matrix_after_level_1(dist_matrix):
+
+
+
+    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
+    info_csv = pd.read_csv(info_csv_path, index_col=None)
+    patch_id_list = list(dist_matrix.index)
+
+    for patch_id in patch_id_list:
+        print (patch_id)
+        this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
+        this_image_id = this_image_id.values[0]
+
+        this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
+        this_donor_id = this_donor_id.values[0]
+
+
+        not_same_donor_id = info_csv['donor_id'] != this_donor_id
+        same_image_id = info_csv['image_id'] == this_image_id
+        not_same_patch_id = info_csv['patch_id'] != patch_id
+        res1 = list(info_csv[not_same_donor_id].patch_id.values)
+        res2 = list(info_csv[same_image_id & not_same_patch_id].patch_id.values)
+        res = res1 + res2
+
+        res=[item for item in res if item in patch_id_list]
+
+
+        dist_matrix.loc[patch_id,res] = np.nan
+
+
+
+
+    dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist_after_1.csv")
+    return dist_matrix
+
+def filter_dist_matrix_after_level_2(dist_matrix):
+    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
+    info_csv = pd.read_csv(info_csv_path, index_col=None)
+    patch_id_list = info_csv['patch_id'][:9]
+
+    for patch_id in patch_id_list:
+        this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
+        this_image_id = this_image_id.values[0]
+        this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
+        this_donor_id = this_donor_id.values[0]
+
+        same_image_id = info_csv['image_id'] == this_image_id
+        same_donor_id = info_csv['donor_id'] == this_donor_id
+        not_same_patch_id = info_csv['patch_id'] != patch_id
+
+        res1 = list(info_csv[same_image_id | same_donor_id].patch_id.values)
+        res2 = list(info_csv[not_same_patch_id].patch_id.values)
+
+        res = res1 + res2
+        res = [item for item in res if item in patch_id_list]
+
+        dist_matrix.loc[patch_id, res] = np.nan
+
+    dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist_after_2.csv")
+    return dist_matrix
+
 
 def level_1_evaluation(min_indexes_df):
     """
@@ -88,6 +149,7 @@ def level_1_evaluation(min_indexes_df):
     min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
 
     same_image = min_indexes_df.query('image_id_x == image_id_y')
+
     match_count = len(same_image)
     proportion = (match_count / total_count) * 100.0
 
@@ -121,9 +183,13 @@ def level_2_evaluation(min_indexes_df):
     not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
     same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
     same_donor = same_gene.query('donor_id_x == donor_id_y')
+
+    print (same_donor)
     match_count = len(same_donor)
     proportion = (match_count / total_count) * 100.0
 
+
+    print (match_count)
     return proportion
 
 
@@ -149,14 +215,17 @@ def level_3_evaluation(min_indexes_df):
     not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
     not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
     same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
+    print (same_gene)
 
     match_count = len(same_gene)
+    print (match_count)
     proportion = (match_count / total_count) * 100.0
 
     return proportion
 
 
-def evaluate(filename):
+
+def evaluate_sum_100(filename):
 
     # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
@@ -164,15 +233,57 @@ def evaluate(filename):
 
     dist_df = build_distance_matrix(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
+
+    print("level 1")
     level_1_proportion = level_1_evaluation(min_indexes_df)
+    print(level_1_proportion)
+
+    print("level 2")
     level_2_proportion = level_2_evaluation(min_indexes_df)
+    print(level_2_proportion)
+
+    print("level 3")
     level_3_proportion = level_3_evaluation(min_indexes_df)
-
-    print (level_1_proportion)
-    print (level_2_proportion)
-    print (level_3_proportion)
+    print(level_3_proportion)
 
 
-evaluate("")
+def evaluate_with_filtering():
 
+    # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
+    # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
+    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
+
+    print("level 1")
+    dist_df = build_distance_matrix(path_to_embeddings)
+    min_indexes_df = find_closest_image(dist_df)
+    print (min_indexes_df)
+    level_1_proportion = level_1_evaluation(min_indexes_df)
+    print(level_1_proportion)
+
+
+    print ("level 2")
+    new_dist_df = filter_dist_matrix_after_level_1(dist_df)
+    min_indexes_df = find_closest_image(new_dist_df)
+    print (min_indexes_df)
+    level_2_proportion = level_2_evaluation(min_indexes_df)
+    print(level_2_proportion)
+
+    print ("level 3")
+    new_dist_df = filter_dist_matrix_after_level_2(dist_df)
+    min_indexes_df = find_closest_image(new_dist_df)
+    print(min_indexes_df)
+    level_2_proportion = level_3_evaluation(min_indexes_df)
+    print(level_2_proportion)
+
+
+
+def main():
+    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
+    embed_df = pd.read_csv(path_to_embeddings)
+
+    dist_df = build_distance_matrix(path_to_embeddings)
+    new_dist_df = filter_dist_matrix_after_level_1(dist_df)
+
+
+main()
 
