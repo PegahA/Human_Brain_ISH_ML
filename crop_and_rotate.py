@@ -650,76 +650,80 @@ def create_valid_patches_info_csv_file(patches_path):
 
 
 
+def create_patches(patch_type):
+
+
+    if patch_type == "r_overall":
+
+        # ------- use a single radius based on the globally minimum height and width ---------
+
+        h, w = get_min_height_width_v2(per_image_r_patches_path)
+        # h=4796
+        # w= 1892
+        r = get_circle_radius_overall(h, w)
+
+        all_images_parameters_list = []
+        image_list = []
+        temp_list = os.listdir(images_path)
+        existing_patches = check_existing_files(overall_r_patches_path)
+
+        for file in temp_list:
+            if file.endswith(".jpg"):
+                file_name = file.split(".")[0]
+                if existing_patches.count(file_name) != NUMBER_OF_CIRCLES_IN_HEIGHT * NUMBER_OF_CIRCLES_IN_WIDTH:
+                    image_list.append(file)
+
+        print("There are  {} images to process".format(len(image_list)))
+
+        for c in range(len(image_list)):
+            print(c)
+            image_name = image_list[c]
+            img = rotate_horizontal_to_vertical(image_name)
+            parameters_list = crop_circle(r, img, image_name, overall_r_patches_path)
+            all_images_parameters_list = all_images_parameters_list + parameters_list
+
+        create_patches_info_csv_file(overall_r_patches_path, all_images_parameters_list)
+        create_valid_patches_info_csv_file(per_image_r_patches_path)
+
+    # -----------------------------------------------------------------------------------
+
+    elif patch_type == "r_per_image":
+        #------- fit a circle within each image and use its radius -------------------------
+
+        all_images_parameters_list = []
+        image_list = []
+        temp_list = os.listdir(images_path)
+        existing_patches = check_existing_files(per_image_r_patches_path)
+
+        for file in temp_list:
+            if file.endswith(".jpg"):
+                #image_list.append(file)
+                file_name = file.split(".")[0]
+                if existing_patches.count(file_name) != NUMBER_OF_CIRCLES_IN_HEIGHT * NUMBER_OF_CIRCLES_IN_WIDTH:
+                    image_list.append(file)
+
+        print("There are  {} images to process".format(len(image_list)))
+
+        for c in range(len(image_list)):
+            print(c)
+            image_name = image_list[c]
+            img = rotate_horizontal_to_vertical(image_name)
+            r =get_circle_radius_for_single_image(img, image_name)
+            parameters_list = crop_circle(r, img, image_name, per_image_r_patches_path)
+            all_images_parameters_list = all_images_parameters_list + parameters_list
+
+        create_patches_info_csv_file(per_image_r_patches_path, all_images_parameters_list)
+        create_valid_patches_info_csv_file(overall_r_patches_path)
+
+    # -----------------------------------------------------------------------------------
+
+
 def run():
-
-    # ------- use a single radius based on the globally minimum height and width ---------
-
-    h, w = get_min_height_width_v2(per_image_r_patches_path)
-    # h=4796
-    # w= 1892
-    r = get_circle_radius_overall(h, w)
-
-    all_images_parameters_list = []
-    image_list = []
-    temp_list = os.listdir(images_path)
-    existing_patches = check_existing_files(overall_r_patches_path)
-
-    for file in temp_list:
-        if file.endswith(".jpg"):
-            file_name = file.split(".")[0]
-            if existing_patches.count(file_name) != NUMBER_OF_CIRCLES_IN_HEIGHT * NUMBER_OF_CIRCLES_IN_WIDTH:
-                image_list.append(file)
-
-    print("There are  {} images to process".format(len(image_list)))
-
-    for c in range(len(image_list)):
-        print(c)
-        image_name = image_list[c]
-        img = rotate_horizontal_to_vertical(image_name)
-        parameters_list = crop_circle(r, img, image_name, overall_r_patches_path)
-        all_images_parameters_list = all_images_parameters_list + parameters_list
-
-    create_patches_info_csv_file(overall_r_patches_path, all_images_parameters_list)
-    create_valid_patches_info_csv_file(per_image_r_patches_path)
-
-    # -----------------------------------------------------------------------------------
-
-    """
-    #------- fit a circle within each image and use its radius -------------------------
-
-    all_images_parameters_list = []
-    image_list = []
-    temp_list = os.listdir(images_path)
-    existing_patches = check_existing_files(per_image_r_patches_path)
-
-    for file in temp_list:
-        if file.endswith(".jpg"):
-            #image_list.append(file)
-            file_name = file.split(".")[0]
-            if existing_patches.count(file_name) != NUMBER_OF_CIRCLES_IN_HEIGHT * NUMBER_OF_CIRCLES_IN_WIDTH:
-                image_list.append(file)
-
-    print("There are  {} images to process".format(len(image_list)))
-
-    for c in range(len(image_list)):
-        print(c)
-        image_name = image_list[c]
-        img = rotate_horizontal_to_vertical(image_name)
-        r =get_circle_radius_for_single_image(img, image_name)
-        parameters_list = crop_circle(r, img, image_name, per_image_r_patches_path)
-        all_images_parameters_list = all_images_parameters_list + parameters_list
-
-    create_patches_info_csv_file(per_image_r_patches_path, all_images_parameters_list)
-    create_valid_patches_info_csv_file(overall_r_patches_path)
-
-    # -----------------------------------------------------------------------------------
-    """
-
+    pass
 
 if __name__ == "__main__":
 
     run()
-
 
 
 
