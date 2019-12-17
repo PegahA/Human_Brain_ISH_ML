@@ -6,6 +6,7 @@ from human_ISH_config import *
 import h5py
 import time
 from shutil import copyfile
+import operator
 
 random.seed(1)
 
@@ -553,6 +554,53 @@ def merge_embeddings_to_gene_level(filename):
             save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_level.csv")
             grouped_df.to_csv(save_to_path)
 
+
+
+def filter_common_genes_out(df_file_name,threshold = 3):
+
+    df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
+    print(len(df))
+
+    genes = df.iloc[:, 0]
+    unique_gene_count_dict = {}
+
+    genes_unique, counts = np.unique(genes, return_counts=True)
+
+    for i in range(len(genes_unique)):
+        unique_gene_count_dict[genes_unique[i]] = counts[i]
+
+    sorted_dict = sorted(unique_gene_count_dict.items(), key=operator.itemgetter(1))
+
+    print (sorted_dict)
+
+    most_common = []
+    for i in range(threshold):
+        most_common.append(sorted_dict[-1-i][0])
+
+    # ----------
+
+    new_df = df[~df.iloc[:,0].isin(most_common)]
+    print(len(new_df))
+
+
+    genes = new_df.iloc[:, 0]
+    unique_gene_count_dict = {}
+
+    genes_unique, counts = np.unique(genes, return_counts=True)
+
+    for i in range(len(genes_unique)):
+        unique_gene_count_dict[genes_unique[i]] = counts[i]
+
+    sorted_dict = sorted(unique_gene_count_dict.items(), key=operator.itemgetter(1))
+
+    print(sorted_dict)
+
+    new_df_file_name = df_file_name.split(".")[0] + "_filtered.csv"
+    new_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", new_df_file_name), index=None)
+
+
+
+
 def make_sets():
 
     images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
@@ -563,6 +611,8 @@ def make_sets():
     get_stats_on_sets(stats_dict, training_df, validation_df, test_df)
 
     make_triplet_csvs((training_df, validation_df, test_df, train_val_df))
+
+    filter_common_genes_out("triplet_training_validation.csv")
 
     """
     training_df, validation_df, test_df = define_sets_with_no_shared_donors(images_info_df)
@@ -580,8 +630,8 @@ def make_sets():
 
 def run():
     pass
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     run()
 
 
