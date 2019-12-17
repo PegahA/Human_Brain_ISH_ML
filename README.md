@@ -56,3 +56,31 @@ The next step is to download the images. The ```download_images()``` function wi
 
 The ```redownload_small_images()``` function will redownload the images that have a smaller size than some given threshold. This is to make sure that if there have been any interruptions while donwloading an image, it can be redownloaded. 
 
+
+**crop_and_rotate.py**
+
+
+After downloading the images, the next step is to get patches out of the image.  
+We are interested in patches coming from random places of the image with random rotations.  
+Our approach is:  
+Select a number of cirlces on the image. The number of circles is determined by NUMBER_OF_CIRCLES_IN_HEIGHT* NUMBER_OF_CIRCLES_IN_WIDTH  
+
+You can change the values of ```NUMBER_OF_CIRCLES_IN_HEIGHT``` and ```NUMBER_OF_CIRCLES_IN_WIDTH``` in the ```human_ISH_config.py``` file.
+Crop those circles out of the original image.  
+Rotate the corcles by some random angle.  
+Crop out a square from inside the rotated circles as the final patches.  
+
+This idea of using circles is to make rotation easier so that we don't have to worry about the complications of rotating a square.
+
+Also, we would like patches that cover the brain tissue and do not fall on the margins of the image.  
+To ensure this, we try to take the circles which are closest to the central lines of the original image (the lines that cut the image half horizontally and vertically).   
+
+There are other and perhaps better approaches. Another approach that we will be using soon is to segment the images and separate the foreground (brain tissue) and background, and pick patches that mostly overlap with the foreground.  
+
+
+There are two ways to find and fit circles inside the images: 
+1. Find the minimum width and height value among all the images and find the circle radius that could fit within these values. This means all the circles within all the images will have the same size. We call this approach ```r_overall```.
+
+2. For each image, find the circle radius that could fit within this specific image. This means the circles of each image will have their own size and are not necessarily equal to circles of other images. We call this approach ```r_per_image```.
+
+
