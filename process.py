@@ -612,7 +612,7 @@ def make_sets():
 
     make_triplet_csvs((training_df, validation_df, test_df, train_val_df))
 
-    filter_common_genes_out("triplet_training_validation.csv")
+    filter_common_genes_out("triplet_training.csv")
 
     """
     training_df, validation_df, test_df = define_sets_with_no_shared_donors(images_info_df)
