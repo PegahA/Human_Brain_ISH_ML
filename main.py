@@ -2,6 +2,7 @@ from human_ISH_config import *
 import extract_data
 import process
 import crop_and_rotate
+import evaluate_embeddings
 from argparse import ArgumentParser
 import os
 
@@ -162,7 +163,7 @@ parser.add_argument(
 
 if __name__ == "__main__":
     #extract_data.run()
-    #crop_and_rotate.run()
+    #crop_and_rotate.create_patches(PATCH_TYPE)
     #process.run()
     
     args = parser.parse_args()
@@ -252,6 +253,9 @@ if __name__ == "__main__":
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file()
     process.merge_embeddings_to_gene_level(filename)
+    evaluate_embeddings.evaluate(filename)
+
+
     
 
 
