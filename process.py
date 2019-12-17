@@ -129,6 +129,12 @@ def get_stats(images_info_df):
 
 
 def define_sets_with_no_shared_genes(images_info_df):
+    """
+    We want to create training, validation, and test set.
+    The condition is that the sets should not have any genes in common.
+    :param images_info_df:  pandas dataframe that has the information of all image
+    :return: 3 pandas dataframes: training, validation, test
+    """
 
     unique_genes = list(np.unique(images_info_df['gene_symbol']))
     total_unique_gene_count = len(unique_genes)
@@ -547,7 +553,7 @@ def merge_embeddings_to_gene_level(filename):
             save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_level.csv")
             grouped_df.to_csv(save_to_path)
 
-def run():
+def make_sets():
 
     images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
 
@@ -571,6 +577,9 @@ def run():
     get_stats_on_sets(stats_dict, new_training_df, new_validation_df, test_df)
     """
 
+
+def run():
+    pass
 if __name__ == '__main__':
 
     run()
