@@ -164,7 +164,7 @@ parser.add_argument(
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    #process.run()
+    #process.make_sets()
     
     args = parser.parse_args()
     print ("\n------- Arguments:")
