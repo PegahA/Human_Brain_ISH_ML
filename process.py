@@ -7,6 +7,7 @@ import h5py
 import time
 from shutil import copyfile
 import operator
+import matplotlib.pyplot as plt
 
 random.seed(1)
 
@@ -555,8 +556,7 @@ def merge_embeddings_to_gene_level(filename):
             grouped_df.to_csv(save_to_path)
 
 
-
-def filter_common_genes_out(df_file_name,threshold = 3):
+def filter_out_common_genes(df_file_name,threshold = 3):
 
     df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
     print(len(df))
@@ -599,6 +599,99 @@ def filter_common_genes_out(df_file_name,threshold = 3):
     new_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", new_df_file_name), index=None)
 
 
+def filter_out_genes_out_of_mean_and_std(df_file_name):
+
+    in_range = []
+    df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
+    print(len(df))
+
+    genes = df.iloc[:, 0]
+    unique_gene_count_dict = {}
+
+    genes_unique, counts = np.unique(genes, return_counts=True)
+
+    for i in range(len(genes_unique)):
+        unique_gene_count_dict[genes_unique[i]] = counts[i]
+
+    sorted_dict = sorted(unique_gene_count_dict.items(), key=operator.itemgetter(1))
+
+    print (sorted_dict)
+    ordered_genes = [item[0] for item in sorted_dict]
+    ordered_unique_gene_count = [item[1] for item in sorted_dict]
+
+    avg =np.mean(ordered_unique_gene_count)
+    sd = np.std(ordered_unique_gene_count)
+
+    max_lim = int(avg) + int(sd)
+    min_lim = int(avg) - int(sd)
+
+    print ("avg is: ", avg)
+    print ("sd is: ", sd)
+    print ("max lim is: ", max_lim)
+    print ("min lim is: ",min_lim)
+
+    num_of_out_of_range_genes = 0
+    num_of_out_of_range_images = 0
+    for item in sorted_dict:
+        if item[1]> min_lim and item[1] < max_lim:
+            in_range.append(item[0])
+        else:
+            num_of_out_of_range_genes +=1
+            num_of_out_of_range_images += item[1]
+
+    print ("num of out of range genes: ", num_of_out_of_range_genes)
+    print ("num of out of range images: ", num_of_out_of_range_images)
+
+
+    # ----------
+
+    new_df = df[df.iloc[:, 0].isin(in_range)]
+    print(len(new_df))
+
+    genes = new_df.iloc[:, 0]
+    unique_gene_count_dict = {}
+
+    genes_unique, counts = np.unique(genes, return_counts=True)
+
+    for i in range(len(genes_unique)):
+        unique_gene_count_dict[genes_unique[i]] = counts[i]
+
+    sorted_dict = sorted(unique_gene_count_dict.items(), key=operator.itemgetter(1))
+
+    print(sorted_dict)
+
+    new_df_file_name = df_file_name.split(".")[0] + "_in_range.csv"
+    new_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", new_df_file_name), index=None)
+
+
+
+
+
+def draw_hist(df_file_name):
+    df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
+    print(len(df))
+
+    genes = df.iloc[:, 0]
+    unique_gene_count_dict = {}
+
+    genes_unique, counts = np.unique(genes, return_counts=True)
+
+    for i in range(len(genes_unique)):
+        unique_gene_count_dict[genes_unique[i]] = counts[i]
+
+    sorted_dict = sorted(unique_gene_count_dict.items(), key=operator.itemgetter(1))
+
+    ordered_genes = [item[0] for item in sorted_dict]
+    ordered_unique_gene_count = [item[1] for item in sorted_dict]
+
+    print(ordered_genes)
+    print(ordered_unique_gene_count)
+    print(np.mean(ordered_unique_gene_count))
+    print(np.std(ordered_unique_gene_count))
+
+    plt.hist(ordered_unique_gene_count, normed=False, bins=100)
+    plt.ylabel('unique gene count')
+    plt.show()
 
 
 def make_sets():
@@ -612,7 +705,8 @@ def make_sets():
 
     make_triplet_csvs((training_df, validation_df, test_df, train_val_df))
 
-    filter_common_genes_out("triplet_training.csv")
+    filter_out_common_genes("triplet_training.csv")
+    filter_out_genes_out_of_mean_and_std("triplet_training.csv")
 
     """
     training_df, validation_df, test_df = define_sets_with_no_shared_donors(images_info_df)
