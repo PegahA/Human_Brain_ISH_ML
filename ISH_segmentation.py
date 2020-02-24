@@ -497,10 +497,23 @@ def check_masks_and_patches_info():
 def check_genes_in_images_with_not_enough_patches(file_name):
     not_enough_patches_df = pd.read_csv(os.path.join(MAIN_DATA_PATH,"outlier_images", file_name))
     human_ish_info = pd.read_csv(os.path.join(STUDY_PATH, "human_ISH_info.csv"))
-
+    print ("human ish info has {} rows.".format(len(human_ish_info)))
+ 
+    general_unique_genes = set(human_ish_info["gene_symbol"])
+ 
     merge_res = not_enough_patches_df.merge(human_ish_info, how="left", on="image_id", )
     print (len(merge_res))
     
+    unique_genes = set(merge_res["gene_symbol"])
+    
+    print ("There are {} unique genes in human ISH info csv file".format(len(general_unique_genes)))
+    print ("There are {} unique genes after merge".format(len(unique_genes)))
+
+    remove_from_human_ish_info = human_ish_info[(~human_ish_info.image_id.isin(not_enough_patches_df.image_id))]
+    print (len(remove_from_human_ish_info))
+    
+
+    print (len(set(remove_from_human_ish_info["gene_symbol"])))
 
 
 
