@@ -408,7 +408,8 @@ def use_trained_model(model_name):
 if __name__ == "__main__":
 
 
-    use_trained_model("training_example_feb_6.pkl")
+    #use_trained_model("training_example_feb_6.pkl")
+    print ("hello")
 
 
 
