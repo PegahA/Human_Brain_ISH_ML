@@ -443,7 +443,7 @@ def donor_info(my_set):
     print (unique_image_count_per_donor_list)
 
 
-def make_triplet_csv(df, out_file):
+def make_triplet_csv_no_segmentation(df, out_file):
     """
     Use this function to create input suited for the triplet-reid training scripts
     """
@@ -465,12 +465,18 @@ def make_triplet_csv(df, out_file):
     return (new_df.to_csv(out_file, index=False, header=False))
 
 
+def make_triplet_csv_with_segmentation():
+    pass
 
 def make_triplet_csvs(dfs):
 
     out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
-    return tuple((make_triplet_csv(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
-                 for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
+
+    if SEGMENTATION:
+        pass
+    else:
+        return tuple((make_triplet_csv_no_segmentation(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
+                     for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
 
 
 
