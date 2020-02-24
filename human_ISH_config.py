@@ -4,7 +4,8 @@ import shutil
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
 STUDY = "cortex"
-DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
+#DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
+DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
 CODE_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_brain_ish"
 PATCH_TYPE = 'r_per_image'    # options: 'r_per_image' and 'r_overall'
 
@@ -16,7 +17,7 @@ PATCH_HEIGHT = 256
 PATCH_WIDTH = 256
 NUMBER_OF_CIRCLES_IN_HEIGHT = 2
 NUMBER_OF_CIRCLES_IN_WIDTH = 1
-
+SEGMENTATION = False
 
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
