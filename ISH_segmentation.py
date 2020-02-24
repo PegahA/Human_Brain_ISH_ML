@@ -404,12 +404,100 @@ def use_trained_model(model_name):
                 invalid_images.write('\n')
 
 
+def check_predicted_masks():
+    path_to_masks = os.path.join(MAIN_DATA_PATH, "predicted_masks")
+    path_contents = os.listdir(path_to_masks)
+    masks = [item for item in path_contents if item.endswith("_pred.jpg")]
+    
+    return masks
+
+
+def check_final_patches():
+    path_to_final_patches = os.path.join(MAIN_DATA_PATH, "results", "final_patches")
+    path_contents = os.listdir(path_to_final_patches)
+    final_patches = [item for item in path_contents if item.endswith(".jpg")]
+
+    return final_patches
+
+def check_mask_patches():
+    path_to_mask_patches = os.path.join(MAIN_DATA_PATH, "results", "mask_patches")
+    path_contents = os.listdir(path_to_mask_patches)
+    mask_patches = [item for item in path_contents if item.endswith(".jpg")]
+
+    return mask_patches
+
+
+def check_masks_and_patches_info():
+    predicted_masks  = check_predicted_masks()
+    print("There are {} masks.".format(len(predicted_masks)))
+ 
+    final_patches = check_final_patches()
+    mask_patches = check_mask_patches()
+
+    if len(final_patches) != len(mask_patches):
+        print ("something is wrong. The number of final patches does not match with number of mask patches")
+	
+    print ("Number of final patches: {} ".format(len(final_patches)))
+    print ("Number of mask patches: {} ".format(len(mask_patches)))
+
+
+
+    image_id_from_predicted_masks = [item.split("_pred.jpg")[0] for item in predicted_masks]
+
+    image_id_from_final_patches = [item.split("_")[0] for item in final_patches]
+    final_patches_values, final_patches_counts = np.unique(image_id_from_final_patches, return_counts=True)
+
+    image_id_from_mask_patches = [item.split("_")[0] for item in mask_patches]
+    mask_patches_values, mask_patches_counts = np.unique(image_id_from_mask_patches, return_counts=True)
+
+    images_with_no_patches = []
+    for item in image_id_from_predicted_masks:
+        if item not in final_patches_values and item not in mask_patches_values:
+             images_with_no_patches.append(item)
+
+    print ("There are {} images with no valid patches".format(len(images_with_no_patches)))
+    print (images_with_no_patches)
+
+    print (len(final_patches_values))
+    print (len(mask_patches_values))
+    
+    # -------------------------------
+    final_patches_less_than_thresh_id = []
+    final_patches_less_than_thresh_count = []
+    
+    #mask_patches_less_than_thresh = []
+ 
+    for i in range(len(final_patches_values)):
+         if final_patches_counts[i] != 10:
+             #print ("{} : {} ".format(final_patches_values[i], final_patches_counts[i]))
+             final_patches_less_than_thresh_id.append(final_patches_values[i])
+             final_patches_less_than_thresh_count.append(final_patches_counts[i])
+
+    #for i in range(len(mask_patches_values)):
+         #if mask_patches_counts[i] != 10:
+             #print ("{} : {} ".format(mask_patches_values[i], mask_patches_counts[i]))
+             #mask_patches_less_than_thresh.append(mask_patches_values[i])
+   
+    print ("-----")
+    #print (final_patches_less_than_thresh_count)
+    #print (mask_patches_less_than_thresh_count)
+
+    # -----------------------------
+    not_enough_patches_df = pd.DataFrame(columns=["image_id", "count"])
+    #final_patches_less_than_thresh_id = [item+".jpg" for item in final_patches_less_than_thresh_id]
+    not_enough_patches_df["image_id"] = final_patches_less_than_thresh_id
+    not_enough_patches_df["count"] = final_patches_less_than_thresh_count
+
+    not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", "less_than_10.csv"), index=None)
+
 
 if __name__ == "__main__":
 
 
     #use_trained_model("training_example_feb_6.pkl")
-    print ("hello")
+
+    check_masks_and_patches_info()
+
 
 
 
