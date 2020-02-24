@@ -14,6 +14,7 @@ from sklearn.datasets import load_sample_image
 from sklearn.feature_extraction import image
 from PIL import Image
 from pathlib import Path
+import pandas as pd
 
 import torchvision
 print(fastai.__version__,
@@ -23,7 +24,8 @@ cv.__version__)
 
 
 MAIN_DATA_PATH = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/segmentation_data"
-ORIGINAL_IMAGES_PATH =  "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex/images"
+STUDY_PATH =  "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex"
+ORIGINAL_IMAGES_PATH =  os.path.join(STUDY_PATH, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = 1024
 PATCH_COUNT_PER_IMAGE = 10
@@ -491,13 +493,24 @@ def check_masks_and_patches_info():
     not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", "less_than_10.csv"), index=None)
 
 
+
+def check_genes_in_images_with_not_enough_patches(file_name):
+    not_enough_patches_df = pd.read_csv(os.path.join(MAIN_DATA_PATH,"outlier_images", file_name))
+    human_ish_info = pd.read_csv(os.path.join(STUDY_PATH, "human_ISH_info.csv"))
+
+    merge_res = not_enough_patches_df.merge(human_ish_info, how="left", on="image_id", )
+    print (len(merge_res))
+    
+
+
+
 if __name__ == "__main__":
 
 
     #use_trained_model("training_example_feb_6.pkl")
 
-    check_masks_and_patches_info()
-
+    #check_masks_and_patches_info()
+    check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
 
