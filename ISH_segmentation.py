@@ -407,6 +407,12 @@ def use_trained_model(model_name):
 
 
 def check_predicted_masks():
+    """
+    Returns the list of images for which we have a mask.
+    The length of this list must be equal to the total number of original images. Because there should be a black and white
+    mask for every image.
+    :return: python list of strings
+    """
     path_to_masks = os.path.join(MAIN_DATA_PATH, "predicted_masks")
     path_contents = os.listdir(path_to_masks)
     masks = [item for item in path_contents if item.endswith("_pred.jpg")]
@@ -415,6 +421,12 @@ def check_predicted_masks():
 
 
 def check_final_patches():
+    """
+    Returns this list of final patches that we have from the images.
+    These are the patches taken from original ISH images.
+
+    :return: python list of strings
+    """
     path_to_final_patches = os.path.join(MAIN_DATA_PATH, "results", "final_patches")
     path_contents = os.listdir(path_to_final_patches)
     final_patches = [item for item in path_contents if item.endswith(".jpg")]
@@ -422,6 +434,13 @@ def check_final_patches():
     return final_patches
 
 def check_mask_patches():
+    """
+    Returns this list of mask patches that we have from the images.
+    There are patches taken from the masks.
+
+    :return: python list of strings
+    """
+
     path_to_mask_patches = os.path.join(MAIN_DATA_PATH, "results", "mask_patches")
     path_contents = os.listdir(path_to_mask_patches)
     mask_patches = [item for item in path_contents if item.endswith(".jpg")]
@@ -430,6 +449,13 @@ def check_mask_patches():
 
 
 def check_masks_and_patches_info():
+    """
+    This function checks to see for how many of the images there are no valid patches. And for how many of the images
+    there are not enough valid patches. Enough means equal to PATCH_COUNT_PER_IMAGE.
+    It creates a csv file and stores the image id and patch count of images that have less than PATCH_COUNT_PER_IMAGE valid patches.
+
+    :returns: None
+    """
     predicted_masks  = check_predicted_masks()
     print("There are {} masks.".format(len(predicted_masks)))
  
@@ -443,7 +469,7 @@ def check_masks_and_patches_info():
     print ("Number of mask patches: {} ".format(len(mask_patches)))
 
 
-
+    # -----------------------------------
     image_id_from_predicted_masks = [item.split("_pred.jpg")[0] for item in predicted_masks]
 
     image_id_from_final_patches = [item.split("_")[0] for item in final_patches]
@@ -451,6 +477,12 @@ def check_masks_and_patches_info():
 
     image_id_from_mask_patches = [item.split("_")[0] for item in mask_patches]
     mask_patches_values, mask_patches_counts = np.unique(image_id_from_mask_patches, return_counts=True)
+
+    # -----------------------------------
+
+    # There might be images that do not have any valid patches.
+    # A valid patch is a patch with FOREGROUND_THRESHOLD % of tissue in it.
+    # In these cases, we do have a mask, but there are no patch images generated from that mask.
 
     images_with_no_patches = []
     for item in image_id_from_predicted_masks:
@@ -463,46 +495,51 @@ def check_masks_and_patches_info():
     print (len(final_patches_values))
     print (len(mask_patches_values))
     
-    # -------------------------------
+    # ----------------------------------------
     final_patches_less_than_thresh_id = []
     final_patches_less_than_thresh_count = []
-    
-    #mask_patches_less_than_thresh = []
- 
+
+
+    # There are also cases were we have some valid patches from an image. But the count is less than PATCH_COUNT_PER_IMAGE.
+    # So here, we keep track of the images that do not have enough patches and check how many patches they actually do have.
     for i in range(len(final_patches_values)):
-         if final_patches_counts[i] != 10:
-             #print ("{} : {} ".format(final_patches_values[i], final_patches_counts[i]))
+         if final_patches_counts[i] != PATCH_COUNT_PER_IMAGE:
              final_patches_less_than_thresh_id.append(final_patches_values[i])
              final_patches_less_than_thresh_count.append(final_patches_counts[i])
 
-    #for i in range(len(mask_patches_values)):
-         #if mask_patches_counts[i] != 10:
-             #print ("{} : {} ".format(mask_patches_values[i], mask_patches_counts[i]))
-             #mask_patches_less_than_thresh.append(mask_patches_values[i])
    
     print ("-----")
-    #print (final_patches_less_than_thresh_count)
-    #print (mask_patches_less_than_thresh_count)
+    print ("There are {} images that have less than {} patches.".format(len(final_patches_less_than_thresh_id), PATCH_COUNT_PER_IMAGE))
 
     # -----------------------------
+
+    # we store the images that have less than PATCH_COUNT_PER_IMAGE patches in a csv file
     not_enough_patches_df = pd.DataFrame(columns=["image_id", "count"])
-    #final_patches_less_than_thresh_id = [item+".jpg" for item in final_patches_less_than_thresh_id]
     not_enough_patches_df["image_id"] = final_patches_less_than_thresh_id
     not_enough_patches_df["count"] = final_patches_less_than_thresh_count
 
-    not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", "less_than_10.csv"), index=None)
+    csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
+    not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", csv_file_name), index=None)
 
 
 
 def check_genes_in_images_with_not_enough_patches(file_name):
+    """
+    This is a helper function to check unique gene counts.
+    The goal is to see if any genes will be removed from the data set if we remove the images from which we do not have
+    enough patches.
+
+    :param file_name: string: name of the csv files that has info of the images from which we do not have
+    enough patches.
+
+    :return: None
+    """
     not_enough_patches_df = pd.read_csv(os.path.join(MAIN_DATA_PATH,"outlier_images", file_name))
     human_ish_info = pd.read_csv(os.path.join(STUDY_PATH, "human_ISH_info.csv"))
-    print ("human ish info has {} rows.".format(len(human_ish_info)))
- 
+   
     general_unique_genes = set(human_ish_info["gene_symbol"])
  
     merge_res = not_enough_patches_df.merge(human_ish_info, how="left", on="image_id", )
-    print (len(merge_res))
     
     unique_genes = set(merge_res["gene_symbol"])
     
