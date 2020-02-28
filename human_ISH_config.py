@@ -5,8 +5,9 @@ import shutil
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
 STUDY = "cortex"
 #DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
-DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
-CODE_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_brain_ish"
+#DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
+DATA_DIR = "/human_ISH/human_ish_data"
+CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'r_per_image'    # options: 'r_per_image' and 'r_overall'
 
 TEST_SPLIT = 10
@@ -26,7 +27,7 @@ FOREGROUND_THRESHOLD = 90
 
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_2")
     EMBEDDING_DEST =  os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
 
 
@@ -37,7 +38,8 @@ elif  PATCH_TYPE == 'r_overall' :
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
 EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_training_validation.csv")
-INITIAL_CHECKPOINT = os.path.join(CODE_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
+INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
+TRIPLET_DIR = os.path.join(DATA_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
 TRAIN_EMBEDDING_DIM = 128
