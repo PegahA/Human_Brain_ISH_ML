@@ -557,14 +557,17 @@ def check_genes_in_images_with_not_enough_patches(file_name):
     print (len(set(remove_from_human_ish_info["gene_symbol"])))
 
 
+def main():
+    use_trained_model("training_example_feb_6.pkl")
+
 
 if __name__ == "__main__":
-
+    pass
 
     #use_trained_model("training_example_feb_6.pkl")
 
     #check_masks_and_patches_info()
-    check_genes_in_images_with_not_enough_patches("less_than_10.csv")
+    #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
 
