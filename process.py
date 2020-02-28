@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 
 random.seed(1)
 
-if (not os.path.exists(os.path.join(DATA_DIR, STUDY, "sets"))):
-    os.mkdir(os.path.join(DATA_DIR, STUDY, "sets"))
+#if (not os.path.exists(os.path.join(DATA_DIR, STUDY, "sets"))):
+    #os.mkdir(os.path.join(DATA_DIR, STUDY, "sets"))
+
 
 
 def get_stats(images_info_df):
@@ -465,16 +466,42 @@ def make_triplet_csv_no_segmentation(df, out_file):
     return (new_df.to_csv(out_file, index=False, header=False))
 
 
-def make_triplet_csv_with_segmentation(df):
+def make_triplet_csv_with_segmentation(df, out_file):
+
 
     csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
-    not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", csv_file_name), index=None)
+    not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data", "outlier_images", csv_file_name))
+
+    not_enough_patches_dict = dict(zip(not_enough_patches_df["image_id"], not_enough_patches_df["count"]))
+
 
     temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
     new_image_info = []
 
     for id, gene in zip(temp_df['image'],temp_df['gene_symbol']):
-        if id in
+
+        id_temp = int(id.split(".")[0])
+        if id_temp in not_enough_patches_dict:
+
+            count = not_enough_patches_dict[id_temp]
+            for patch_index in range(0, count):
+                patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
+                new_image_info += patch_image_list
+
+
+        else:
+
+            for patch_index in range(0, PATCH_COUNT_PER_IMAGE):
+                patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
+                new_image_info += patch_image_list
+
+    new_df = pd.DataFrame(columns=['gene_symbol', 'image'])
+    new_df['image'] = [item[0] for item in new_image_info]
+    new_df['gene_symbol'] = [item[1] for item in new_image_info]
+
+    new_df = new_df.sort_values(by=['image'])
+
+    return (new_df.to_csv(out_file, index=False, header=False))
 
 
 
@@ -485,7 +512,10 @@ def make_triplet_csvs(dfs):
     out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
 
     if SEGMENTATION:
-        pass
+        return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+            out_base, ext))
+                     for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
+
     else:
         return tuple((make_triplet_csv_no_segmentation(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
                      for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
@@ -744,6 +774,7 @@ def run():
     pass
 
 if __name__ == '__main__':
+
     run()
 
 
