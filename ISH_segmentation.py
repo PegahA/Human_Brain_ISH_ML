@@ -26,7 +26,6 @@ cv.__version__)
 
 
 SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR, "segmentation_data")
-STUDY_PATH =  "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex"
 ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = PATCH_HEIGHT
@@ -277,6 +276,10 @@ def use_trained_model(model_name):
     learn = fastai.basic_train.load_learner(path=learner_path.parent, file=learner_path.name)
 
     images_path = os.path.join(SEGMENTATION_DATA_PATH, "results")
+    if not os.path.exists(images_path):
+        os.mkdir(images_path)
+
+
     original_images_path = ORIGINAL_IMAGES_PATH
     dir_images_list = os.listdir(original_images_path)
 
