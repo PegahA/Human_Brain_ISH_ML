@@ -26,8 +26,9 @@ torchvision.__version__,
 cv.__version__)
 
 
-SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR, "segmentation_data")
-ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
+SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
+#ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
+ORIGINAL_IMAGES_PATH = "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex/images"
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = PATCH_HEIGHT
 
@@ -309,8 +310,8 @@ def use_trained_model(model_name):
 
     print ("Starting to pad and resize ISH images to predict a mask for them ...")
 
-    invalid_images_path = os.path.join(SEGMENTATION_DATA_PATH, "invalid_images", "invalid_images.txt")
-    invalid_images = open(invalid_images_path, "w")
+    #invalid_images_path = os.path.join(SEGMENTATION_DATA_PATH, "invalid_images", "invalid_images.txt")
+    #invalid_images = open(invalid_images_path, "w")
    
     for item in dir_images_list:
         if item.endswith(".jpg") and item not in predicted_masks:  # the images are saved with jpg format
