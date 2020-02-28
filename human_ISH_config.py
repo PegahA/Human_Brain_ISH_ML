@@ -19,6 +19,11 @@ NUMBER_OF_CIRCLES_IN_HEIGHT = 2
 NUMBER_OF_CIRCLES_IN_WIDTH = 1
 SEGMENTATION = False
 
+PATCH_COUNT_PER_IMAGE = 10
+FOREGROUND_THRESHOLD = 90
+
+
+
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
