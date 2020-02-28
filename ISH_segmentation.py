@@ -300,6 +300,7 @@ def use_trained_model(model_name):
 
     if not os.path.exists(predicted_masks_path):
         os.mkdir(predicted_masks_path)
+        predicted_masks = []
     else:
         predicted_masks= os.listdir(predicted_masks_path)
         predicted_masks = [x.split("_")[0]+".jpg" for x in predicted_masks]
