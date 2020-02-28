@@ -465,8 +465,20 @@ def make_triplet_csv_no_segmentation(df, out_file):
     return (new_df.to_csv(out_file, index=False, header=False))
 
 
-def make_triplet_csv_with_segmentation():
-    pass
+def make_triplet_csv_with_segmentation(df):
+
+    csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
+    not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", csv_file_name), index=None)
+
+    temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
+    new_image_info = []
+
+    for id, gene in zip(temp_df['image'],temp_df['gene_symbol']):
+        if id in
+
+
+
+
 
 def make_triplet_csvs(dfs):
 
