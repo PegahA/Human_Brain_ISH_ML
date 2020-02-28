@@ -511,7 +511,7 @@ def make_triplet_csvs(dfs):
 
     out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
 
-    if SEGMENTATION:
+    if PATCH_TYPE=="segmentation":
         return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
             out_base, ext))
                      for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
