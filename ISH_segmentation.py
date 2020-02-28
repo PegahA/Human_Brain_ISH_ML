@@ -16,6 +16,8 @@ from PIL import Image
 from pathlib import Path
 import pandas as pd
 
+from human_ISH_config import *
+
 import torchvision
 print(fastai.__version__,
 torch.__version__,
@@ -23,13 +25,12 @@ torchvision.__version__,
 cv.__version__)
 
 
-MAIN_DATA_PATH = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/segmentation_data"
+SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR, "segmentation_data")
 STUDY_PATH =  "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex"
-ORIGINAL_IMAGES_PATH =  os.path.join(STUDY_PATH, "images")
+ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
-PATCH_SIZE = 1024
-PATCH_COUNT_PER_IMAGE = 10
-FOREGROUND_THRESHOLD = 90
+PATCH_SIZE = PATCH_HEIGHT
+
 
 
 def pad_and_scale_for_training(images,labels,img_size):
@@ -271,11 +272,11 @@ def use_trained_model(model_name):
     :return:
     """
 
-    model_path = os.path.join(MAIN_DATA_PATH, model_name)
+    model_path = os.path.join(SEGMENTATION_DATA_PATH, model_name)
     learner_path = Path(model_path)
     learn = fastai.basic_train.load_learner(path=learner_path.parent, file=learner_path.name)
 
-    images_path = os.path.join(MAIN_DATA_PATH, "results")
+    images_path = os.path.join(SEGMENTATION_DATA_PATH, "results")
     original_images_path = ORIGINAL_IMAGES_PATH
     dir_images_list = os.listdir(original_images_path)
 
@@ -290,7 +291,7 @@ def use_trained_model(model_name):
         os.mkdir(mask_patches_path)
 
 
-    predicted_masks_path = os.path.join(MAIN_DATA_PATH, "predicted_masks")
+    predicted_masks_path = os.path.join(SEGMENTATION_DATA_PATH, "predicted_masks")
 
     if not os.path.exists(predicted_masks_path):
         os.mkdir(predicted_masks_path)
@@ -304,7 +305,7 @@ def use_trained_model(model_name):
 
     print ("Starting to pad and resize ISH images to predict a mask for them ...")
 
-    invalid_images_path = os.path.join(MAIN_DATA_PATH, "invalid_images", "invalid_images.txt")
+    invalid_images_path = os.path.join(SEGMENTATION_DATA_PATH, "invalid_images", "invalid_images.txt")
     invalid_images = open(invalid_images_path, "w")
    
     for item in dir_images_list:
@@ -397,7 +398,7 @@ def use_trained_model(model_name):
                 rand_state += 1
                 this_image_lookup_count +=1
 		
-                if this_image_lookup_count == 100:
+                if this_image_lookup_count == 500:
                     no_valid_patch == True			
                     break
 
@@ -413,7 +414,7 @@ def check_predicted_masks():
     mask for every image.
     :return: python list of strings
     """
-    path_to_masks = os.path.join(MAIN_DATA_PATH, "predicted_masks")
+    path_to_masks = os.path.join(SEGMENTATION_DATA_PATH, "predicted_masks")
     path_contents = os.listdir(path_to_masks)
     masks = [item for item in path_contents if item.endswith("_pred.jpg")]
     
@@ -427,7 +428,7 @@ def check_final_patches():
 
     :return: python list of strings
     """
-    path_to_final_patches = os.path.join(MAIN_DATA_PATH, "results", "final_patches")
+    path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "final_patches")
     path_contents = os.listdir(path_to_final_patches)
     final_patches = [item for item in path_contents if item.endswith(".jpg")]
 
@@ -441,7 +442,7 @@ def check_mask_patches():
     :return: python list of strings
     """
 
-    path_to_mask_patches = os.path.join(MAIN_DATA_PATH, "results", "mask_patches")
+    path_to_mask_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "mask_patches")
     path_contents = os.listdir(path_to_mask_patches)
     mask_patches = [item for item in path_contents if item.endswith(".jpg")]
 
@@ -519,7 +520,7 @@ def check_masks_and_patches_info():
     not_enough_patches_df["count"] = final_patches_less_than_thresh_count
 
     csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
-    not_enough_patches_df.to_csv(os.path.join(MAIN_DATA_PATH, "outlier_images", csv_file_name), index=None)
+    not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images", csv_file_name), index=None)
 
 
 
@@ -534,9 +535,9 @@ def check_genes_in_images_with_not_enough_patches(file_name):
 
     :return: None
     """
-    not_enough_patches_df = pd.read_csv(os.path.join(MAIN_DATA_PATH,"outlier_images", file_name))
-    human_ish_info = pd.read_csv(os.path.join(STUDY_PATH, "human_ISH_info.csv"))
-   
+    not_enough_patches_df = pd.read_csv(os.path.join(SEGMENTATION_DATA_PATH,"outlier_images", file_name))
+    human_ish_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
+
     general_unique_genes = set(human_ish_info["gene_symbol"])
  
     merge_res = not_enough_patches_df.merge(human_ish_info, how="left", on="image_id", )
