@@ -30,7 +30,7 @@ SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
 #ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 ORIGINAL_IMAGES_PATH = "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex/images"
 TRAIN_INPUT_IMAGE_SIZE = 224
-PATCH_SIZE = PATCH_HEIGHT
+PATCH_SIZE = SEGMENTATION_PATCH_SIZE
 
 
 
