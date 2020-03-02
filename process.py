@@ -741,12 +741,9 @@ def draw_hist(df_file_name):
 
 def images_wiht_no_valid_patches():
     path_to_outliers = os.path.join(DATA_DIR,STUDY,"segmentation_data","outlier_images")
-    content = os.listdir(path_to_outliers)
-    no_valid_patch_list = []
-
-    for item in content:
-        if item.endswith(".jpg"):
-            no_valid_patch_list.append(item.split(".")[0])
+    less_than_thresh_df = pd.read_csv(os.path.join(path_to_outliers, "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"))
+    no_valid_patch_list = list(less_than_thresh_df[less_than_thresh_df["count"] == 0]["image_id"])
+    no_valid_patch_list = [str(item) for item in no_valid_patch_list]
     return no_valid_patch_list
 
 def make_sets():
@@ -784,9 +781,9 @@ def run():
 
 if __name__ == '__main__':
 
-    run()
+    #run()
     
-
+    print  (images_wiht_no_valid_patches())
 
 
 
