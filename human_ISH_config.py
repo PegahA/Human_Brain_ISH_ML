@@ -46,7 +46,7 @@ elif PATCH_TYPE == 'segmentation':
     #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
     IMAGE_ROOT = os.path.join("/human_ISH/segmentation_data/results/final_patches")
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
-    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation__embeddings")
+    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
