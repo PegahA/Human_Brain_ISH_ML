@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-#import h5py
+import h5py
 import time
 from shutil import copyfile
 import operator
@@ -781,9 +781,9 @@ def run():
 
 if __name__ == '__main__':
 
-    #run()
+    run()
     
-    print  (images_wiht_no_valid_patches())
+    
 
 
 
