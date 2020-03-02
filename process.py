@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-import h5py
+#import h5py
 import time
 from shutil import copyfile
 import operator
@@ -739,11 +739,20 @@ def draw_hist(df_file_name):
     plt.ylabel('unique gene count')
     plt.show()
 
+def images_wiht_no_valid_patches():
+    path_to_outliers = os.path.join(DATA_DIR,STUDY,"segmentation_data","outlier_images")
+    content = os.listdir(path_to_outliers)
+    no_valid_patch_list = []
+
+    for item in content:
+        if item.endswith(".jpg"):
+            no_valid_patch_list.append(item.split(".")[0])
+    return no_valid_patch_list
 
 def make_sets():
 
     images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
-    no_valid_patch_list = ["78747004", "78863068","78942979"]
+    no_valid_patch_list = images_wiht_no_valid_patches()
     images_info_df = images_info_df[~images_info_df["image_id"].isin(no_valid_patch_list)]
 
     stats_dict = get_stats(images_info_df)
@@ -776,6 +785,7 @@ def run():
 if __name__ == '__main__':
 
     run()
+    
 
 
 
