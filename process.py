@@ -541,14 +541,12 @@ def convert_h5_to_csv():
 
 
 
-def save_embedding_info_into_file():
+def save_embedding_info_into_file(filename):
 
 
     if (not os.path.exists(EMBEDDING_DEST)):
         os.mkdir(EMBEDDING_DEST)
 
-    current_time  = int(time.time())
-    filename = str(current_time)
     os.mkdir(os.path.join(EMBEDDING_DEST, filename))
     embed_info_dir = os.path.join(EMBEDDING_DEST, filename)
 
@@ -745,6 +743,8 @@ def draw_hist(df_file_name):
 def make_sets():
 
     images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    no_valid_patch_list = ["78747004", "78863068","78942979"]
+    images_info_df = images_info_df[~images_info_df["image_id"].isin(no_valid_patch_list)]
 
     stats_dict = get_stats(images_info_df)
 
