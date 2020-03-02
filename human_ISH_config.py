@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
@@ -26,20 +27,25 @@ FOREGROUND_THRESHOLD = 90
 SEGMENTATION_PATCH_SIZE = 1024
 
 
+current_time  = int(time.time())
+TIMESTAMP = str(current_time)
+
+
+
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
-    EMBEDDING_DEST =  os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
-
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
+    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
 
 elif  PATCH_TYPE == 'r_overall' :
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
 elif PATCH_TYPE == 'segmentation':
-    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "final_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
+    #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
+    IMAGE_ROOT = os.path.join("/human_ISH/segmentation_data/results/final_patches")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation__embeddings")
 
 
