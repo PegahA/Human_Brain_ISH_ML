@@ -34,18 +34,18 @@ TIMESTAMP = str(current_time)
 
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
 
 elif  PATCH_TYPE == 'r_overall' :
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
 elif PATCH_TYPE == 'segmentation':
     #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" , "results" , "final_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_" + TIMESTAMP)
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
 
@@ -56,8 +56,8 @@ TRIPLET_DIR = os.path.join(DATA_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
 TRAIN_EMBEDDING_DIM = 128
-TRAIN_BATCH_P = 50
-TRAIN_BATCH_K = 2
+TRAIN_BATCH_P = 20
+TRAIN_BATCH_K = 10
 EMBED_BATCH_SIZE = 128
 NET_INPUT_HEIGHT = PATCH_HEIGHT  # do you want to try 240?
 NET_INPUT_WIDTH = PATCH_WIDTH # do you want to try 240?
@@ -68,7 +68,7 @@ MARGIN = 'soft'
 METRIC = 'euclidean'
 LOSS = 'batch_hard'
 LEARNING_RATE = 3e-4
-TRAIN_ITERATIONS = 25000
+TRAIN_ITERATIONS = 5
 DECAY_START_ITERATION = 15000
 CHECKPOINT_FREQUENCY = 1000
 TRAIN_FLIP_AUGMENT = False
