@@ -256,7 +256,16 @@ if __name__ == "__main__":
     
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file(TIMESTAMP)
-    process.merge_embeddings_to_gene_level(filename)
+     
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "experiment_files")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
+
+
+    #os.chmod(DATA_DIR, 0o777) # for example
+    #process.merge_embeddings_to_gene_level(filename)
     #evaluate_embeddings.evaluate(filename)
     
    
