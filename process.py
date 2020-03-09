@@ -511,7 +511,7 @@ def make_triplet_csvs(dfs):
 
     out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
 
-    if SEGMENTATION:
+    if PATCH_TYPE=="segmentation":
         return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
             out_base, ext))
                      for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
@@ -541,14 +541,12 @@ def convert_h5_to_csv():
 
 
 
-def save_embedding_info_into_file():
+def save_embedding_info_into_file(filename):
 
 
     if (not os.path.exists(EMBEDDING_DEST)):
         os.mkdir(EMBEDDING_DEST)
 
-    current_time  = int(time.time())
-    filename = str(current_time)
     os.mkdir(os.path.join(EMBEDDING_DEST, filename))
     embed_info_dir = os.path.join(EMBEDDING_DEST, filename)
 
@@ -741,10 +739,18 @@ def draw_hist(df_file_name):
     plt.ylabel('unique gene count')
     plt.show()
 
+def images_wiht_no_valid_patches():
+    path_to_outliers = os.path.join(DATA_DIR,STUDY,"segmentation_data","outlier_images")
+    less_than_thresh_df = pd.read_csv(os.path.join(path_to_outliers, "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"))
+    no_valid_patch_list = list(less_than_thresh_df[less_than_thresh_df["count"] == 0]["image_id"])
+    no_valid_patch_list = [str(item) for item in no_valid_patch_list]
+    return no_valid_patch_list
 
 def make_sets():
 
     images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    no_valid_patch_list = images_wiht_no_valid_patches()
+    images_info_df = images_info_df[~images_info_df["image_id"].isin(no_valid_patch_list)]
 
     stats_dict = get_stats(images_info_df)
 
@@ -776,7 +782,8 @@ def run():
 if __name__ == '__main__':
 
     run()
-
+    
+    
 
 
 

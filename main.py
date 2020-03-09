@@ -1,8 +1,9 @@
 from human_ISH_config import *
-import extract_data
+#import extract_data
 import process
-import crop_and_rotate
-import evaluate_embeddings
+#import  ISH_segmentation
+#import crop_and_rotate
+#import evaluate_embeddings
 from argparse import ArgumentParser
 import os
 
@@ -164,7 +165,10 @@ parser.add_argument(
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    #process.make_sets()
+    #process.make_sets() 
+    
+    print ("i am here in main!")
+
     
     args = parser.parse_args()
     print ("\n------- Arguments:")
@@ -200,11 +204,11 @@ if __name__ == "__main__":
     print ("embed flip augment: ", args.embed_flip_augment)
     print ("embed crop augment: ", args.embed_crop_augment)
     print ('embed aggregator: ', args.embed_aggregator)
-
+   
     
 
-
-    train_command_line_string = "python triplet-reid/train.py" + \
+    train_py_path = os.path.join(TRIPLET_DIR, "train.py")
+    train_command_line_string = "python " + train_py_path + \
                           " --experiment_root=" + "'" + args.experiment_root + "'" + \
                           " --train_set=" + "'" + args.train_set + "'" \
                           " --image_root=" + "'" + args.image_root + "'" + \
@@ -232,8 +236,8 @@ if __name__ == "__main__":
                           (" --detailed_logs" if args.detailed_logs else "")
 
 
-
-    embed_command_line_string = "python triplet-reid/embed.py" + \
+    embed_py_path = os.path.join(TRIPLET_DIR, "embed.py")
+    embed_command_line_string = "python " + embed_py_path  + \
                                 " --experiment_root=" + "'" + args.experiment_root + "'" + \
                                 " --dataset=" + "'" + args.embed_dataset + "'" +\
                                 " --image_root=" + "'" + args.image_root + "'" + \
@@ -243,19 +247,28 @@ if __name__ == "__main__":
                                 (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
-
+     
     if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
         shutil.rmtree(EXPERIMENT_ROOT)
 
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
-
+    
     process.convert_h5_to_csv()
-    filename = process.save_embedding_info_into_file()
-    process.merge_embeddings_to_gene_level(filename)
-    evaluate_embeddings.evaluate(filename)
+    filename = process.save_embedding_info_into_file(TIMESTAMP)
+     
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "experiment_files")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
 
 
+    #os.chmod(DATA_DIR, 0o777) # for example
+    #process.merge_embeddings_to_gene_level(filename)
+    #evaluate_embeddings.evaluate(filename)
+    
+   
     
 
 

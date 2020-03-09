@@ -1,14 +1,16 @@
 import os
 import shutil
+import time
 
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
 STUDY = "cortex"
 #DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 #DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
+#DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
 DATA_DIR = "/human_ISH/human_ish_data"
 CODE_DIR = "/human_ISH/human_ish_code"
-PATCH_TYPE = 'r_per_image'    # options: 'r_per_image' and 'r_overall'
+PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
 TEST_SPLIT = 10
 VALIDATION_SPLIT = 10
@@ -22,19 +24,30 @@ SEGMENTATION = False
 
 PATCH_COUNT_PER_IMAGE = 10
 FOREGROUND_THRESHOLD = 90
+SEGMENTATION_PATCH_SIZE = 1024
+
+
+current_time  = int(time.time())
+TIMESTAMP = str(current_time)
 
 
 
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files_2")
-    EMBEDDING_DEST =  os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
-
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
+    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
 
 elif  PATCH_TYPE == 'r_overall' :
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
+
+elif PATCH_TYPE == 'segmentation':
+    #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
+    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" , "results" , "final_patches")
+    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
+    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
+
 
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
 EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_training_validation.csv")
@@ -43,8 +56,8 @@ TRIPLET_DIR = os.path.join(DATA_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
 TRAIN_EMBEDDING_DIM = 128
-TRAIN_BATCH_P = 50
-TRAIN_BATCH_K = 2
+TRAIN_BATCH_P = 20
+TRAIN_BATCH_K = 10
 EMBED_BATCH_SIZE = 128
 NET_INPUT_HEIGHT = PATCH_HEIGHT  # do you want to try 240?
 NET_INPUT_WIDTH = PATCH_WIDTH # do you want to try 240?
@@ -55,7 +68,7 @@ MARGIN = 'soft'
 METRIC = 'euclidean'
 LOSS = 'batch_hard'
 LEARNING_RATE = 3e-4
-TRAIN_ITERATIONS = 25000
+TRAIN_ITERATIONS = 5
 DECAY_START_ITERATION = 15000
 CHECKPOINT_FREQUENCY = 1000
 TRAIN_FLIP_AUGMENT = False

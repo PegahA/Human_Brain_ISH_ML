@@ -19,6 +19,7 @@ import pandas as pd
 from human_ISH_config import *
 
 import torchvision
+
 print(fastai.__version__,
 torch.__version__,
 torchvision.__version__,
@@ -26,10 +27,11 @@ cv.__version__)
 
 
 
-SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR, "segmentation_data")
-ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
+SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
+#ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
+ORIGINAL_IMAGES_PATH = "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex/images"
 TRAIN_INPUT_IMAGE_SIZE = 224
-PATCH_SIZE = PATCH_HEIGHT
+PATCH_SIZE = SEGMENTATION_PATCH_SIZE
 
 
 
@@ -299,6 +301,7 @@ def use_trained_model(model_name):
 
     if not os.path.exists(predicted_masks_path):
         os.mkdir(predicted_masks_path)
+        predicted_masks = []
     else:
         predicted_masks= os.listdir(predicted_masks_path)
         predicted_masks = [x.split("_")[0]+".jpg" for x in predicted_masks]
@@ -309,8 +312,7 @@ def use_trained_model(model_name):
 
     print ("Starting to pad and resize ISH images to predict a mask for them ...")
 
-    invalid_images_path = os.path.join(SEGMENTATION_DATA_PATH, "invalid_images", "invalid_images.txt")
-    invalid_images = open(invalid_images_path, "w")
+    
    
     for item in dir_images_list:
         if item.endswith(".jpg") and item not in predicted_masks:  # the images are saved with jpg format
@@ -406,9 +408,7 @@ def use_trained_model(model_name):
                     no_valid_patch == True			
                     break
 
-            if no_valid_patch:
-                invalid_images.write(item)
-                invalid_images.write('\n')
+           
 
 
 def check_predicted_masks():
@@ -493,6 +493,7 @@ def check_masks_and_patches_info():
     for item in image_id_from_predicted_masks:
         if item not in final_patches_values and item not in mask_patches_values:
              images_with_no_patches.append(item)
+             
 
     print ("There are {} images with no valid patches".format(len(images_with_no_patches)))
     print (images_with_no_patches)
@@ -515,6 +516,11 @@ def check_masks_and_patches_info():
    
     print ("-----")
     print ("There are {} images that have less than {} patches.".format(len(final_patches_less_than_thresh_id), PATCH_COUNT_PER_IMAGE))
+
+    # ----------------------------
+    for item in images_with_no_patches:
+         final_patches_less_than_thresh_id.append(item)
+         final_patches_less_than_thresh_count.append(0)
 
     # -----------------------------
 
@@ -558,14 +564,18 @@ def check_genes_in_images_with_not_enough_patches(file_name):
     print (len(set(remove_from_human_ish_info["gene_symbol"])))
 
 
+def main():
+    #use_trained_model("training_example_feb_6.pkl")
+    check_masks_and_patches_info()
+
 
 if __name__ == "__main__":
-
+    main()
 
     #use_trained_model("training_example_feb_6.pkl")
 
     #check_masks_and_patches_info()
-    check_genes_in_images_with_not_enough_patches("less_than_10.csv")
+    #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
 
