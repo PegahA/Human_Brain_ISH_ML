@@ -225,11 +225,11 @@ def level_3_evaluation(min_indexes_df):
 
 
 
-def evaluate_sum_100(filename):
+def evaluate_sum_100(path_to_embeddings):
 
     # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
-    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
+    # path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
 
     dist_df = build_distance_matrix(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
@@ -247,11 +247,11 @@ def evaluate_sum_100(filename):
     print(level_3_proportion)
 
 
-def evaluate_with_filtering():
+def evaluate_with_filtering(path_to_embeddings):
 
     # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
-    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
+    #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
 
     print("level 1")
     dist_df = build_distance_matrix(path_to_embeddings)
@@ -274,6 +274,13 @@ def evaluate_with_filtering():
     print(min_indexes_df)
     level_2_proportion = level_3_evaluation(min_indexes_df)
     print(level_2_proportion)
+
+
+
+
+def evaluate():
+    evaluate_sum_100()
+    evaluate_with_filtering()
 
 
 
