@@ -1,8 +1,8 @@
-#import fastai
-#from fastai.vision import *
-#from fastai.callbacks.hooks import *
-#from fastai.utils.mem import *
-#from fastai.callbacks import SaveModelCallback
+import fastai
+from fastai.vision import *
+from fastai.callbacks.hooks import *
+from fastai.utils.mem import *
+from fastai.callbacks import SaveModelCallback
 from functools import partial
 import cv2 as cv
 import matplotlib.pyplot as plt
@@ -19,10 +19,11 @@ import pandas as pd
 from human_ISH_config import *
 
 import torchvision
-#print(fastai.__version__,
-#torch.__version__,
-#torchvision.__version__,
-#cv.__version__)
+print(fastai.__version__,
+torch.__version__,
+torchvision.__version__,
+cv.__version__)
+
 
 
 SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR, "segmentation_data")
