@@ -569,8 +569,36 @@ def create_valid_patches_info_csv_file():
     contents_list = os.listdir(IMAGE_ROOT)
     patches_list = [item for item in contents_list if item.endswith(".jpg")]
 
-    print (len(patches_list))
+    patch_id_list = [item.split(".")[0] for item in patches_list]
 
+    image_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    columns = list(image_info_df)
+    columns.insert(0, 'patch_id')
+
+    print (columns)
+
+    """
+    patch_id_list = patches_info_df['patch_id']
+    patch_index_list = [patch_id.split('_')[1].split(".")[0] for patch_id in patch_id_list]
+    patch_id_list = [int(patch_id.split("_")[0]) for patch_id in patch_id_list]
+
+    patches_info_df['patch_id'] = patch_id_list
+    patches_info_df['patch_index'] = patch_index_list
+
+    patches_info_df = patches_info_df.rename(columns={'patch_id': 'image_id'})
+    valid_patches_df = pd.merge(patches_info_df, image_info_df, on='image_id')
+    old_patch_id_list = [str(patch_id) + "_" + str(patch_index) for patch_id, patch_index in
+                         zip(valid_patches_df['image_id'], valid_patches_df['patch_index'])]
+
+    valid_patches_df['patch_id'] = old_patch_id_list
+    valid_patches_df = valid_patches_df.drop(columns=['patch_index'])
+
+    columns = list(valid_patches_df)
+    columns = columns[-1:] + columns[:-1]
+    valid_patches_df = valid_patches_df[columns]
+
+    valid_patches_df.to_csv(os.path.join(patches_path, "valid_patches_info.csv"), index=None)
+    """
 
 def main():
     #use_trained_model("training_example_feb_6.pkl")
