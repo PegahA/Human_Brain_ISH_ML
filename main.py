@@ -1,6 +1,6 @@
 from human_ISH_config import *
 #import extract_data
-import process
+#import process
 #import  ISH_segmentation
 #import crop_and_rotate
 #import evaluate_embeddings
@@ -166,7 +166,9 @@ if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
     #process.make_sets() 
-    
+
+
+       
     print ("i am here in main!")
 
     
@@ -256,18 +258,30 @@ if __name__ == "__main__":
     
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file(TIMESTAMP)
-     
+    
+
+    #process.merge_embeddings_to_gene_level(filename)
+    #evaluate_embeddings.evaluate(filename)
+
+
     for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "experiment_files")):
         for d in dirs:
             os.chmod(os.path.join(root, d), 0o777)
         for f in files:
             os.chmod(os.path.join(root, f), 0o777)
-
-
-    #os.chmod(DATA_DIR, 0o777) # for example
-    #process.merge_embeddings_to_gene_level(filename)
-    #evaluate_embeddings.evaluate(filename)
     
+
+    print ("permisssions fixed for experiment files")
+
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "segmentation_embeddings")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)        
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
+    
+    print ("permissions fixed for segmentation embeddings")
+
+     
    
     
 
