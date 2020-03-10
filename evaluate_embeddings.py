@@ -13,6 +13,15 @@ def build_distance_matrix(path_to_embeddings):
     """
 
     embed_df = pd.read_csv(path_to_embeddings)
+    columns = list(embed_df)
+   
+    type_dict = {}
+    type_dict['image_id'] = 'string'
+    for column in columns[1:]:
+        type_dict[column] = 'float32'
+ 
+    embed_df = embed_df.astype(type_dict)
+   
     distances = euclidean_distances(embed_df.iloc[:, 1:], embed_df.iloc[:, 1:])
     embed_df = embed_df.set_index(['image_id'])
     # format distance matrix
@@ -23,7 +32,7 @@ def build_distance_matrix(path_to_embeddings):
 
     # dist_df_file_name = EMBED_SET.split(".csv")[0] + "_dist.csv"
     # dist_df.to_csv(os.path.join(EMBEDDING_DEST, filename, dist_df_file_name))
-    distances_df.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist.csv")
+    #distances_df.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist.csv")
     return distances_df
 
 
@@ -293,12 +302,13 @@ def main():
 
 
      
-    embed_file_name = "triplet_training_validation_embeddings_gene_level.csv"
+    embed_file_name = "triplet_training_validation_embeddings.csv"
     embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
     ts_list = os.listdir(embed_dir) 
 
     for ts in ts_list:
         path_to_embeddings = os.path.join(embed_dir, ts, embed_file_name)
+        print (path_to_embeddings)
         print ("{} --------------".format(ts))
         evaluate(path_to_embeddings)
 
