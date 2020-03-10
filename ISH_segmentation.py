@@ -596,6 +596,7 @@ def create_valid_patches_info_csv_file():
     columns = columns[-1:] + columns[:-1]
 
     valid_patches_df = valid_patches_df[columns]
+    valid_patches_df = valid_patches_df.sort_values(by=['patch_id'])
 
     valid_patches_df.to_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"), index=None)
 
