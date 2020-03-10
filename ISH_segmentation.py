@@ -569,13 +569,15 @@ def create_valid_patches_info_csv_file():
     contents_list = os.listdir(IMAGE_ROOT)
     patches_list = [item for item in contents_list if item.endswith(".jpg")]
 
-    patch_id_list = [item.split(".")[0] for item in patches_list]
+    patches_info_df = pd.DataFrame('patch_id')
+    patches_info_df['patch_id'] = patches_list
+
+    print (patches_info_df.head)
 
     image_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
     columns = list(image_info_df)
     columns.insert(0, 'patch_id')
 
-    print (columns)
 
     """
     patch_id_list = patches_info_df['patch_id']
