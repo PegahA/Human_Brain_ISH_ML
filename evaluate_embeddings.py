@@ -278,19 +278,38 @@ def evaluate_with_filtering(path_to_embeddings):
 
 
 
-def evaluate():
-    evaluate_sum_100()
-    evaluate_with_filtering()
+def evaluate(path_to_embeddings):
+
+    print ("sum 100 -----------------")
+    evaluate_sum_100(path_to_embeddings)
+ 
+    print ("with filtering ----------------")
+    evaluate_with_filtering(path_to_embeddings)
 
 
 
 def main():
-    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
-    embed_df = pd.read_csv(path_to_embeddings)
-
-    dist_df = build_distance_matrix(path_to_embeddings)
-    new_dist_df = filter_dist_matrix_after_level_1(dist_df)
+    
 
 
+     
+    embed_file_name = "triplet_training_validation_embeddings_gene_level.csv"
+    embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
+    ts_list = os.listdir(embed_dir) 
+
+    for ts in ts_list:
+        path_to_embeddings = os.path.join(embed_dir, ts, embed_file_name)
+        print ("{} --------------".format(ts))
+        evaluate(path_to_embeddings)
+
+        print ("________________________")
+   
+    #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
+    #embed_df = pd.read_csv(path_to_embeddings)
+
+    #dist_df = build_distance_matrix(path_to_embeddings)
+    #new_dist_df = filter_dist_matrix_after_level_1(dist_df)
 
 
+
+main()
