@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-import h5py
+#import h5py
 import time
 from shutil import copyfile
 import operator
@@ -574,32 +574,36 @@ def merge_embeddings_to_gene_level(filename):
     embed_file_contents = os.listdir(os.path.join(EMBEDDING_DEST, filename))
     for item in embed_file_contents:
         if item.endswith(".csv"):
-            embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
-            patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
+            if item.endswith("_gene_level.csv"):
+                pass
+            else:
+
+                embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
+                patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
             
-            embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
-            # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
-            merged_df = embeddings_file.merge(patches_info[["patch_id", "gene_symbol"]], how = "left" , on = "patch_id")
+                embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
+                # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
+                merged_df = embeddings_file.merge(patches_info[["patch_id", "gene_symbol"]], how = "left" , on = "patch_id")
 
-            # reorder the dataframe columns
-            merged_columns = list(merged_df)
-            merged_columns = [merged_columns[0]] + [merged_columns [-1]] + merged_columns[1:-1]
-            merged_df = merged_df[merged_columns]
+                # reorder the dataframe columns
+                merged_columns = list(merged_df)
+                merged_columns = [merged_columns[0]] + [merged_columns [-1]] + merged_columns[1:-1]
+                merged_df = merged_df[merged_columns]
 
-            # drop the patch_id column
-            merged_df = merged_df.drop(columns=["patch_id"])
+                # drop the patch_id column
+                merged_df = merged_df.drop(columns=["patch_id"])
 
-            # group by gene_symbol and average over the embedding values
-            grouped_df = merged_df.groupby(['gene_symbol']).mean()
+                # group by gene_symbol and average over the embedding values
+                grouped_df = merged_df.groupby(['gene_symbol']).mean()
 
-            print (grouped_df.head())
+                print (grouped_df.head())
 
-            print ("the number of genes is: {}".format(len(grouped_df)))
+                print ("the number of genes is: {}".format(len(grouped_df)))
 
-            # and then I want to save this file as gene_embddings in the same folder.
-            item_name = item.split(".")[0]
-            save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_level.csv")
-            grouped_df.to_csv(save_to_path)
+                # and then I want to save this file as gene_embddings in the same folder.
+                item_name = item.split(".")[0]
+                save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_level.csv")
+                grouped_df.to_csv(save_to_path)
 
 
 def filter_out_common_genes(df_file_name,threshold = 3):
@@ -778,9 +782,18 @@ def make_sets():
 
 def run():
     pass
+    #embed_file_name = "triplet_training_validation_embeddings.csv"
+    #embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
+    #ts_list = os.listdir(embed_dir)
+
+    #for ts in ts_list:
+        #print ("ts:", ts)
+        #filename = os.path.join(embed_dir, ts, embed_file_name)
+        #merge_embeddings_to_gene_level(ts)
+
+
 
 if __name__ == '__main__':
-
     run()
     
     
