@@ -572,14 +572,11 @@ def create_valid_patches_info_csv_file():
     patches_info_df = pd.DataFrame(columns=['patch_id'])
     patches_info_df['patch_id'] = patches_list
 
-    print (patches_info_df.head)
 
     image_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
     columns = list(image_info_df)
     columns.insert(0, 'patch_id')
 
-
-    """
     patch_id_list = patches_info_df['patch_id']
     patch_index_list = [patch_id.split('_')[1].split(".")[0] for patch_id in patch_id_list]
     patch_id_list = [int(patch_id.split("_")[0]) for patch_id in patch_id_list]
@@ -597,10 +594,11 @@ def create_valid_patches_info_csv_file():
 
     columns = list(valid_patches_df)
     columns = columns[-1:] + columns[:-1]
+
     valid_patches_df = valid_patches_df[columns]
 
-    valid_patches_df.to_csv(os.path.join(patches_path, "valid_patches_info.csv"), index=None)
-    """
+    valid_patches_df.to_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"), index=None)
+
 
 def main():
     #use_trained_model("training_example_feb_6.pkl")
