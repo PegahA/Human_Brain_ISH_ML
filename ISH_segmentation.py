@@ -564,13 +564,24 @@ def check_genes_in_images_with_not_enough_patches(file_name):
     print (len(set(remove_from_human_ish_info["gene_symbol"])))
 
 
+def create_valid_patches_info_csv_file():
+
+    contents_list = os.listdir(IMAGE_ROOT)
+    patches_list = [item for item in contents_list if item.endswith(".jpg")]
+
+    print (len(patches_list))
+
+
 def main():
     #use_trained_model("training_example_feb_6.pkl")
     check_masks_and_patches_info()
 
 
 if __name__ == "__main__":
-    main()
+
+
+    create_valid_patches_info_csv_file()
+    #main()
 
     #use_trained_model("training_example_feb_6.pkl")
 
