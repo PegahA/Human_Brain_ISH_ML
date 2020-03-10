@@ -569,7 +569,7 @@ def create_valid_patches_info_csv_file():
     contents_list = os.listdir(IMAGE_ROOT)
     patches_list = [item for item in contents_list if item.endswith(".jpg")]
 
-    patches_info_df = pd.DataFrame('patch_id')
+    patches_info_df = pd.DataFrame(columns=['patch_id'])
     patches_info_df['patch_id'] = patches_list
 
     print (patches_info_df.head)
