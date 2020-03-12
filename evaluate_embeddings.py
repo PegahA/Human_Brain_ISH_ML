@@ -8,19 +8,20 @@ import numpy as np
 
 def build_distance_matrix(path_to_embeddings):
     """
-    :param filename: String. This is the name of the folder in the EMBEDDING_DEST folder which containts the embeddings csv file
+    Distance from one item to itself shows up as inf.
+    :param filename: String. This is the name of the folder in the EMBEDDING_DEST folder which contains the embeddings csv file
     :return: pandas DataFrame. A distance matrix that has the euclidean distance between all the possible pairs of embedding vectors
     """
 
     embed_df = pd.read_csv(path_to_embeddings)
-    columns = list(embed_df)
-   
-    type_dict = {}
-    type_dict['image_id'] = 'string'
-    for column in columns[1:]:
-        type_dict[column] = 'float32'
+
+    #columns = list(embed_df)
+    #type_dict = {}
+    #type_dict['image_id'] = 'string'
+    #for column in columns[1:]:
+        #type_dict[column] = 'float32'
  
-    embed_df = embed_df.astype(type_dict)
+    #embed_df = embed_df.astype(type_dict)
    
     distances = euclidean_distances(embed_df.iloc[:, 1:], embed_df.iloc[:, 1:])
     embed_df = embed_df.set_index(['image_id'])
@@ -32,12 +33,12 @@ def build_distance_matrix(path_to_embeddings):
 
     # dist_df_file_name = EMBED_SET.split(".csv")[0] + "_dist.csv"
     # dist_df.to_csv(os.path.join(EMBEDDING_DEST, filename, dist_df_file_name))
-    #distances_df.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist.csv")
     return distances_df
 
 
 def build_distance_matrix_2(path_to_embeddings):
     """
+    Distance from one item to itself shows up as 0.
     :param filename: String. This is the name of the folder in the EMBEDDING_DEST folder which containts the embeddings csv file
     :return: pandas DataFrame. A distance matrix that has the euclidean distance between all the possible pairs of embedding vectors
     """
@@ -53,7 +54,6 @@ def build_distance_matrix_2(path_to_embeddings):
     )
 
     #dist_df_file_name = EMBED_SET.split(".csv")[0] + "_dist.csv"
-    #dist_df.to_csv(os.path.join(EMBEDDING_DEST, filename, dist_df_file_name))
 
     return dist_df
 
@@ -240,7 +240,7 @@ def evaluate_sum_100(path_to_embeddings):
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
     # path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
 
-    dist_df = build_distance_matrix(path_to_embeddings)
+    dist_df = build_distance_matrix_2(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
 
     print("level 1")
@@ -263,7 +263,7 @@ def evaluate_with_filtering(path_to_embeddings):
     #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
 
     print("level 1")
-    dist_df = build_distance_matrix(path_to_embeddings)
+    dist_df = build_distance_matrix_2(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
     print (min_indexes_df)
     level_1_proportion = level_1_evaluation(min_indexes_df)
@@ -301,7 +301,7 @@ def main():
     
 
 
-     
+
     embed_file_name = "triplet_training_validation_embeddings.csv"
     embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
     ts_list = os.listdir(embed_dir) 
