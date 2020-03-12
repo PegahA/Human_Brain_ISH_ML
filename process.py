@@ -567,14 +567,14 @@ def save_embedding_info_into_file(filename):
 
 def merge_embeddings_to_gene_level(filename):
     """
-    We have an embedding for every image in the dataset. However, each gene may have more than one image associated to it.
+    We have an embedding for every patch in the dataset. However, each gene may have more than one image associated to it.
     This function will take all the images that correspond to an image, and average over the values of the embedding vector to generate a final embedding for that gene.
     """
 
     embed_file_contents = os.listdir(os.path.join(EMBEDDING_DEST, filename))
     for item in embed_file_contents:
         if item.endswith(".csv"):
-            if item.endswith("_gene_level.csv"):
+            if item.endswith("_gene_level.csv") or item.endswith("_image_level.csv"):
                 pass
             else:
 
@@ -603,6 +603,51 @@ def merge_embeddings_to_gene_level(filename):
                 # and then I want to save this file as gene_embddings in the same folder.
                 item_name = item.split(".")[0]
                 save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name+"_gene_level.csv")
+                grouped_df.to_csv(save_to_path)
+
+
+
+
+
+def merge_embeddings_to_image_level(filename):
+    """
+        We have an embedding for every patch in the dataset.
+        This function will take all the patches that correspond to an image, and average over the values of the
+        embedding vector to generate a final embedding for that image.
+        """
+
+    embed_file_contents = os.listdir(os.path.join(EMBEDDING_DEST, filename))
+    for item in embed_file_contents:
+        if item.endswith(".csv"):
+            if item.endswith("_gene_level.csv") or item.endswith("_image_level.csv"):
+                pass
+            else:
+
+                embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
+                patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
+
+                embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
+                # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
+                merged_df = embeddings_file.merge(patches_info[["patch_id", "image_id"]], how="left", on="patch_id")
+
+                # reorder the dataframe columns
+                merged_columns = list(merged_df)
+                merged_columns = [merged_columns[0]] + [merged_columns[-1]] + merged_columns[1:-1]
+                merged_df = merged_df[merged_columns]
+
+                # drop the patch_id column
+                merged_df = merged_df.drop(columns=["patch_id"])
+
+                # group by gene_symbol and average over the embedding values
+                grouped_df = merged_df.groupby(['image_id']).mean()
+
+                print(grouped_df.head())
+
+                print("the number of images is: {}".format(len(grouped_df)))
+
+                # and then I want to save this file as gene_embddings in the same folder.
+                item_name = item.split(".")[0]
+                save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name + "_image_level.csv")
                 grouped_df.to_csv(save_to_path)
 
 
@@ -781,15 +826,15 @@ def make_sets():
 
 
 def run():
-    pass
-    #embed_file_name = "triplet_training_validation_embeddings.csv"
-    #embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
-    #ts_list = os.listdir(embed_dir)
+    #pass
+    embed_file_name = "triplet_training_validation_embeddings.csv"
+    embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
+    ts_list = os.listdir(embed_dir)
 
-    #for ts in ts_list:
-        #print ("ts:", ts)
-        #filename = os.path.join(embed_dir, ts, embed_file_name)
-        #merge_embeddings_to_gene_level(ts)
+    for ts in ts_list:
+        print ("ts:", ts)
+        filename = os.path.join(embed_dir, ts, embed_file_name)
+        merge_embeddings_to_image_level(ts)
 
 
 
