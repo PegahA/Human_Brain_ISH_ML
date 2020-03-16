@@ -14,6 +14,7 @@ def build_distance_matrix(path_to_embeddings):
     """
 
     embed_df = pd.read_csv(path_to_embeddings)
+    print ("length is: ", len(embed_df))
     columns = list(embed_df)
 
     # ------- these line are to convert the data types from float64 to float32.
@@ -157,11 +158,11 @@ def level_1_evaluation(min_indexes_df, level):
     """
 
 
-    if level == 'patch':
+    if level == 'image':
         print ("skipping level 1 evaluation ...")
         return None
 
-    elif level == 'image':
+    elif level == 'patch':
 
         total_count = len(min_indexes_df)
 
@@ -220,11 +221,13 @@ def level_2_evaluation(min_indexes_df, level):
     elif level == 'image':
 
         total_count = len(min_indexes_df)
+        print ("total number of images: ", total_count)
 
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
         info_csv = pd.read_csv(info_csv_path, index_col=None)
 
         gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
+        gene_donor_mapping['image_id']=gene_donor_mapping['image_id'].astype(str)
         min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
         min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
 
@@ -232,9 +235,13 @@ def level_2_evaluation(min_indexes_df, level):
         same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
         same_donor = same_gene.query('donor_id_x == donor_id_y')
 
-        print(same_donor)
+        print( same_donor)
         match_count = len(same_donor)
+        print("number of matches with the same gene and the same donor: ", match_count)
         proportion = (match_count / total_count) * 100.0
+     
+        print ("proportion: ", proportion)
+        print ("\n\n")
 
         return proportion
 
@@ -275,11 +282,12 @@ def level_3_evaluation(min_indexes_df, level):
     elif level == 'image':
 
         total_count = len(min_indexes_df)
-
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        print ("total number of images: ", total_count)
+        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
         info_csv = pd.read_csv(info_csv_path, index_col=None)
 
         gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
+        gene_donor_mapping['image_id']=gene_donor_mapping['image_id'].astype(str)
         min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
         min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
 
@@ -289,11 +297,35 @@ def level_3_evaluation(min_indexes_df, level):
         print(same_gene)
 
         match_count = len(same_gene)
-        print(match_count)
+        print("number of matches with the same gene and not the same donor: ", match_count)
+        proportion = (match_count / total_count) * 100.0
+     
+        print ("proportion: ", proportion)
+        print ("\n\n")
+        return proportion
+
+def not_the_same_gene(min_indexes_df, level):
+    if level == 'image':
+
+        total_count = len(min_indexes_df)
+        print ("total number of images: ", total_count)
+        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+
+        gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
+        gene_donor_mapping['image_id']=gene_donor_mapping['image_id'].astype(str)
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
+
+        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+        not_the_same_gene = not_the_same_image.query('gene_symbol_x != gene_symbol_y')
+        print(not_the_same_gene)
+
+        match_count = len(not_the_same_gene)
+        print("number of matches with not the same gene is: ", match_count)
         proportion = (match_count / total_count) * 100.0
 
         return proportion
-
 
 
 def evaluate_sum_100(path_to_embeddings, level):
@@ -313,6 +345,10 @@ def evaluate_sum_100(path_to_embeddings, level):
 
     dist_df = build_distance_matrix(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
+
+
+    print ("not the same gene")
+    not_the_same_gene(min_indexes_df, level)
 
     print("level 1")
     level_1_proportion = level_1_evaluation(min_indexes_df, level)
@@ -400,14 +436,14 @@ def evaluate(ts, level):
 
 def main():
     ts = "1583770480"
-
+    evaluate(ts, 'image')
     #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
-    path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
+   # path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
     #dist = build_distance_matrix(path_to_embeddings)
 
     #find_closest_image(dist)
 
-    evaluate_sum_100(path_to_embeddings)
+    #evaluate_sum_100(path_to_embeddings)
 
 
     """
@@ -430,4 +466,4 @@ def main():
     #new_dist_df = filter_dist_matrix_after_level_1(dist_df)
     """
 
-
+main()
