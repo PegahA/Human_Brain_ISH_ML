@@ -37,6 +37,7 @@ def build_distance_matrix(path_to_embeddings):
     distances_df.index = list(embed_df.index)
     distances_df.values[[np.arange(distances_df.shape[0])] * 2] = float("inf")
 
+    print ("finished building the distance matrix ...")
     return distances_df
 
 
@@ -70,23 +71,25 @@ def find_closest_image(distances_df):
     the corresponding closest image.
     """
 
-    # find the closest image
+    # find the closest image in each row
+
     min_indexes = distances_df.idxmin(axis=1, skipna=True)
     min_indexes_df = pd.DataFrame(min_indexes).reset_index()
     min_indexes_df.columns = ["id1", "id2"]
     min_indexes_df = min_indexes_df.applymap(str)
 
+    print("finished finding the closest image ...")
     return min_indexes_df
 
 
 def filter_dist_matrix_after_level_1(dist_matrix):
 
-
-
-    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
+    info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     info_csv = pd.read_csv(info_csv_path, index_col=None)
     patch_id_list = list(dist_matrix.index)
 
+
+    # for each patch_id row, I need to set some of the cells to nan.
     for patch_id in patch_id_list:
         print (patch_id)
         this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
@@ -110,11 +113,13 @@ def filter_dist_matrix_after_level_1(dist_matrix):
 
 
 
-
-    dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist_after_1.csv")
+    dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation//dist_after_1.csv")
     return dist_matrix
 
 def filter_dist_matrix_after_level_2(dist_matrix):
+
+
+    info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
     info_csv = pd.read_csv(info_csv_path, index_col=None)
     patch_id_list = info_csv['patch_id'][:9]
@@ -137,11 +142,12 @@ def filter_dist_matrix_after_level_2(dist_matrix):
 
         dist_matrix.loc[patch_id, res] = np.nan
 
+
     dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist_after_2.csv")
     return dist_matrix
 
 
-def level_1_evaluation(min_indexes_df):
+def level_1_evaluation(min_indexes_df, level):
     """
     The level 1 evaluation checks to see for how many of the patches, the closest patch is from the same brain image.
     Which means the same gene, and the same donor, and the same brain tissue slice.
@@ -150,30 +156,38 @@ def level_1_evaluation(min_indexes_df):
     :return: float. The proportion of matches.
     """
 
-    total_count = len(min_indexes_df)
 
-    # info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
-    info_csv = pd.read_csv(info_csv_path, index_col=None)
+    if level == 'patch':
+        print ("skipping level 1 evaluation ...")
+        return None
 
-    gene_donor_mapping = info_csv[['patch_id', 'image_id']]
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
+    elif level == 'image':
 
-    same_image = min_indexes_df.query('image_id_x == image_id_y')
+        total_count = len(min_indexes_df)
 
-    match_count = len(same_image)
-    proportion = (match_count / total_count) * 100.0
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+
+        gene_donor_mapping = info_csv[['patch_id', 'image_id']]
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
+
+        same_image = min_indexes_df.query('image_id_x == image_id_y')
+
+        match_count = len(same_image)
+        proportion = (match_count / total_count) * 100.0
 
 
-    min_indexes_df['id1'] = [id.split("_")[0] for id in min_indexes_df['id1']]
-    min_indexes_df['id2'] = [id.split("_")[0] for id in min_indexes_df['id2']]
-
-    return  proportion
+        min_indexes_df['id1'] = [id.split("_")[0] for id in min_indexes_df['id1']]
+        min_indexes_df['id2'] = [id.split("_")[0] for id in min_indexes_df['id2']]
 
 
+        print (match_count)
+        return  proportion
 
-def level_2_evaluation(min_indexes_df):
+
+
+def level_2_evaluation(min_indexes_df, level):
     """
     The level 2  evaluation checks to see for how many of the patches, the closest patch is not from the same brain image,
     but is the same gene and comes from the same donor.
@@ -182,30 +196,51 @@ def level_2_evaluation(min_indexes_df):
     :return: float. The proportion of matches.
     """
 
-    total_count = len(min_indexes_df)
 
-    # info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
-    info_csv = pd.read_csv(info_csv_path, index_col=None)
+    if level == 'patch':
+        total_count = len(min_indexes_df)
 
-    gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
 
-    not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
-    same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
-    same_donor = same_gene.query('donor_id_x == donor_id_y')
+        gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
 
-    print (same_donor)
-    match_count = len(same_donor)
-    proportion = (match_count / total_count) * 100.0
+        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+        same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
+        same_donor = same_gene.query('donor_id_x == donor_id_y')
+
+        print (same_donor)
+        match_count = len(same_donor)
+        proportion = (match_count / total_count) * 100.0
+
+        return proportion
+
+    elif level == 'image':
+
+        total_count = len(min_indexes_df)
+
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+
+        gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
+
+        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+        same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
+        same_donor = same_gene.query('donor_id_x == donor_id_y')
+
+        print(same_donor)
+        match_count = len(same_donor)
+        proportion = (match_count / total_count) * 100.0
+
+        return proportion
 
 
-    print (match_count)
-    return proportion
 
-
-def level_3_evaluation(min_indexes_df):
+def level_3_evaluation(min_indexes_df, level):
     """
     The level 3 evaluation checks to see for how many of the patches, the closest patch is from the same gene
     but not from the same donor.
@@ -214,30 +249,63 @@ def level_3_evaluation(min_indexes_df):
     :return: float. The proportion of matches.
     """
 
-    total_count = len(min_indexes_df)
 
-    # info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
-    info_csv = pd.read_csv(info_csv_path, index_col=None)
+    if level == 'patch':
 
-    gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
-    min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
+        total_count = len(min_indexes_df)
 
-    not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
-    not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
-    same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
-    print (same_gene)
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
 
-    match_count = len(same_gene)
-    print (match_count)
-    proportion = (match_count / total_count) * 100.0
+        gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
 
-    return proportion
+        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+        not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
+        same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
+        print (same_gene)
+
+        match_count = len(same_gene)
+        print (match_count)
+        proportion = (match_count / total_count) * 100.0
+
+        return proportion
+
+    elif level == 'image':
+
+        total_count = len(min_indexes_df)
+
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+
+        gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
+        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
+
+        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
+        not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
+        same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
+        print(same_gene)
+
+        match_count = len(same_gene)
+        print(match_count)
+        proportion = (match_count / total_count) * 100.0
+
+        return proportion
 
 
 
-def evaluate_sum_100(path_to_embeddings):
+def evaluate_sum_100(path_to_embeddings, level):
+    """
+    In this case, I compute the distance matrix once, and take the closest image to every image.
+    Then, I check to see what percentage falls into condition of level 1,
+                         what percentage falls into condition of level 2,
+                     and what percentage falls into condition of level 3.
+
+
+    """
+
 
     # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
@@ -247,19 +315,28 @@ def evaluate_sum_100(path_to_embeddings):
     min_indexes_df = find_closest_image(dist_df)
 
     print("level 1")
-    level_1_proportion = level_1_evaluation(min_indexes_df)
+    level_1_proportion = level_1_evaluation(min_indexes_df, level)
     print(level_1_proportion)
 
     print("level 2")
-    level_2_proportion = level_2_evaluation(min_indexes_df)
+    level_2_proportion = level_2_evaluation(min_indexes_df, level)
     print(level_2_proportion)
 
     print("level 3")
-    level_3_proportion = level_3_evaluation(min_indexes_df)
+    level_3_proportion = level_3_evaluation(min_indexes_df, level)
     print(level_3_proportion)
 
 
+
+
 def evaluate_with_filtering(path_to_embeddings):
+    """
+       In this case, I compute the distance matrix once, and take the closest image to every image to perform level 1.
+       Then, before moving to the next level, I modify the distance matrix by assigning nan to those cells that
+       met the conditions in the previous level, and calculate the closest images again using the new filtered distance matrix.
+
+
+       """
 
     # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
@@ -290,21 +367,48 @@ def evaluate_with_filtering(path_to_embeddings):
 
 
 
-def evaluate(path_to_embeddings):
+def evaluate(ts, level):
 
-    print ("sum 100 -----------------")
-    evaluate_sum_100(path_to_embeddings)
+    base_path = os.path.join(EMBEDDING_DEST, ts)
+    contents = os.listdir(base_path)
+    embeddings_files = []
+
+    if level == 'patch':
+        for item in contents:
+            if item.endswith("embeddings.csv"):
+                embeddings_files.append(item)
+
+
+    elif level == 'image':
+        for item in contents:
+            if item.endswith("embeddings_image_level.csv"):
+                embeddings_files.append(item)
+
+    print ("list of embedding files is: ")
+    print (embeddings_files)
+
+    for item in embeddings_files:
+        path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, item)
+        print (item)
+        print ("sum 100 -----------------")
+        evaluate_sum_100(path_to_embeddings, level)
  
-    print ("with filtering ----------------")
-    evaluate_with_filtering(path_to_embeddings)
+        #print ("with filtering ----------------")
+        #evaluate_with_filtering(path_to_embeddings, level)
 
 
 
 def main():
+    ts = "1583770480"
 
+    #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
+    path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
+    #dist = build_distance_matrix(path_to_embeddings)
 
-    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
-    build_distance_matrix(path_to_embeddings)
+    #find_closest_image(dist)
+
+    evaluate_sum_100(path_to_embeddings)
+
 
     """
     embed_file_name = "triplet_training_validation_embeddings.csv"
@@ -327,5 +431,3 @@ def main():
     """
 
 
-
-main()
