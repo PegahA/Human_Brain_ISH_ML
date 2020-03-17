@@ -324,7 +324,8 @@ def not_the_same_gene(min_indexes_df, level):
         match_count = len(not_the_same_gene)
         print("number of matches with not the same gene is: ", match_count)
         proportion = (match_count / total_count) * 100.0
-
+        
+        print ("proportion is: ", proportion)
         return proportion
 
 
@@ -435,8 +436,12 @@ def evaluate(ts, level):
 
 
 def main():
-    ts = "1583770480"
-    evaluate(ts, 'image')
+    ts_list = ["1583770480","1584025762"]
+
+
+    for ts in ts_list:
+        print ("ts is: ", ts)
+        evaluate(ts, 'image')
     #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
    # path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
     #dist = build_distance_matrix(path_to_embeddings)
