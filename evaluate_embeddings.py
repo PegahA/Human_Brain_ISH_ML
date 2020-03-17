@@ -83,69 +83,94 @@ def find_closest_image(distances_df):
     return min_indexes_df
 
 
-def filter_dist_matrix_after_level_1(dist_matrix):
-
-    info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-    info_csv = pd.read_csv(info_csv_path, index_col=None)
-    patch_id_list = list(dist_matrix.index)
+def filter_dist_matrix_after_level_1(dist_matrix, level):
 
 
-    # for each patch_id row, I need to set some of the cells to nan.
-    for patch_id in patch_id_list:
-        print (patch_id)
-        this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
-        this_image_id = this_image_id.values[0]
+    if level == 'image':
+        print ("skipping filtering after level 1 ...")
+        return dist_matrix
 
-        this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
-        this_donor_id = this_donor_id.values[0]
-
-
-        not_same_donor_id = info_csv['donor_id'] != this_donor_id
-        same_image_id = info_csv['image_id'] == this_image_id
-        not_same_patch_id = info_csv['patch_id'] != patch_id
-        res1 = list(info_csv[not_same_donor_id].patch_id.values)
-        res2 = list(info_csv[same_image_id & not_same_patch_id].patch_id.values)
-        res = res1 + res2
-
-        res=[item for item in res if item in patch_id_list]
+    elif level == 'patch':
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+        patch_id_list = list(dist_matrix.index)
 
 
-        dist_matrix.loc[patch_id,res] = np.nan
+        # for each patch_id row, I need to set some of the cells to nan.
+        for patch_id in patch_id_list:
+            this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
+            this_image_id = this_image_id.values[0]
+
+            this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
+            this_donor_id = this_donor_id.values[0]
+
+
+            not_same_donor_id = info_csv['donor_id'] != this_donor_id
+            same_image_id = info_csv['image_id'] == this_image_id
+            not_same_patch_id = info_csv['patch_id'] != patch_id
+            res1 = list(info_csv[not_same_donor_id].patch_id.values)
+            res2 = list(info_csv[same_image_id & not_same_patch_id].patch_id.values)
+            res = res1 + res2
+
+            res=[item for item in res if item in patch_id_list]
+
+
+            dist_matrix.loc[patch_id,res] = np.nan
+
+
+        return dist_matrix
+
+def filter_dist_matrix_after_level_2(dist_matrix, level):
+
+
+    if level == 'patch':
+        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+        patch_id_list = list(dist_matrix.index)
+
+        for patch_id in patch_id_list:
+            this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
+            this_image_id = this_image_id.values[0]
+            this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
+            this_donor_id = this_donor_id.values[0]
+
+            same_image_id = info_csv['image_id'] == this_image_id
+            same_donor_id = info_csv['donor_id'] == this_donor_id
+            not_same_patch_id = info_csv['patch_id'] != patch_id
+
+            res1 = list(info_csv[same_image_id | same_donor_id].patch_id.values)
+            res2 = list(info_csv[not_same_patch_id].patch_id.values)
+
+            res = res1 + res2
+            res = [item for item in res if item in patch_id_list]
+
+            dist_matrix.loc[patch_id, res] = np.nan
 
 
 
-    dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation//dist_after_1.csv")
-    return dist_matrix
+        return dist_matrix
 
-def filter_dist_matrix_after_level_2(dist_matrix):
+    elif level == 'image':
+        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
+        info_csv = pd.read_csv(info_csv_path, index_col=None)
+        image_id_list = list(dist_matrix.index)
 
+        for image_id in image_id_list:
+            this_image_id = image_id
+            this_donor_id = info_csv[info_csv['image_id'] == image_id].donor_id
+            this_donor_id = this_donor_id.values[0]
 
-    info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-    info_csv_path = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/valid_patches_info.csv"
-    info_csv = pd.read_csv(info_csv_path, index_col=None)
-    patch_id_list = info_csv['patch_id'][:9]
+            same_image_id = info_csv['image_id'] == this_image_id
+            same_donor_id = info_csv['donor_id'] == this_donor_id
 
-    for patch_id in patch_id_list:
-        this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
-        this_image_id = this_image_id.values[0]
-        this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
-        this_donor_id = this_donor_id.values[0]
+            res1 = list(info_csv[same_image_id | same_donor_id].patch_id.values)
 
-        same_image_id = info_csv['image_id'] == this_image_id
-        same_donor_id = info_csv['donor_id'] == this_donor_id
-        not_same_patch_id = info_csv['patch_id'] != patch_id
+            res = res1
+            res = [item for item in res if item in image_id_list]
 
-        res1 = list(info_csv[same_image_id | same_donor_id].patch_id.values)
-        res2 = list(info_csv[not_same_patch_id].patch_id.values)
+            dist_matrix.loc[image_id, res] = np.nan
 
-        res = res1 + res2
-        res = [item for item in res if item in patch_id_list]
-
-        dist_matrix.loc[patch_id, res] = np.nan
-
-
-    dist_matrix.to_csv("/Users/pegah_abed/Documents/old_Human_ISH/cortex/dist_after_2.csv")
-    return dist_matrix
+        return dist_matrix
 
 
 def level_1_evaluation(min_indexes_df, level):
@@ -366,7 +391,7 @@ def evaluate_sum_100(path_to_embeddings, level):
 
 
 
-def evaluate_with_filtering(path_to_embeddings):
+def evaluate_with_filtering(path_to_embeddings, level):
     """
        In this case, I compute the distance matrix once, and take the closest image to every image to perform level 1.
        Then, before moving to the next level, I modify the distance matrix by assigning nan to those cells that
@@ -383,22 +408,22 @@ def evaluate_with_filtering(path_to_embeddings):
     dist_df = build_distance_matrix(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
     print (min_indexes_df)
-    level_1_proportion = level_1_evaluation(min_indexes_df)
+    level_1_proportion = level_1_evaluation(min_indexes_df, level)
     print(level_1_proportion)
 
 
     print ("level 2")
-    new_dist_df = filter_dist_matrix_after_level_1(dist_df)
+    new_dist_df = filter_dist_matrix_after_level_1(dist_df, level)
     min_indexes_df = find_closest_image(new_dist_df)
     print (min_indexes_df)
-    level_2_proportion = level_2_evaluation(min_indexes_df)
+    level_2_proportion = level_2_evaluation(min_indexes_df, level)
     print(level_2_proportion)
 
     print ("level 3")
-    new_dist_df = filter_dist_matrix_after_level_2(dist_df)
+    new_dist_df = filter_dist_matrix_after_level_2(dist_df, level)
     min_indexes_df = find_closest_image(new_dist_df)
     print(min_indexes_df)
-    level_2_proportion = level_3_evaluation(min_indexes_df)
+    level_2_proportion = level_3_evaluation(min_indexes_df, level)
     print(level_2_proportion)
 
 
