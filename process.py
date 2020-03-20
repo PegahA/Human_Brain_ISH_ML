@@ -626,7 +626,11 @@ def merge_embeddings_to_image_level(filename):
                 embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
                 patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
 
-                embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
+
+                if filename == "random":
+                    embeddings_file = embeddings_file.rename(columns={'id': 'patch_id'})
+                else:
+                    embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
                 # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
                 merged_df = embeddings_file.merge(patches_info[["patch_id", "image_id"]], how="left", on="patch_id")
 
