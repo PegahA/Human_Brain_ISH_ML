@@ -825,6 +825,48 @@ def make_sets():
     """
 
 
+def generate_random_embeddings(info_csv_file, embeddings_length):
+    """
+    this function generates random embeddings for the images. The result will be a csv files that has the embedding vector of every image.
+
+    :param embeddings_length: the length of the embedding vector which also determines the number of columns in the final csv file.
+    :param range_min: the minimum possible value in the embeddings.
+    :param range_max: the maximum possible value in the embeddings.
+
+    :return: None
+    """
+
+
+
+    path_to_info_csv = os.path.join(IMAGE_ROOT,info_csv_file)
+    info_csv = pd.read_csv(path_to_info_csv,)
+
+    columns = list(info_csv)
+    id_column = info_csv[columns[0]]
+
+    n_images = len(info_csv)
+
+    cols = np.arange(0, embeddings_length)
+    cols = list(map(str, cols))
+    cols = ['id'] + cols
+
+    random_embed_file = pd.DataFrame(columns=cols)
+    random_embed_file['id'] = id_column
+
+    for i in range(embeddings_length):
+        sample = np.random.uniform(size=(n_images,))
+        random_embed_file[str(i)] = sample
+
+
+    path_to_random = os.path.join(EMBEDDING_DEST, "random")
+    if (not os.path.exists(path_to_random)):
+        os.mkdir(path_to_random)
+
+    random_embed_file.to_csv(os.path.join(path_to_random, "random_embeddings.csv"))
+
+    print ("finished generating random embeddings...")
+
+
 def run():
     #pass
     embed_file_name = "triplet_training_validation_embeddings.csv"
@@ -840,7 +882,8 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    generate_random_embeddings("valid_patches_info.csv", 128)
+    merge_embeddings_to_image_level("random")
     
     
 
