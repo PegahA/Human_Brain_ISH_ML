@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-import h5py
+#import h5py
 import time
 from shutil import copyfile
 import operator
@@ -829,11 +829,12 @@ def run():
     #pass
     embed_file_name = "triplet_training_validation_embeddings.csv"
     embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
-    ts_list = os.listdir(embed_dir)
-
+    #ts_list = os.listdir(embed_dir)
+    ts_list =["1584025762"]
     for ts in ts_list:
         print ("ts:", ts)
         filename = os.path.join(embed_dir, ts, embed_file_name)
+        merge_embeddings_to_gene_level(ts)
         merge_embeddings_to_image_level(ts)
 
 
