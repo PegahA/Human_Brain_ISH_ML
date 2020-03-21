@@ -111,6 +111,9 @@ parser.add_argument(
     help='After how many iterations a checkpoint is stored. Set this to 0 to '
          'disable intermediate storing. This will result in only one final '
          'checkpoint.')
+parser.add_argument(
+    'train_standardize', default=TRAIN_STANDARDIZE,
+    help='When this flag is provided, standardization is performed.')
 
 parser.add_argument(
     '--train_flip_augment', default=TRAIN_FLIP_AUGMENT,
@@ -196,6 +199,7 @@ if __name__ == "__main__":
     print ("train iterations: ", args.train_iterations)
     print ("decay start iteration: ", args.decay_start_iteration)
     print ("checkpoint frequency: ", args.checkpoint_frequency)
+    print ("train standardize: ", args.train_standardize)
     print ("train flip augment: ", args.train_flip_augment)
     print ("train crop augment: ", args.train_crop_augment)
     print ("detailed logs: ", args.detailed_logs)
@@ -233,6 +237,7 @@ if __name__ == "__main__":
                           " --train_iterations=" + str(args.train_iterations) + \
                           " --decay_start_iteration=" + str(args.decay_start_iteration) + \
                           " --checkpoint_frequency=" + str(args.checkpoint_frequency) + \
+                          (" --standardize" if args.train_standardize else "") + \
                           (" --flip_augment" if args.train_flip_augment else "") + \
                           (" --crop_augment" if args.train_crop_augment else "") + \
                           (" --detailed_logs" if args.detailed_logs else "")
