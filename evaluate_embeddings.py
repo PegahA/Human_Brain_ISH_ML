@@ -436,6 +436,8 @@ def evaluate_with_filtering(path_to_embeddings, level):
     print(level_2_proportion)
 
 
+    return level_1_proportion, level_2_proportion, level_2_proportion
+
 
 
 def evaluate(ts, level):
@@ -463,10 +465,11 @@ def evaluate(ts, level):
         #print (item)
         #print ("sum 100 -----------------")
         #evaluate_sum_100(path_to_embeddings, level)
-       
-        print ("\n\n\n")
+
         print ("with filtering ----------------")
-        evaluate_with_filtering(path_to_embeddings, level)
+        l_1, l_2, l_3 = evaluate_with_filtering(path_to_embeddings, level)
+
+    return l_1, l_2, l_3
 
 
 
@@ -475,11 +478,22 @@ def main():
     ts_list =  ["random"]
 
     for ts in ts_list:
+
+        columns = ["ts", "level_1", "level_2", "level_3"]
+        eval_results_df = pd.DataFrame(columns=columns)
+
         print ("ts is: ", ts)
-        evaluate(ts, 'image')
+        l_1, l_2, l_3 = evaluate(ts, 'image')
 
+        eval_results_df["ts"] = ts
+        eval_results_df["level_1"] = l_1
+        eval_results_df["level_2"] = l_2
+        eval_results_df["level_3"] = l_3
 
-    print (ts)
+        eval_path = os.path.join(EMBEDDING_DEST, ts)
+        eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result.csv"), index=None)
+        
+        print (ts)
     #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
    # path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
     #dist = build_distance_matrix(path_to_embeddings)
