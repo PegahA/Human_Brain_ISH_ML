@@ -281,6 +281,7 @@ def level_3_evaluation(min_indexes_df, level):
     :return: float. The proportion of matches.
     """
 
+    print ("in level 3 evaluation ")
 
     if level == 'patch':
 
