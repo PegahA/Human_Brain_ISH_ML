@@ -112,7 +112,7 @@ parser.add_argument(
          'disable intermediate storing. This will result in only one final '
          'checkpoint.')
 parser.add_argument(
-    'train_standardize', default=TRAIN_STANDARDIZE,
+    '--train_standardize', default=TRAIN_STANDARDIZE,
     help='When this flag is provided, standardization is performed.')
 
 parser.add_argument(
@@ -265,7 +265,8 @@ if __name__ == "__main__":
     filename = process.save_embedding_info_into_file(TIMESTAMP)
     
 
-    #process.merge_embeddings_to_gene_level(filename)
+    process.merge_embeddings_to_gene_level(filename)
+    process.merge_embeddings_to_image_level(filename)
     #evaluate_embeddings.evaluate(filename)
 
 
