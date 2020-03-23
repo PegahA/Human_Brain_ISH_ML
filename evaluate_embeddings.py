@@ -122,7 +122,7 @@ def filter_dist_matrix_after_level_1(dist_matrix, level):
 
 def filter_dist_matrix_after_level_2(dist_matrix, level):
 
-
+    print ("filtering the distance matrix after level 2 ...")
     if level == 'patch':
         info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
         info_csv = pd.read_csv(info_csv_path, index_col=None)
@@ -154,22 +154,27 @@ def filter_dist_matrix_after_level_2(dist_matrix, level):
         info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
         info_csv = pd.read_csv(info_csv_path, index_col=None)
         image_id_list = list(dist_matrix.index)
+        index = 0
 
         for image_id in image_id_list:
-            this_image_id = image_id
+            print (image_id)
+            #print (index)
+            #index = index +1 
+            #this_image_id = image_id
             this_donor_id = info_csv[info_csv['image_id'] == image_id].donor_id
             this_donor_id = this_donor_id.values[0]
 
-            same_image_id = info_csv['image_id'] == this_image_id
+            #same_image_id = info_csv['image_id'] == this_image_id
             same_donor_id = info_csv['donor_id'] == this_donor_id
 
-            res1 = list(info_csv[same_image_id | same_donor_id].patch_id.values)
-
-            res = res1
+            #res1 = list(info_csv[same_image_id | same_donor_id].image_id.values)
+            res = list(info_csv[same_donor_id].image_id.values)   
+            #res = res1
             res = [item for item in res if item in image_id_list]
 
             dist_matrix.loc[image_id, res] = np.nan
-
+        
+        print ("finished")
         return dist_matrix
 
 
@@ -182,7 +187,7 @@ def level_1_evaluation(min_indexes_df, level):
     :return: float. The proportion of matches.
     """
 
-
+    print ("in level 1 ...")
     if level == 'image':
         print ("skipping level 1 evaluation ...")
         return None
@@ -266,7 +271,6 @@ def level_2_evaluation(min_indexes_df, level):
         proportion = (match_count / total_count) * 100.0
      
         print ("proportion: ", proportion)
-        print ("\n\n")
 
         return proportion
 
@@ -281,7 +285,7 @@ def level_3_evaluation(min_indexes_df, level):
     :return: float. The proportion of matches.
     """
 
-
+    print ("in level 3 evaluation...")
     if level == 'patch':
 
         total_count = len(min_indexes_df)
@@ -326,7 +330,7 @@ def level_3_evaluation(min_indexes_df, level):
         proportion = (match_count / total_count) * 100.0
      
         print ("proportion: ", proportion)
-        print ("\n\n")
+ 
         return proportion
 
 def not_the_same_gene(min_indexes_df, level):
@@ -404,6 +408,10 @@ def evaluate_with_filtering(path_to_embeddings, level):
     # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
     #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
 
+
+    #print ("not the same gene")
+    #not_the_same_gene(min_indexes_df, level)
+
     print("level 1")
     dist_df = build_distance_matrix(path_to_embeddings)
     min_indexes_df = find_closest_image(dist_df)
@@ -419,7 +427,7 @@ def evaluate_with_filtering(path_to_embeddings, level):
     level_2_proportion = level_2_evaluation(min_indexes_df, level)
     print(level_2_proportion)
 
-    print ("level 3")
+    print ("-level 3-")
     new_dist_df = filter_dist_matrix_after_level_2(dist_df, level)
     min_indexes_df = find_closest_image(new_dist_df)
     print(min_indexes_df)
@@ -451,22 +459,26 @@ def evaluate(ts, level):
 
     for item in embeddings_files:
         path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, item)
-        print (item)
-        print ("sum 100 -----------------")
-        evaluate_sum_100(path_to_embeddings, level)
- 
-        #print ("with filtering ----------------")
-        #evaluate_with_filtering(path_to_embeddings, level)
+        #print (item)
+        #print ("sum 100 -----------------")
+        #evaluate_sum_100(path_to_embeddings, level)
+       
+        print ("\n\n\n")
+        print ("with filtering ----------------")
+        evaluate_with_filtering(path_to_embeddings, level)
 
 
 
 def main():
-    ts_list = ["1583770480","1584025762"]
-
+    #ts_list = ["1584753511"]
+    ts_list =  ["random"]
 
     for ts in ts_list:
         print ("ts is: ", ts)
         evaluate(ts, 'image')
+
+
+    print (ts)
     #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
    # path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
     #dist = build_distance_matrix(path_to_embeddings)
