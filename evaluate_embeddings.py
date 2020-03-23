@@ -227,7 +227,7 @@ def level_2_evaluation(min_indexes_df, level):
     :return: float. The proportion of matches.
     """
 
-
+    print ("in level 2 ... ")
     if level == 'patch':
         total_count = len(min_indexes_df)
 
@@ -285,7 +285,7 @@ def level_3_evaluation(min_indexes_df, level):
     :return: float. The proportion of matches.
     """
 
-    print ("in level 3 evaluation...")
+    print ("in level 3 ...")
 
     if level == 'patch':
 
@@ -393,7 +393,7 @@ def evaluate_sum_100(path_to_embeddings, level):
     level_3_proportion = level_3_evaluation(min_indexes_df, level)
     print(level_3_proportion)
 
-
+    return level_1_proportion, level_2_proportion, level_3_proportion
 
 
 def evaluate_with_filtering(path_to_embeddings, level):
@@ -462,12 +462,12 @@ def evaluate(ts, level):
 
     for item in embeddings_files:
         path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, item)
-        #print (item)
-        #print ("sum 100 -----------------")
-        #evaluate_sum_100(path_to_embeddings, level)
+        print (item)
+        print ("sum 100 -----------------")
+        l_1, l_2, l_3 = evaluate_sum_100(path_to_embeddings, level)
 
-        print ("with filtering ----------------")
-        l_1, l_2, l_3 = evaluate_with_filtering(path_to_embeddings, level)
+        #print ("with filtering ----------------")
+        #l_1, l_2, l_3 = evaluate_with_filtering(path_to_embeddings, level)
 
     return l_1, l_2, l_3
 
@@ -485,11 +485,15 @@ def main():
         print ("ts is: ", ts)
         l_1, l_2, l_3 = evaluate(ts, 'image')
 
-        eval_results_df["ts"] = ts
-        eval_results_df["level_1"] = l_1
-        eval_results_df["level_2"] = l_2
-        eval_results_df["level_3"] = l_3
-
+        print (l_1, l_2, l_3)
+         
+        eval_results_df.loc[0] = [ts, l_1, l_2, l_3]
+        #eval_results_df["ts"] = ts
+        #eval_results_df["level_1"] = l_1
+        #eval_results_df["level_2"] = l_2
+        #eval_results_df["level_3"] = l_3
+       
+        print (eval_results_df)
         eval_path = os.path.join(EMBEDDING_DEST, ts)
         eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result.csv"), index=None)
         
