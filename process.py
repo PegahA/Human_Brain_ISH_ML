@@ -866,7 +866,7 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     if (not os.path.exists(path_to_random)):
         os.mkdir(path_to_random)
 
-    random_embed_file.to_csv(os.path.join(path_to_random, "random_embeddings.csv"))
+    random_embed_file.to_csv(os.path.join(path_to_random, "random_embeddings.csv"),index=None)
 
     print ("finished generating random embeddings...")
 
@@ -888,7 +888,7 @@ def run():
 if __name__ == '__main__':
     generate_random_embeddings("valid_patches_info.csv", 128)
     merge_embeddings_to_image_level("random")
-    
+   
     
 
 
