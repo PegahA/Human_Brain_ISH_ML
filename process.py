@@ -871,6 +871,92 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     print ("finished generating random embeddings...")
 
 
+def get_embeddings_from_pre_trained_model(model="resnet50",
+                                          trained_on="imagenet", dim=128, standardize = False ):
+
+
+    image_dir = IMAGE_ROOT
+    print ("image dir is: ", image_dir)
+
+    height = PATCH_HEIGHT
+    width = PATCH_WIDTH
+
+
+    image_list = []
+    for file in os.listdir(image_dir):
+        if file.endswith(".jpg"):
+            image_list.append(file)
+
+    embeddings_list = []
+    if model == "resnet50":
+        import tensorflow as tf
+        from tensorflow.keras import layers
+        from tensorflow.keras import Model
+        from tensorflow.keras.applications.resnet50 import ResNet50
+        from tensorflow.keras.preprocessing import image
+        from tensorflow.keras.applications.resnet50 import preprocess_input
+        pre_trained_model = ResNet50(input_shape=(height, width, 3),
+                                     include_top=False,
+                                     pooling=max,
+                                     weights=trained_on)
+
+        # freeze all the layers
+        for layer in pre_trained_model.layers:
+            layer.trainable = False
+
+        # print (pre_trained_model.summary())
+
+        last_layer = pre_trained_model.get_layer(index=-1)
+        print("last layer output shape is: ", last_layer.output_shape)
+        last_output = last_layer.output
+
+        # x = layers.AveragePooling2D((8,8))(last_output)
+        # x = layers.Flatten()(x)
+
+        x = layers.Flatten()(last_output)
+        x = layers.Dense(dim, activation='relu')(x)
+
+        model = Model(pre_trained_model.input, x)
+        # model = Model(pre_trained_model.input, last_output)
+
+        print("total number of images: ", len(image_list))
+        for i in range(len(image_list)):
+            print(i)
+            image_to_embed = image_list[i]
+            image_id = image_to_embed.split(".")[0]
+
+            img_path = os.path.join(image_dir, image_to_embed)
+            img = image.load_img(img_path, target_size=(height, width))
+
+            if standardize:
+                img = tf.image.per_image_standardization(img)
+                
+            img_data = image.img_to_array(img)
+            img_data = np.expand_dims(img_data, axis=0)
+            img_data = preprocess_input(img_data)
+            # img_data = np.vstack([x])
+            resnet50_feature = model.predict(img_data)
+            resnet50_feature = resnet50_feature.squeeze().tolist()
+            resnet50_feature = [image_id] + resnet50_feature
+
+            embeddings_list.append(resnet50_feature)
+
+        column_names = np.arange(0, dim)
+        column_names = [str(name) for name in column_names]
+        column_names = ['image_id'] + column_names
+
+
+        if standardize:
+            embeddings_csv_file_name = model + "_standardized_embeddings.csv"
+        else:
+            embeddings_csv_file_name = model + "_embeddings.csv"
+
+        embedding_df = pd.DataFrame(embeddings_list, columns=column_names)
+        embeddings_path = os.path.join(EMBEDDING_DEST, model, embeddings_csv_file_name)
+        embedding_df.to_csv(embeddings_path, index=None)
+
+
+
 def run():
     #pass
     embed_file_name = "triplet_training_validation_embeddings.csv"
