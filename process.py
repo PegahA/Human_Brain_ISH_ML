@@ -871,10 +871,23 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     print ("finished generating random embeddings...")
 
 
-def get_embeddings_from_pre_trained_model(model="resnet50",
+def get_embeddings_from_pre_trained_model(model_name="resnet50",
                                           trained_on="imagenet", dim=128, standardize = False ):
 
 
+    if standardize:
+        embeddings_csv_file_name = model_name + "_standardized_embeddings.csv"
+    else:
+        embeddings_csv_file_name = model_name + "_embeddings.csv"
+
+    if (not os.path.exists(os.path.join(EMBEDDING_DEST, model_name))):
+        os.mkdir(os.path.join(EMBEDDING_DEST, model_name))
+
+
+    print ("starting to generate embeddings from a plain " , model_name)
+
+
+    
     image_dir = IMAGE_ROOT
     print ("image dir is: ", image_dir)
 
@@ -888,7 +901,7 @@ def get_embeddings_from_pre_trained_model(model="resnet50",
             image_list.append(file)
 
     embeddings_list = []
-    if model == "resnet50":
+    if model_name == "resnet50":
         import tensorflow as tf
         from tensorflow.keras import layers
         from tensorflow.keras import Model
@@ -930,8 +943,10 @@ def get_embeddings_from_pre_trained_model(model="resnet50",
 
             if standardize:
                 img = tf.image.per_image_standardization(img)
-                
-            img_data = image.img_to_array(img)
+                img_data = tf.keras.backend.eval(img)
+            else:    
+            	img_data = image.img_to_array(img)
+            
             img_data = np.expand_dims(img_data, axis=0)
             img_data = preprocess_input(img_data)
             # img_data = np.vstack([x])
@@ -945,14 +960,9 @@ def get_embeddings_from_pre_trained_model(model="resnet50",
         column_names = [str(name) for name in column_names]
         column_names = ['image_id'] + column_names
 
-
-        if standardize:
-            embeddings_csv_file_name = model + "_standardized_embeddings.csv"
-        else:
-            embeddings_csv_file_name = model + "_embeddings.csv"
-
         embedding_df = pd.DataFrame(embeddings_list, columns=column_names)
-        embeddings_path = os.path.join(EMBEDDING_DEST, model, embeddings_csv_file_name)
+       
+        embeddings_path = os.path.join(EMBEDDING_DEST, model_name, embeddings_csv_file_name)
         embedding_df.to_csv(embeddings_path, index=None)
 
 
@@ -972,8 +982,9 @@ def run():
 
 
 if __name__ == '__main__':
-    generate_random_embeddings("valid_patches_info.csv", 128)
-    merge_embeddings_to_image_level("random")
+    #generate_random_embeddings("valid_patches_info.csv", 128)
+    merge_embeddings_to_image_level("resnet50")
+    #get_embeddings_from_pre_trained_model(standardize=True)
    
     
 
