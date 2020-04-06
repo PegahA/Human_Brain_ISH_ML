@@ -28,8 +28,7 @@ cv.__version__)
 
 
 SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
-#ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
-ORIGINAL_IMAGES_PATH = "/genome/scratch/Neuroinformatics/pabed/human_ish_data/cortex/images"
+ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = SEGMENTATION_PATCH_SIZE
 
@@ -266,7 +265,7 @@ def check_percentage_foreground(arr, threshold, patch_size):
     return False
 
 
-def use_trained_model(model_name):
+def use_trained_model(model_name, predict_new_masks=True):
     """
     Assuming that we have a trained model at this point, this function loads the model and runs all the images through
     it to get a predicted mask for each.
@@ -287,8 +286,8 @@ def use_trained_model(model_name):
     dir_images_list = os.listdir(original_images_path)
 
 
-    final_patches_path = os.path.join(images_path, "final_patches")
-    mask_patches_path = os.path.join(images_path, "mask_patches")
+    final_patches_path = os.path.join(images_path, "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
+    mask_patches_path = os.path.join(images_path, "mask_patches_"+str(PATCH_COUNT_PER_IMAGE))
 
     if not os.path.exists(final_patches_path):
         os.mkdir(final_patches_path)
@@ -308,106 +307,131 @@ def use_trained_model(model_name):
         #print (predicted_masks[:10])
         print ("There are already {} predicted masks".format(len(predicted_masks)))
 
-    WHITE = [255, 255, 255]
-
     print ("Starting to pad and resize ISH images to predict a mask for them ...")
 
     
    
     for item in dir_images_list:
-        if item.endswith(".jpg") and item not in predicted_masks:  # the images are saved with jpg format
-            print(item)
+        if predict_new_masks:
+            if item.endswith(".jpg") and item not in predicted_masks:  # the images are saved with jpg format
+                print(item)
 
-            final_name = item.split(".")[0] + "_mask.jpg"
+                final_name = item.split(".")[0] + "_mask.jpg"
 
-            img = cv.imread(os.path.join(original_images_path, item), cv.COLOR_BGR2GRAY)
-            img_h = img.shape[0]
-            img_w = img.shape[1]
+                img = cv.imread(os.path.join(original_images_path, item), cv.COLOR_BGR2GRAY)
+                img_h = img.shape[0]
+                img_w = img.shape[1]
 
+                h_w_dif = img_h - img_w
+
+                # ------- pad the image to make it into a square
+                padded_img = cv.copyMakeBorder(img, 0, 0, h_w_dif // 2, h_w_dif // 2, cv.BORDER_CONSTANT, value=WHITE)
+
+                # ------- scale the image into TRAIN_INPUT_IMAGE_SIZExTRAIN_INPUT_IMAGE_SIZE  (224x244)
+                size = (TRAIN_INPUT_IMAGE_SIZE, TRAIN_INPUT_IMAGE_SIZE)
+                scaled_img = cv.resize(padded_img, size)
+
+                # ------- convert to fastai.vision.image.Image type
+                img_fastai = fastai.vision.image.Image(pil2tensor(scaled_img, dtype=np.float32).div_(255))
+
+                # ------- get the prediction from the model
+                segmented_img = learn.predict(img_fastai)[0].data.squeeze().numpy().astype('float32')
+                segmented_img[segmented_img != 0] = 255
+
+
+                # ------- save the predicted masks of size TRAIN_INPUT_IMAGE_SIZExTRAIN_INPUT_IMAGE_SIZE  (224x244)
+                # we store them because we might want to go through them later to see if there is an image that gets
+                # predicted is totally background or totally foreground.
+                pred_name = item.split(".")[0] + "_pred.jpg"
+
+
+                cv.imwrite(os.path.join(predicted_masks_path, pred_name), segmented_img)
+
+                # ------- re-scale the segmented image back to original size
+                size = (img_h, img_h)
+                rescaled_img = cv.resize(segmented_img, size, interpolation=cv.INTER_NEAREST)
+
+                # -------- append it to the list of rescaled masks along with its name
+                #rescaled_masks.append((rescaled_img, final_name))
+
+
+                print("Finished segementing and starting to get the patches for: ", final_name)
+
+                create_patches(rescaled_img, final_name, original_images_path, final_patches_path, mask_patches_path)
+
+
+        else:  # if we only want to create new patches. We already have the segmented masks.
+
+            print ("using already existing prediction masks")
+
+            if item.endswith(".jpg"):
+
+                # read the image and get its size
+                img = cv.imread(os.path.join(original_images_path, item), cv.COLOR_BGR2GRAY)
+                img_h = img.shape[0]
+                img_w = img.shape[1]
+
+                # retrieve image's mask
+                predicted_mask_name = item.split(".")[0] + "_pred.jpg"
+                predicted_mask_path = os.path.join(predicted_masks_path, predicted_mask_name)
+                predicted_mask = cv.imread(predicted_mask_path, cv.COLOR_BGR2GRAY)
+
+                # rescale the mask to image's original size
+                size = (img_h, img_h)
+                rescaled_img = cv.resize(predicted_mask, size, interpolation=cv.INTER_NEAREST)
+
+                final_name = item.split(".")[0] + "_mask.jpg"
+
+                # call the function to create patches
+                create_patches(rescaled_img, final_name, original_images_path, final_patches_path, mask_patches_path)
+
+
+
+def create_patches(rescaled_img, final_name, original_images_path, final_patches_path, mask_patches_path):
+
+    WHITE = [255, 255, 255]
+    mask = rescaled_img
+    mask_name = final_name  # the mask image name
+
+    rand_state = int(mask_name.split("_")[0])
+
+    this_image_lookup_count = 0
+    this_image_patch_count = 0
+    no_valid_patch = False
+    while (this_image_patch_count < PATCH_COUNT_PER_IMAGE):
+        patch_from_mask = image.extract_patches_2d(mask, (PATCH_SIZE, PATCH_SIZE), 1, rand_state)
+        patch_from_mask[patch_from_mask > 128] = 255
+        patch_from_mask[patch_from_mask <= 128] = 0
+
+        valid = check_percentage_foreground(patch_from_mask, FOREGROUND_THRESHOLD, PATCH_SIZE)
+
+        if valid:  # if this is a valid patch based on the mask, pick it from the original image
+
+            patch_name = mask_name.split("_")[0] + "_" + str(this_image_patch_count) + ".jpg"
+            cv.imwrite(os.path.join(mask_patches_path, patch_name), patch_from_mask[0])
+
+            print("patch count: ", this_image_patch_count)
+            this_image_patch_count += 1
+
+            original_image_name = mask_name.split("_")[0] + ".jpg"
+            original_image = cv.imread(os.path.join(original_images_path, original_image_name))
+            img_h = original_image.shape[0]
+            img_w = original_image.shape[1]
             h_w_dif = img_h - img_w
 
-            # ------- pad the image to make it into a square
-            padded_img = cv.copyMakeBorder(img, 0, 0, h_w_dif // 2, h_w_dif // 2, cv.BORDER_CONSTANT, value=WHITE)
+            original_image_padded = cv.copyMakeBorder(original_image, 0, 0, h_w_dif // 2, h_w_dif // 2,
+                                                      cv.BORDER_CONSTANT, value=WHITE)
+            patch_from_original = image.extract_patches_2d(original_image_padded, (PATCH_SIZE, PATCH_SIZE), 1,
+                                                           rand_state)
 
-            # ------- scale the image into TRAIN_INPUT_IMAGE_SIZExTRAIN_INPUT_IMAGE_SIZE  (224x244)
-            size = (TRAIN_INPUT_IMAGE_SIZE, TRAIN_INPUT_IMAGE_SIZE)
-            scaled_img = cv.resize(padded_img, size)
+            cv.imwrite(os.path.join(final_patches_path, patch_name), patch_from_original[0])
 
-            # ------- convert to fastai.vision.image.Image type
-            img_fastai = fastai.vision.image.Image(pil2tensor(scaled_img, dtype=np.float32).div_(255))
+        rand_state += 1
+        this_image_lookup_count += 1
 
-            # ------- get the prediction from the model
-            segmented_img = learn.predict(img_fastai)[0].data.squeeze().numpy().astype('float32')
-            segmented_img[segmented_img != 0] = 255
-
-
-            # ------- save the predicted masks of size TRAIN_INPUT_IMAGE_SIZExTRAIN_INPUT_IMAGE_SIZE  (224x244)
-            # we store them because we might want to go through them later to see if there is an image that gets
-            # predicted is totally background or totally foreground.
-            pred_name = item.split(".")[0] + "_pred.jpg"
-        
-
-            cv.imwrite(os.path.join(predicted_masks_path, pred_name), segmented_img)
-
-            # ------- re-scale the segmented image back to original size
-            size = (img_h, img_h)
-            rescaled_img = cv.resize(segmented_img, size, interpolation=cv.INTER_NEAREST)
-
-            # -------- append it to the list of rescaled masks along with its name
-            #rescaled_masks.append((rescaled_img, final_name))
-
-
-            print("Finished segementing and starting to get the patches for: ", final_name)
-
-
-
-
-    #for element in rescaled_masks:
-
-            mask = rescaled_img
-            mask_name =  final_name  # the mask image name
-
-
-            rand_state = int(mask_name.split("_")[0])
-           
-            this_image_lookup_count = 0
-            this_image_patch_count = 0
-            no_valid_patch = False
-            while (this_image_patch_count < PATCH_COUNT_PER_IMAGE):
-                patch_from_mask = image.extract_patches_2d(mask, (PATCH_SIZE, PATCH_SIZE), 1, rand_state)
-                patch_from_mask[patch_from_mask > 128] = 255
-                patch_from_mask[patch_from_mask <= 128] = 0
-
-                valid = check_percentage_foreground(patch_from_mask, FOREGROUND_THRESHOLD, PATCH_SIZE)
-
-                if valid:  # if this is a valid patch based on the mask, pick it from the original image
-
-                    patch_name = mask_name.split("_")[0] + "_" + str(this_image_patch_count) + ".jpg"
-                    cv.imwrite(os.path.join(mask_patches_path, patch_name), patch_from_mask[0])
-
-                    print ("patch count: ", this_image_patch_count)
-                    this_image_patch_count += 1
-
-                    original_image_name = mask_name.split("_")[0] + ".jpg"
-                    original_image = cv.imread(os.path.join(original_images_path, original_image_name))
-                    img_h = original_image.shape[0]
-                    img_w = original_image.shape[1]
-                    h_w_dif = img_h - img_w
-
-                    original_image_padded = cv.copyMakeBorder(original_image, 0, 0, h_w_dif // 2, h_w_dif // 2,
-                                                              cv.BORDER_CONSTANT, value=WHITE)
-                    patch_from_original = image.extract_patches_2d(original_image_padded, (PATCH_SIZE, PATCH_SIZE), 1,
-                                                                   rand_state)
-
-                    cv.imwrite(os.path.join(final_patches_path, patch_name), patch_from_original[0])
-
-                rand_state += 1
-                this_image_lookup_count +=1
-		
-                if this_image_lookup_count == 500:
-                    no_valid_patch == True			
-                    break
-
+        if this_image_lookup_count == 500:
+            no_valid_patch == True
+            break
            
 
 
@@ -612,7 +636,7 @@ if __name__ == "__main__":
     #create_valid_patches_info_csv_file()
     #main()
 
-    use_trained_model("training_example_feb_6.pkl")
+    use_trained_model("training_example_feb_6.pkl",predict_new_masks=False )
 
     #check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
