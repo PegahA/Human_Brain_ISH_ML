@@ -609,10 +609,10 @@ def main():
 if __name__ == "__main__":
 
 
-    create_valid_patches_info_csv_file()
+    #create_valid_patches_info_csv_file()
     #main()
 
-    #use_trained_model("training_example_feb_6.pkl")
+    use_trained_model("training_example_feb_6.pkl")
 
     #check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
