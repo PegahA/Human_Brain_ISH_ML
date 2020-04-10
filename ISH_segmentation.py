@@ -456,7 +456,7 @@ def check_final_patches():
 
     :return: python list of strings
     """
-    path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "final_patches")
+    path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "final_patches_"+ str(PATCH_COUNT_PER_IMAGE))
     path_contents = os.listdir(path_to_final_patches)
     final_patches = [item for item in path_contents if item.endswith(".jpg")]
 
@@ -470,7 +470,7 @@ def check_mask_patches():
     :return: python list of strings
     """
 
-    path_to_mask_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "mask_patches")
+    path_to_mask_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "mask_patches_"+ str(PATCH_COUNT_PER_IMAGE ))
     path_contents = os.listdir(path_to_mask_patches)
     mask_patches = [item for item in path_contents if item.endswith(".jpg")]
 
@@ -589,7 +589,8 @@ def check_genes_in_images_with_not_enough_patches(file_name):
 
 
 def create_valid_patches_info_csv_file():
-
+    
+    print(IMAGE_ROOT)
     contents_list = os.listdir(IMAGE_ROOT)
     patches_list = [item for item in contents_list if item.endswith(".jpg")]
 
@@ -624,7 +625,7 @@ def create_valid_patches_info_csv_file():
 
     valid_patches_df.to_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"), index=None)
 
-
+    print ("finished creating valid patches info csv file ...")
 def main():
     #use_trained_model("training_example_feb_6.pkl")
     check_masks_and_patches_info()
@@ -636,9 +637,9 @@ if __name__ == "__main__":
     #create_valid_patches_info_csv_file()
     #main()
 
-    use_trained_model("training_example_feb_6.pkl",predict_new_masks=False )
+    #use_trained_model("training_example_feb_6.pkl",predict_new_masks=False )
 
-    #check_masks_and_patches_info()
+    check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
