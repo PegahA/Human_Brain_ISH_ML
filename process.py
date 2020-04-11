@@ -961,7 +961,8 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
         for i in range(len(loaded_images)):
             print(i, " standardizing", " chunk_ID: ", chunk_ID)
-            img = loaded_images[i]
+            img = loaded_images[i] 
+            img = tf.keras.preprocessing.image.img_to_array(img)
             img = tf.image.per_image_standardization(img)
             img_data = tf.keras.backend.eval(img)
             tf.keras.backend.clear_session()
