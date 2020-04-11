@@ -1034,6 +1034,8 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
             embeddings_list.append(resnet50_feature)
 
+        tf.keras.backend.clear_session()
+        
         column_names = np.arange(0, dim)
         column_names = [str(name) for name in column_names]
         column_names = ['image_id'] + column_names
