@@ -940,7 +940,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
             embeddings_csv_file_name = model_name + "_embeddings.csv"
 
 
-    if (not os.path.exists(os.path.join(EMBEDDING_DEST, model_name))):
+    if (not os.path.exists(os.path.join(EMBEDDING_DEST, embed_folder_name))):
         os.mkdir(os.path.join(EMBEDDING_DEST, embed_folder_name))
 
 
@@ -1040,7 +1040,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
         embedding_df = pd.DataFrame(embeddings_list, columns=column_names)
 
-        embeddings_path = os.path.join(EMBEDDING_DEST, model_name, embeddings_csv_file_name)
+        embeddings_path = os.path.join(EMBEDDING_DEST, embed_folder_name, embeddings_csv_file_name)
         embedding_df.to_csv(embeddings_path, index=None)
 
 
