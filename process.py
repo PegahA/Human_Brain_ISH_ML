@@ -1048,6 +1048,7 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10):
         print ("this chunk start and end indices are {} , {}".format(this_chunk_start_ind, this_chunk_end_ind))
         chunk_ID = i
         print ("chunk ID: {}".format(chunk_ID))
+        start = this_chunk_end_ind
 
 
 
