@@ -1052,6 +1052,14 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10):
 
 
 
+    this_chunk_start_ind = start
+    this_chunk_end_ind= number_of_images-1
+    print ("last chunk's start and end indices are {} , {}".format(this_chunk_start_ind, this_chunk_end_ind))
+    chunk_ID = number_of_chunks
+    print("chunk ID: {}".format(chunk_ID))
+
+
+
 
 
 
