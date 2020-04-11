@@ -7,8 +7,8 @@ LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", 
 STUDY = "cortex"
 #DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 #DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
-#DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
-DATA_DIR = "/human_ISH/human_ish_data"
+DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
+#DATA_DIR = "/human_ISH/human_ish_data"
 CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
@@ -22,7 +22,7 @@ NUMBER_OF_CIRCLES_IN_HEIGHT = 2
 NUMBER_OF_CIRCLES_IN_WIDTH = 1
 SEGMENTATION = False
 
-PATCH_COUNT_PER_IMAGE = 10
+PATCH_COUNT_PER_IMAGE = 5
 FOREGROUND_THRESHOLD = 90
 SEGMENTATION_PATCH_SIZE = 1024
 
@@ -44,7 +44,7 @@ elif  PATCH_TYPE == 'r_overall' :
 
 elif PATCH_TYPE == 'segmentation':
     #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
-    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" , "results" , "final_patches")
+    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" , "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
