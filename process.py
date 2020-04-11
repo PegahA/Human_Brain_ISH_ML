@@ -946,7 +946,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
     loaded_images = []
     print("started loading images ...")
     for i in range(len(image_list)):
-        print (i , " loading")
+        print (i , " loading", " chunk_ID: ", chunk_ID)
         image_to_embed = image_list[i]
         image_id = image_to_embed.split(".")[0]
 
@@ -960,7 +960,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
         print("started standardizing images ...")
 
         for i in range(len(loaded_images)):
-            print(i, " standardizing")
+            print(i, " standardizing", " chunk_ID: ", chunk_ID)
             img = loaded_images[i]
             img = tf.image.per_image_standardization(img)
             img_data = tf.keras.backend.eval(img)
@@ -1001,7 +1001,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
         print("\n started passing images through the model ...")
         for i in range(len(loaded_images)):
-            print(i, " passing through")
+            print(i, " passing through", " chunk_ID: ", chunk_ID)
             img = loaded_images[i]
             img_data = image.img_to_array(img)
             img_data = np.expand_dims(img_data, axis=0)
@@ -1024,7 +1024,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
 
 
-def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10):
+def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, standardize=True):
 
     valid_patches_info_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     valid_patches_info = pd.read_csv(valid_patches_info_path)
@@ -1050,6 +1050,11 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10):
         print ("chunk ID: {}".format(chunk_ID))
         start = this_chunk_end_ind
 
+        print ('calling get embed function ...')
+        get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128, standardize=standardize,
+                                              chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
+
+
 
 
     this_chunk_start_ind = start
@@ -1057,8 +1062,10 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10):
     print ("last chunk's start and end indices are {} , {}".format(this_chunk_start_ind, this_chunk_end_ind))
     chunk_ID = number_of_chunks
     print("chunk ID: {}".format(chunk_ID))
-
-
+    print('calling get embed function ...')
+    get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128,
+                                          standardize=standardize,
+                                          chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
 
 
 
