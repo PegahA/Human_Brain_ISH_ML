@@ -899,20 +899,41 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
 
 def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128, standardize=False,
                                           chunk_range=None, chunk_ID=None):
+    """
+    Generates embeddings from a pre-trained model without further training.
+    The function uses 'valid_patches_info.csv' to take the list of images to perform on.
+    But, if the number of images is too high, there might be OOM errors. In that case, the function will perform on chunks
+    of images at each time. There is another function,  'get_embeddings_from_pre_trained_model_in_chunks', which will be
+    called first and will generate the chunk. That function will then call this function.
 
-    # ---- imports libraries
+    :param model_name: string, the pre-trained model to be used
+    :param trained_on: string, the dataset on which the pre-trained model has been trained
+    :param dim: int, the dimensionality of the output embeddings
+    :param standardize: bool, flag to linearly scale each image to have mean 0 and variance 1
+    :param chunk_range: tuple, if the function is supposed to perform on chunks, this tuple indicates the start and end index
+    :param chunk_ID: int, if the function is supposed to perform on chunks, this value indicates the chunk ID
+    :return: None. It creates the embeddings and stores them in a csv file.
+    """
+
+    print("Generating embeddings from a plain ", model_name)
+
+    # ---- imports libraries ---------
     import tensorflow as tf
     from tensorflow.keras import layers
     from tensorflow.keras import Model
     from tensorflow.keras.preprocessing import image
-    # ------------------
+    # --------------------------------
 
     if standardize:
+
+        embed_folder_name = model_name + "_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_standardized"
         if chunk_ID:
             embeddings_csv_file_name = model_name + "_standardized_embeddings_" + str(chunk_ID) +".csv"
         else:
             embeddings_csv_file_name = model_name + "_standardized_embeddings.csv"
+
     else:
+        embed_folder_name = model_name + "_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"
         if chunk_ID:
             embeddings_csv_file_name = model_name + "_embeddings_" + str(chunk_ID)+".csv"
         else:
@@ -920,9 +941,8 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
 
     if (not os.path.exists(os.path.join(EMBEDDING_DEST, model_name))):
-        os.mkdir(os.path.join(EMBEDDING_DEST, model_name))
+        os.mkdir(os.path.join(EMBEDDING_DEST, embed_folder_name))
 
-    print("Generating embeddings from a plain ", model_name)
 
     valid_patches_info_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     valid_patches_info = pd.read_csv(valid_patches_info_path)
@@ -1025,7 +1045,20 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
 
 
-def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, standardize=True):
+def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet", dim=128, standardize=True,):
+
+    """
+    This function is used when the number of images is too high for the system to handle them all at once and it could cause
+    OOM problems.
+    This function will group them in chunks and call the 'get_embeddings_from_pre_trained_model' function on each chunk.
+
+    :param number_of_chunks: int
+    :param model_name:  string, the pre-trained model to be used
+    :param trained_on: string, the dataset on which the pre-trained model has been trained
+    :param dim: int, the dimensionality of the output embeddings
+    :param standardize: bool, flag to linearly scale each image to have mean 0 and variance 1
+    :return: None
+    """
 
     valid_patches_info_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     valid_patches_info = pd.read_csv(valid_patches_info_path)
@@ -1039,6 +1072,8 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, standa
     number_of_images = len(image_list)
     print ("there are {} images in this directory".format(number_of_images))
 
+
+    # maximum number of images in each chunk. There might be less in the last chunk.
     max_in_each_chunk = number_of_images // number_of_chunks
 
     start = 0
@@ -1052,12 +1087,12 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, standa
         start = this_chunk_end_ind
 
         print ('calling get embed function ...')
-        get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128, standardize=standardize,
+        get_embeddings_from_pre_trained_model(model_name=model_name, trained_on=trained_on, dim=dim, standardize=standardize,
                                               chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
 
 
 
-
+    # handling the last chunk
     this_chunk_start_ind = start
     this_chunk_end_ind= number_of_images-1
     print ("last chunk's start and end indices are {} , {}".format(this_chunk_start_ind, this_chunk_end_ind))
