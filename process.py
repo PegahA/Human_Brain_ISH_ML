@@ -1075,13 +1075,13 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_
     print ("there are {} images in this directory".format(number_of_images))
 
 
-    # maximum number of images in each chunk. There might be less in the last chunk.
-    max_in_each_chunk = number_of_images // number_of_chunks
+    # minimum number of images in each chunk. There might be more in the last chunk.
+    min_in_each_chunk = number_of_images // number_of_chunks
 
     start = 0
     for i in range(1, number_of_chunks):
         this_chunk_start_ind = start
-        this_chunk_end_ind = start+max_in_each_chunk
+        this_chunk_end_ind = start+min_in_each_chunk
 
         print ("this chunk start and end indices are {} , {}".format(this_chunk_start_ind, this_chunk_end_ind))
         chunk_ID = i
@@ -1089,14 +1089,14 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_
         start = this_chunk_end_ind
 
         print ('calling get embed function ...')
-        get_embeddings_from_pre_trained_model(model_name=model_name, trained_on=trained_on, dim=dim, standardize=standardize,
-                                              chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
+        #get_embeddings_from_pre_trained_model(model_name=model_name, trained_on=trained_on, dim=dim, standardize=standardize,
+                                              #chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
 
 
 
     # handling the last chunk
     this_chunk_start_ind = start
-    this_chunk_end_ind= number_of_images-1
+    this_chunk_end_ind= number_of_images
     print ("last chunk's start and end indices are {} , {}".format(this_chunk_start_ind, this_chunk_end_ind))
     chunk_ID = number_of_chunks
     print("chunk ID: {}".format(chunk_ID))
@@ -1193,8 +1193,8 @@ if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
-    #get_embeddings_from_pre_trained_model_in_chunks()
-    concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    get_embeddings_from_pre_trained_model_in_chunks()
+    #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
 
     
 
