@@ -1035,7 +1035,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
             embeddings_list.append(resnet50_feature)
 
         tf.keras.backend.clear_session()
-        
+
         column_names = np.arange(0, dim)
         column_names = [str(name) for name in column_names]
         column_names = ['image_id'] + column_names
@@ -1107,6 +1107,39 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_
 
 
 
+def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
+    embed_folder_path = os.path.join(EMBEDDING_DEST, embed_folder_name)
+
+    embed_folder_content = os.listdir(embed_folder_path)
+    general_csv_name = ""
+    embed_csv_files = []
+    for i in range(1, number_of_chunks+1):
+        embed_csv_name = ""
+        for item in embed_folder_content:
+            if item.endswith("_"+str(i)+".csv"):
+                general_csv_name = item.split("_"+str(i)+".csv")[0]
+                embed_csv_name = item
+                break
+
+        print ("embedding csv file name: {}".format(embed_csv_name))
+        embed_csv_file = pd.read_csv(os.path.join(embed_folder_path, embed_csv_name))
+        embed_csv_files.append(embed_csv_file)
+
+    print ("finished reading all the embedding files ... ")
+
+    print ("general csv name: {}".format(general_csv_name))
+
+    final_embed_csv = pd.concat(embed_csv_files, ignore_index=True)
+    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name+".csv"))
+
+
+
+
+
+
+
+
+
 
 
 def run():
@@ -1127,8 +1160,9 @@ if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
-    get_embeddings_from_pre_trained_model_in_chunks()
-   
+    #get_embeddings_from_pre_trained_model_in_chunks()
+    concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+
     
 
 
