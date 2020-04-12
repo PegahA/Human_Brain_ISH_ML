@@ -1132,10 +1132,27 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
 
     print ("general csv name: {}".format(general_csv_name))
 
+    general_csv_name = general_csv_name +".csv"
+
     final_embed_csv = pd.concat(embed_csv_files, ignore_index=True)
-    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name+".csv"),index=None)
+    #final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
 
 
+    # ------
+    check_concatenated_embeddings(embed_folder_name, general_csv_name)
+
+def check_concatenated_embeddings(embed_folder_name, general_csv_name):
+    valid_patches_info_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
+    valid_patches_info = pd.read_csv(valid_patches_info_path)
+    patch_id_list = valid_patches_info['patch_id']
+
+    concat_embed_path = os.path.join(EMBEDDING_DEST, embed_folder_name, general_csv_name)
+    concat_embed_file = pd.read_csv(concat_embed_path)
+    image_id_list = concat_embed_file['image_id']
+
+
+    print ("patch count in valid patch info: {} ".format(len(patch_id_list)))
+    print ("patch count in concatenated embed file: {}".format(len(image_id_list)))
 
 
 
