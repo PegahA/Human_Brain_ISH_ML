@@ -1155,7 +1155,10 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name):
     print ("patch count in concatenated embed file: {}".format(len(image_id_list)))
 
 
-
+    if len(patch_id_list) != len(image_id_list):
+        for item in patch_id_list:
+            if item not in image_id_list:
+                print (item)        
 
 
 
