@@ -1108,6 +1108,9 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_
 
 
 def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
+    
+
+    print ("started concatenating embedding chunks ...")
     embed_folder_path = os.path.join(EMBEDDING_DEST, embed_folder_name)
 
     embed_folder_content = os.listdir(embed_folder_path)
@@ -1130,7 +1133,7 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
     print ("general csv name: {}".format(general_csv_name))
 
     final_embed_csv = pd.concat(embed_csv_files, ignore_index=True)
-    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name+".csv"))
+    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name+".csv"),index=None)
 
 
 
