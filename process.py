@@ -1126,6 +1126,7 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
 
         print ("embedding csv file name: {}".format(embed_csv_name))
         embed_csv_file = pd.read_csv(os.path.join(embed_folder_path, embed_csv_name))
+        print ("length is: {}", len(embed_csv_file))
         embed_csv_files.append(embed_csv_file)
 
     print ("finished reading all the embedding files ... ")
@@ -1141,7 +1142,19 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
     # ------
     check_concatenated_embeddings(embed_folder_name, general_csv_name)
 
-def check_concatenated_embeddings(embed_folder_name, general_csv_name):
+
+
+def check_each_chunk(embed_folder_name, first_file_index, second_file_index, number_of_chunks =10):
+    embed_folder_path = os.path.join(EMBEDDING_DEST, embed_folder_name)
+    embed_folder_content = os.listdir(embed_folder_path)
+
+
+
+
+def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of_chunks =10):
+
+
+
     valid_patches_info_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     valid_patches_info = pd.read_csv(valid_patches_info_path)
     patch_id_list = valid_patches_info['patch_id']
@@ -1155,10 +1168,7 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name):
     print ("patch count in concatenated embed file: {}".format(len(image_id_list)))
 
 
-    if len(patch_id_list) != len(image_id_list):
-        for item in patch_id_list:
-            if item not in image_id_list:
-                print (item)        
+
 
 
 
