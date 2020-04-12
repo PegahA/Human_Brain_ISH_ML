@@ -1168,6 +1168,13 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of
     print ("patch count in concatenated embed file: {}".format(len(image_id_list)))
 
 
+    dif_count = 0
+
+    for item in patch_id_list:
+        if item not in image_id_list:
+            dif_count +=1
+
+    print (dif_count)
 
 
 
@@ -1193,8 +1200,8 @@ if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
-    get_embeddings_from_pre_trained_model_in_chunks()
-    #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    #get_embeddings_from_pre_trained_model_in_chunks()
+    concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
 
     
 
