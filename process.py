@@ -961,8 +961,8 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
         chunk_start = chunk_range[0]
         chunk_end = chunk_range[1]
         image_list = image_list[chunk_start:chunk_end]
-
-
+    print (image_list[:10])
+    
     loaded_images = []
     print("started loading images ...")
     for i in range(len(image_list)):
@@ -1044,7 +1044,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
         embeddings_path = os.path.join(EMBEDDING_DEST, embed_folder_name, embeddings_csv_file_name)
         embedding_df.to_csv(embeddings_path, index=None)
-
+    
 
 
 def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet", dim=128, standardize=True,):
@@ -1089,8 +1089,8 @@ def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_
         start = this_chunk_end_ind
 
         print ('calling get embed function ...')
-        #get_embeddings_from_pre_trained_model(model_name=model_name, trained_on=trained_on, dim=dim, standardize=standardize,
-                                              #chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
+        get_embeddings_from_pre_trained_model(model_name=model_name, trained_on=trained_on, dim=dim, standardize=standardize,
+                                              chunk_range=(this_chunk_start_ind, this_chunk_end_ind), chunk_ID=chunk_ID)
 
 
 
@@ -1127,6 +1127,8 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
         print ("embedding csv file name: {}".format(embed_csv_name))
         embed_csv_file = pd.read_csv(os.path.join(embed_folder_path, embed_csv_name))
         print ("length is: {}", len(embed_csv_file))
+        print (embed_csv_file.head())
+        print ("////")
         embed_csv_files.append(embed_csv_file)
 
     print ("finished reading all the embedding files ... ")
@@ -1175,7 +1177,9 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of
             dif_count +=1
 
     print (dif_count)
-
+    #print (patch_id_list[:50])
+    print ("---")
+    #print (image_id_list[:50])
 
 
 
@@ -1200,8 +1204,8 @@ if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
-    #get_embeddings_from_pre_trained_model_in_chunks()
-    concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    get_embeddings_from_pre_trained_model_in_chunks()
+    #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
 
     
 
