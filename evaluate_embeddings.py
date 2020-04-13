@@ -463,11 +463,11 @@ def evaluate(ts, level):
     for item in embeddings_files:
         path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, item)
         print (item)
-        print ("sum 100 -----------------")
-        l_1, l_2, l_3 = evaluate_sum_100(path_to_embeddings, level)
+        #print ("sum 100 -----------------")
+        #l_1, l_2, l_3 = evaluate_sum_100(path_to_embeddings, level)
 
-        #print ("with filtering ----------------")
-        #l_1, l_2, l_3 = evaluate_with_filtering(path_to_embeddings, level)
+        print ("with filtering ----------------")
+        l_1, l_2, l_3 = evaluate_with_filtering(path_to_embeddings, level)
 
     return l_1, l_2, l_3
 
@@ -475,7 +475,7 @@ def evaluate(ts, level):
 
 def main():
     #ts_list = ["1584753511"]
-    ts_list =  ["random"]
+    ts_list =  ["resnet50_10_patches_standardized"]
 
     for ts in ts_list:
 
