@@ -618,67 +618,67 @@ def merge_embeddings_to_image_level(filename):
     
     embed_file_contents = os.listdir(os.path.join(EMBEDDING_DEST, filename))
     for item in embed_file_contents:
-        if item.endswith(".csv"):
-            if item.endswith("_gene_level.csv") or item.endswith("_image_level.csv"):
-                pass
+        if item.endswith("embeddings.csv"):
+            #if item.endswith("_gene_level.csv") or item.endswith("_image_level.csv"):
+                #pass
+            #else:
+            print ("staaaaaaart: ", item)
+            embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
+            patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
+
+            print (embeddings_file.head())
+            print ("---")
+            print (patches_info.head())
+            im_id_list = patches_info['image_id']
+            im_id_ex = im_id_list[10]
+            print (im_id_ex)
+            print (type(im_id_ex))
+
+            if filename == "random":
+                embeddings_file = embeddings_file.rename(columns={'id': 'patch_id'})
             else:
-                print ("staaaaaaart: ", item)
-                embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
-                patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
-                  
-                print (embeddings_file.head())            
-                print ("---")
-                print (patches_info.head())
-                im_id_list = patches_info['image_id']
-                im_id_ex = im_id_list[10]
-                print (im_id_ex)
-                print (type(im_id_ex))
+                embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
 
-                if filename == "random":
-                    embeddings_file = embeddings_file.rename(columns={'id': 'patch_id'})
-                else:
-                    embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
-                
 
-                p_id_list =embeddings_file['patch_id']
-                p_id_ex = p_id_list[10]
-                print (p_id_ex)
-                print (type(p_id_ex))
-                print ("~~~~~")
-                # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
-                merged_df = embeddings_file.merge(patches_info[["patch_id", "image_id"]], how="left", on="patch_id")
-                
-                print ("_---")
-                print (merged_df.head())
-                # reorder the dataframe columns
-                merged_columns = list(merged_df)
-                merged_columns = [merged_columns[0]] + [merged_columns[-1]] + merged_columns[1:-1]
-                merged_df = merged_df[merged_columns]
-                
-                print (merged_df.head())
-                print ("///")
-                im_id_list = merged_df['image_id']
-                im_id_ex = im_id_list[10]
-                print (im_id_ex)
-                print (type(im_id_ex))
-                # drop the patch_id column
-                merged_df = merged_df.drop(columns=["patch_id"])
-                merged_df = merged_df.astype({'image_id': 'int'})
-                print ("_____") 
-                print (merged_df.head())
- 
-                # group by gene_symbol and average over the embedding values
-                grouped_df = merged_df.groupby(['image_id']).mean()
-                
-                print ("[[[[")
-                print(grouped_df.head())
+            p_id_list =embeddings_file['patch_id']
+            p_id_ex = p_id_list[10]
+            print (p_id_ex)
+            print (type(p_id_ex))
+            print ("~~~~~")
+            # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
+            merged_df = embeddings_file.merge(patches_info[["patch_id", "image_id"]], how="left", on="patch_id")
 
-                print("the number of images is: {}".format(len(grouped_df)))
-                
-                # and then I want to save this file as gene_embddings in the same folder.
-                item_name = item.split(".")[0]
-                save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name + "_image_level.csv")
-                grouped_df.to_csv(save_to_path)
+            print ("_---")
+            print (merged_df.head())
+            # reorder the dataframe columns
+            merged_columns = list(merged_df)
+            merged_columns = [merged_columns[0]] + [merged_columns[-1]] + merged_columns[1:-1]
+            merged_df = merged_df[merged_columns]
+
+            print (merged_df.head())
+            print ("///")
+            im_id_list = merged_df['image_id']
+            im_id_ex = im_id_list[10]
+            print (im_id_ex)
+            print (type(im_id_ex))
+            # drop the patch_id column
+            merged_df = merged_df.drop(columns=["patch_id"])
+            merged_df = merged_df.astype({'image_id': 'int'})
+            print ("_____")
+            print (merged_df.head())
+
+            # group by gene_symbol and average over the embedding values
+            grouped_df = merged_df.groupby(['image_id']).mean()
+
+            print ("[[[[")
+            print(grouped_df.head())
+
+            print("the number of images is: {}".format(len(grouped_df)))
+
+            # and then I want to save this file as gene_embddings in the same folder.
+            item_name = item.split(".")[0]
+            save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name + "_image_level.csv")
+            grouped_df.to_csv(save_to_path)
 
 
 def filter_out_common_genes(df_file_name,threshold = 3):
@@ -1158,11 +1158,11 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of
 
     valid_patches_info_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
     valid_patches_info = pd.read_csv(valid_patches_info_path)
-    patch_id_list = valid_patches_info['patch_id']
+    patch_id_list = valid_patches_info['patch_id']  # the type is actually pandas series. Not python list
 
     concat_embed_path = os.path.join(EMBEDDING_DEST, embed_folder_name, general_csv_name)
     concat_embed_file = pd.read_csv(concat_embed_path)
-    image_id_list = concat_embed_file['image_id']
+    image_id_list = concat_embed_file['image_id']  # the type is actually pandas series. Not python list
 
 
     print ("patch count in valid patch info: {} ".format(len(patch_id_list)))
@@ -1170,7 +1170,8 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of
 
 
     dif_count = 0
-   
+
+    # I have to use .values because it is pandas series. Otherwise it will check the indices and return False.
     for item in patch_id_list[:10].values:
         if item not in image_id_list[:10].values:
             dif_count +=1
@@ -1196,7 +1197,8 @@ if __name__ == '__main__':
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
-    concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    merge_embeddings_to_image_level("resnet50_10_patches_standardized")
 
     
 
