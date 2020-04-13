@@ -961,7 +961,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
         chunk_start = chunk_range[0]
         chunk_end = chunk_range[1]
         image_list = image_list[chunk_start:chunk_end]
-    print (image_list[:10])
+
     
     loaded_images = []
     print("started loading images ...")
@@ -1023,6 +1023,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
         print("\n started passing images through the model ...")
         for i in range(len(loaded_images)):
             print(i, " passing through", " chunk_ID: ", chunk_ID)
+            image_id = image_list[i].split(".")[0]
             img = loaded_images[i]
             img_data = image.img_to_array(img)
             img_data = np.expand_dims(img_data, axis=0)
@@ -1126,9 +1127,7 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
 
         print ("embedding csv file name: {}".format(embed_csv_name))
         embed_csv_file = pd.read_csv(os.path.join(embed_folder_path, embed_csv_name))
-        print ("length is: {}", len(embed_csv_file))
-        print (embed_csv_file.head())
-        print ("////")
+
         embed_csv_files.append(embed_csv_file)
 
     print ("finished reading all the embedding files ... ")
@@ -1138,7 +1137,7 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
     general_csv_name = general_csv_name +".csv"
 
     final_embed_csv = pd.concat(embed_csv_files, ignore_index=True)
-    #final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
+    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
 
 
     # ------
@@ -1178,7 +1177,6 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of
 
     print (dif_count)
     #print (patch_id_list[:50])
-    print ("---")
     #print (image_id_list[:50])
 
 
@@ -1205,7 +1203,7 @@ if __name__ == '__main__':
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
     get_embeddings_from_pre_trained_model_in_chunks()
-    #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
 
     
 
