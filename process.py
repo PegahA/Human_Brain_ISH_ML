@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-#import h5py
+import h5py
 import time
 from shutil import copyfile
 import operator
@@ -1137,7 +1137,7 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
     general_csv_name = general_csv_name +".csv"
 
     final_embed_csv = pd.concat(embed_csv_files, ignore_index=True)
-    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
+    #final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
 
 
     # ------
@@ -1170,20 +1170,13 @@ def check_concatenated_embeddings(embed_folder_name, general_csv_name, number_of
 
 
     dif_count = 0
-
-    for item in patch_id_list:
-        if item not in image_id_list:
+   
+    for item in patch_id_list[:10].values:
+        if item not in image_id_list[:10].values:
             dif_count +=1
-
-    print (dif_count)
-    #print (patch_id_list[:50])
-    #print (image_id_list[:50])
-
-
-
-
-
-
+   
+    print ("difference is: {} ".format(dif_count))
+  
 def run():
     #pass
     embed_file_name = "triplet_training_validation_embeddings.csv"
@@ -1202,7 +1195,7 @@ if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
-    get_embeddings_from_pre_trained_model_in_chunks()
+    #get_embeddings_from_pre_trained_model_in_chunks()
     concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
 
     
