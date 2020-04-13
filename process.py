@@ -1198,6 +1198,7 @@ if __name__ == '__main__':
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
+    merge_embeddings_to_gene_level("resnet50_10_patches_standardized")
     merge_embeddings_to_image_level("resnet50_10_patches_standardized")
 
     
