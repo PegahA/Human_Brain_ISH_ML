@@ -122,7 +122,7 @@ def filter_dist_matrix_after_level_1(dist_matrix, level):
 
 def filter_dist_matrix_after_level_2(dist_matrix, level):
 
-    print ("filtering the distance matrix after level 2 ...")
+    #print ("filtering the distance matrix after level 2 ...")
     if level == 'patch':
         info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
         info_csv = pd.read_csv(info_csv_path, index_col=None)
@@ -157,7 +157,7 @@ def filter_dist_matrix_after_level_2(dist_matrix, level):
         index = 0
 
         for image_id in image_id_list:
-            print (image_id)
+            #print (image_id)
             #print (index)
             #index = index +1 
             #this_image_id = image_id
@@ -432,11 +432,11 @@ def evaluate_with_filtering(path_to_embeddings, level):
     new_dist_df = filter_dist_matrix_after_level_2(dist_df, level)
     min_indexes_df = find_closest_image(new_dist_df)
     print(min_indexes_df)
-    level_2_proportion = level_3_evaluation(min_indexes_df, level)
-    print(level_2_proportion)
+    level_3_proportion = level_3_evaluation(min_indexes_df, level)
+    print(level_3_proportion)
 
 
-    return level_1_proportion, level_2_proportion, level_2_proportion
+    return level_1_proportion, level_3_proportion, level_2_proportion
 
 
 
@@ -475,7 +475,7 @@ def evaluate(ts, level):
 
 def main():
     #ts_list = ["1584753511"]
-    ts_list =  ["resnet50_10_patches_standardized"]
+    ts_list =  ["1586740776"]
 
     for ts in ts_list:
 
