@@ -436,7 +436,7 @@ def evaluate_with_filtering(path_to_embeddings, level):
     print(level_3_proportion)
 
 
-    return level_1_proportion, level_3_proportion, level_2_proportion
+    return level_1_proportion, level_2_proportion, level_3_proportion
 
 
 
@@ -475,7 +475,7 @@ def evaluate(ts, level):
 
 def main():
     #ts_list = ["1584753511"]
-    ts_list =  ["1586740776"]
+    ts_list =  ["resnet50_10_patches_standardized"]
 
     for ts in ts_list:
 
