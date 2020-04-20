@@ -127,7 +127,7 @@ def make_tiles(images, labels, l, processed_dir):
 
 def preprocess():
 
-    raw_dir = Path("raw")
+    raw_dir = Path("new_set_of_raw")
 
     raws = [raw_path for raw_path in raw_dir.ls() if ".tif" in raw_path.as_posix()]
     labels = sorted([raw_path for raw_path in raws if "_label" in raw_path.name])
@@ -138,13 +138,13 @@ def preprocess():
     for label, image in zip(labels, images):
         print(label, image)
 
-    processed_dir = Path("processed")
+    processed_dir = Path("new_processed")
     os.makedirs(processed_dir, exist_ok=True)
     # for f in processed_dir.ls(): os.remove(f)
     l = TRAIN_INPUT_IMAGE_SIZE
 
-    pad_and_scale_for_training(images, labels, l)
-    make_tiles(images, labels, l, processed_dir)
+    #pad_and_scale_for_training(images, labels, l)
+    #make_tiles(images, labels, l, processed_dir)
 
 
 def fast_ai():
@@ -627,19 +627,21 @@ def create_valid_patches_info_csv_file():
 
     print ("finished creating valid patches info csv file ...")
 def main():
+    pass
     #use_trained_model("training_example_feb_6.pkl")
-    check_masks_and_patches_info()
+    #check_masks_and_patches_info()
 
 
 if __name__ == "__main__":
 
 
+    preprocess()
     #create_valid_patches_info_csv_file()
     #main()
 
     #use_trained_model("training_example_feb_6.pkl",predict_new_masks=False )
 
-    check_masks_and_patches_info()
+    #check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
