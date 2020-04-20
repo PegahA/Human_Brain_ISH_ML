@@ -310,7 +310,7 @@ def use_trained_model(model_name, predict_new_masks=True):
     print ("Starting to pad and resize ISH images to predict a mask for them ...")
 
     
-   
+    WHITE = [255, 255, 255]   
     for item in dir_images_list:
         if predict_new_masks:
             if item.endswith(".jpg") and item not in predicted_masks:  # the images are saved with jpg format
