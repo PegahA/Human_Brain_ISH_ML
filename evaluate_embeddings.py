@@ -679,6 +679,10 @@ def main():
 
 
 if __name__ == '__main__':
-    valid_patches_info_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2"
+    #valid_patches_info_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2"
+    valid_patches_info_path = IMAGE_ROOT 
+    print ("path is: ", valid_patches_info_path)
+    generate_level_3_positive_pairs(valid_patches_info_path)
+    generate_level_2_positive_pairs(valid_patches_info_path)
     generate_level_3_negative_pairs(valid_patches_info_path)
 
