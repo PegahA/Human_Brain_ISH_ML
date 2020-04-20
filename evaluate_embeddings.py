@@ -109,6 +109,43 @@ def generate_level_2_positive_pairs(valid_patches_info_path):
     positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
 
 
+def generate_level_3_negative_pairs(valid_patches_info_path):
+    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
+    patch_id_list = list(valid_patches_info['patch_id'])
+
+    negatives_for_each_patch_dict= {}
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for patch_id in patch_id_list:
+        print (counter, patch_id)
+        counter += 1
+
+        this_patch_gene = valid_patches_info[valid_patches_info['patch_id']== patch_id]['gene_symbol'].iloc[0]
+        this_patch_donor = valid_patches_info[valid_patches_info['patch_id']== patch_id]['donor_id'].iloc[0]
+
+        not_same_gene = valid_patches_info[valid_patches_info['gene_symbol']!= this_patch_gene]
+        not_same_gene_not_same_donor = not_same_gene[not_same_gene['donor_id']!=this_patch_donor]
+        not_same_gene_not_same_donor_patch_id_list = not_same_gene_not_same_donor['patch_id']
+
+        negatives_for_each_patch_dict[patch_id] = list(not_same_gene_not_same_donor_patch_id_list)
+
+    for item in negatives_for_each_patch_dict:
+        this_item_values = negatives_for_each_patch_dict[item]
+        for val in this_item_values:
+            col_2.append(val)
+            col_1.append(item)
+
+    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    positive_pairs_level_3_df['col_1'] = col_1
+    positive_pairs_level_3_df['col_2'] = col_2
+
+    positive_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_3.csv")
+    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
+
+
+
 def temp():
 
     df = pd.read_csv( "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/positive_pairs_level_2.csv")
@@ -643,5 +680,5 @@ def main():
 
 if __name__ == '__main__':
     valid_patches_info_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2"
-    #generate_level_2_positive_pairs(valid_patches_info_path)
-    temp()
+    generate_level_3_negative_pairs(valid_patches_info_path)
+
