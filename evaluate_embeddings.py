@@ -6,6 +6,119 @@ import pandas as pd
 import numpy as np
 
 
+def generate_level_3_positive_pairs(valid_patches_info_path):
+    """
+    This function generates level 3 positive pairs from the patches.
+    Positive means each pair has the same gene.
+    Level 3 means that each of the items in the pair are from a different donor.
+
+    :return: None. Stores a csv file.
+    """
+
+    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
+
+    by_gene = valid_patches_info.groupby("gene_symbol")
+    genes = by_gene.groups.keys()
+    genes = list(genes)
+    genes.sort()
+
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for gene in genes:
+        this_gene_dict = {}
+        print(counter, gene)
+        counter += 1
+        this_gene_df = by_gene.get_group(gene)
+        this_gene_patch_id_list = this_gene_df['patch_id']
+        # print ("This gene has {} patches associated with it.".format(len(this_gene_patch_id_list)))
+
+        for patch_id in this_gene_patch_id_list:
+            this_patch_donor = this_gene_df[this_gene_df['patch_id'] == patch_id]['donor_id'].iloc[0]
+
+            not_this_donor = this_gene_df[this_gene_df['donor_id'] != this_patch_donor]
+
+            not_this_donor_patch_ids = not_this_donor['patch_id']
+            this_gene_dict[patch_id] = list(not_this_donor_patch_ids)
+
+        for item in this_gene_dict:
+            this_item_values = this_gene_dict[item]
+            for val in this_item_values:
+                col_2.append(val)
+                col_1.append(item)
+
+    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    positive_pairs_level_3_df['col_1'] = col_1
+    positive_pairs_level_3_df['col_2'] = col_2
+
+    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_3.csv")
+    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
+
+
+
+def generate_level_2_positive_pairs(valid_patches_info_path):
+    """
+    This function generates level 2 positive pairs from the patches.
+    Positive means each pair has the same gene.
+    Level 2 means that each of the items in the pair are from the same donor but different image.
+
+    :return: None. Stores a csv file.
+    """
+
+    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
+
+    by_gene = valid_patches_info.groupby("gene_symbol")
+    genes = by_gene.groups.keys()
+    genes = list(genes)
+    genes.sort()
+
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for gene in genes:
+        this_gene_dict = {}
+        print(counter, gene)
+        counter += 1
+        this_gene_df = by_gene.get_group(gene)
+        this_gene_patch_id_list = this_gene_df['patch_id']
+        # print ("This gene has {} patches associated with it.".format(len(this_gene_patch_id_list)))
+
+        for patch_id in this_gene_patch_id_list:
+            this_patch_donor = this_gene_df[this_gene_df['patch_id'] == patch_id]['donor_id'].iloc[0]
+            this_patch_image = this_gene_df[this_gene_df['patch_id'] == patch_id]['image_id'].iloc[0]
+
+            same_donor = this_gene_df[this_gene_df['donor_id'] == this_patch_donor]
+            same_donor_not_this_image = same_donor[same_donor['image_id']!= this_patch_image]
+            same_donor_not_this_image_patch_ids = same_donor_not_this_image['patch_id']
+
+            this_gene_dict[patch_id] = list(same_donor_not_this_image_patch_ids)
+
+        for item in this_gene_dict:
+            this_item_values = this_gene_dict[item]
+            for val in this_item_values:
+                col_2.append(val)
+                col_1.append(item)
+
+    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    positive_pairs_level_3_df['col_1'] = col_1
+    positive_pairs_level_3_df['col_2'] = col_2
+
+    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_2.csv")
+    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
+
+
+def temp():
+
+    df = pd.read_csv( "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/positive_pairs_level_2.csv")
+    print (len(df))
+
+        
+
+
+
+
 def build_distance_matrix(path_to_embeddings):
     """
     Distance from one item to itself shows up as inf.
@@ -527,4 +640,8 @@ def main():
     #new_dist_df = filter_dist_matrix_after_level_1(dist_df)
     """
 
-main()
+
+if __name__ == '__main__':
+    valid_patches_info_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2"
+    #generate_level_2_positive_pairs(valid_patches_info_path)
+    temp()
