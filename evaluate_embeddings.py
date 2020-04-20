@@ -474,8 +474,8 @@ def evaluate(ts, level):
 
 
 def main():
-    #ts_list = ["1584753511"]
-    ts_list =  ["resnet50_10_patches_standardized"]
+    ts_list = ["1586740776"]
+    #ts_list =  ["resnet50_10_patches_standardized_2"]
 
     for ts in ts_list:
 
