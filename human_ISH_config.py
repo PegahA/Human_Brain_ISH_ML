@@ -7,8 +7,8 @@ LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", 
 STUDY = "cortex"
 #DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 #DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
-DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
-#DATA_DIR = "/human_ISH/human_ish_data"
+#DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
+DATA_DIR = "/human_ISH/human_ish_data"
 CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
@@ -20,12 +20,12 @@ PATCH_HEIGHT = 256
 PATCH_WIDTH = 256
 NUMBER_OF_CIRCLES_IN_HEIGHT = 2
 NUMBER_OF_CIRCLES_IN_WIDTH = 1
-SEGMENTATION = False
+
 
 PATCH_COUNT_PER_IMAGE = 5
 FOREGROUND_THRESHOLD = 90
 SEGMENTATION_PATCH_SIZE = 1024
-
+SEGMENTATION_TRAINING_SAMPLES = 40
 
 current_time  = int(time.time())
 TIMESTAMP = str(current_time)
@@ -44,7 +44,7 @@ elif  PATCH_TYPE == 'r_overall' :
 
 elif PATCH_TYPE == 'segmentation':
     #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
-    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" , "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
+    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
@@ -52,7 +52,7 @@ elif PATCH_TYPE == 'segmentation':
 TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets", "triplet_training.csv")
 EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets", "triplet_training_validation.csv")
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
-TRIPLET_DIR = os.path.join(DATA_DIR, "triplet-reid")
+TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
 TRAIN_EMBEDDING_DIM = 128
@@ -67,9 +67,9 @@ LOADING_THREADS = 8
 MARGIN = 'soft'
 METRIC = 'euclidean'
 LOSS = 'batch_hard'
-LEARNING_RATE = 3e-4
-TRAIN_ITERATIONS = 5
-DECAY_START_ITERATION = 15000
+LEARNING_RATE = 1e-5
+TRAIN_ITERATIONS = 30000
+DECAY_START_ITERATION = 25000
 CHECKPOINT_FREQUENCY = 1000
 TRAIN_STANDARDIZE = False
 TRAIN_FLIP_AUGMENT = False

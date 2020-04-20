@@ -27,7 +27,7 @@ cv.__version__)
 
 
 
-SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
+SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES))
 ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = SEGMENTATION_PATCH_SIZE
@@ -639,7 +639,7 @@ if __name__ == "__main__":
     #create_valid_patches_info_csv_file()
     #main()
 
-    #use_trained_model("training_example_feb_6.pkl",predict_new_masks=False )
+    use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
 
     #check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
