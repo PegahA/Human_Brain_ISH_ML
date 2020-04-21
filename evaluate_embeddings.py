@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 
-def generate_level_3_positive_pairs(valid_patches_info_path):
+def generate_level_3_positive_pairs_patch_level(valid_patches_info_path):
     """
     This function generates level 3 positive pairs from the patches.
     Positive means each pair has the same gene.
@@ -52,12 +52,12 @@ def generate_level_3_positive_pairs(valid_patches_info_path):
     positive_pairs_level_3_df['col_1'] = col_1
     positive_pairs_level_3_df['col_2'] = col_2
 
-    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_3.csv")
+    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_3_on_patches.csv")
     positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
 
 
 
-def generate_level_2_positive_pairs(valid_patches_info_path):
+def generate_level_2_positive_pairs_patch_level(valid_patches_info_path):
     """
     This function generates level 2 positive pairs from the patches.
     Positive means each pair has the same gene.
@@ -101,15 +101,15 @@ def generate_level_2_positive_pairs(valid_patches_info_path):
                 col_2.append(val)
                 col_1.append(item)
 
-    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    positive_pairs_level_3_df['col_1'] = col_1
-    positive_pairs_level_3_df['col_2'] = col_2
+    positive_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    positive_pairs_level_2_df['col_1'] = col_1
+    positive_pairs_level_2_df['col_2'] = col_2
 
-    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_2.csv")
-    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
+    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_2_on_patches.csv")
+    positive_pairs_level_2_df.to_csv(positive_pairs_path, index=None)
 
 
-def generate_level_3_negative_pairs(valid_patches_info_path):
+def generate_level_3_negative_pairs_patch_level(valid_patches_info_path):
     """
     This function generates level 3 negative pairs from the patches.
     Negative means each pair has a different gene.
@@ -145,16 +145,16 @@ def generate_level_3_negative_pairs(valid_patches_info_path):
             col_2.append(val)
             col_1.append(item)
 
-    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    positive_pairs_level_3_df['col_1'] = col_1
-    positive_pairs_level_3_df['col_2'] = col_2
+    negative_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    negative_pairs_level_3_df['col_1'] = col_1
+    negative_pairs_level_3_df['col_2'] = col_2
 
-    positive_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_3.csv")
-    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
+    negative_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_3_on_patches.csv")
+    negative_pairs_level_3_df.to_csv(negative_pairs_path, index=None)
 
 
 
-def generate_level_2_negative_pairs(valid_patches_info_path):
+def generate_level_2_negative_pairs_patch_level(valid_patches_info_path):
     """
     This function generates level 2 negative pairs from the patches.
     Negative means each pair has a different gene.
@@ -192,33 +192,247 @@ def generate_level_2_negative_pairs(valid_patches_info_path):
             col_2.append(val)
             col_1.append(item)
 
+    negative_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    negative_pairs_level_2_df['col_1'] = col_1
+    negative_pairs_level_2_df['col_2'] = col_2
+
+    negative_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_2_on_patches.csv")
+    negative_pairs_level_2_df.to_csv(negative_pairs_path, index=None)
+
+
+
+def generate_level_3_positive_pairs_image_level(image_info_path):
+    """
+    This function generates level 3 positive pairs from the images.
+    Positive means each pair has the same gene.
+    Level 3 means that each of the items in the pair are from a different donor.
+
+    :return: None. Stores a csv file.
+    """
+
+    print ("Generating level 3 positive pairs on images ...")
+
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+
+    by_gene = images_info.groupby("gene_symbol")
+    genes = by_gene.groups.keys()
+    genes = list(genes)
+    genes.sort()
+
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for gene in genes:
+        this_gene_dict = {}
+        print(counter, gene)
+        counter += 1
+        this_gene_df = by_gene.get_group(gene)
+        this_gene_image_id_list = this_gene_df['image_id']
+
+        for image_id in this_gene_image_id_list:
+            this_image_donor = this_gene_df[this_gene_df['image_id'] == image_id]['donor_id'].iloc[0]
+
+            not_this_donor = this_gene_df[this_gene_df['donor_id'] != this_image_donor]
+
+            not_this_donor_image_ids = not_this_donor['image_id']
+            this_gene_dict[image_id] = list(not_this_donor_image_ids)
+
+        for item in this_gene_dict:
+            this_item_values = this_gene_dict[item]
+            for val in this_item_values:
+                col_2.append(val)
+                col_1.append(item)
+
     positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
     positive_pairs_level_3_df['col_1'] = col_1
     positive_pairs_level_3_df['col_2'] = col_2
 
-    positive_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_2.csv")
+    positive_pairs_path = os.path.join(image_info_path, "positive_pairs_level_3_on_images.csv")
     positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
 
+    print( "Done generating level 3 positive pairs on images ...")
+
+def generate_level_2_positive_pairs_image_level(image_info_path):
+    """
+    This function generates level 2 positive pairs from the images.
+    Positive means each pair has the same gene.
+    Level 2 means that each of the items in the pair are from the same donor but different slice.
+
+    :return: None. Stores a csv file.
+    """
+
+    print("Generating level 2 positive pairs on images ...")
+
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+
+    by_gene = images_info.groupby("gene_symbol")
+    genes = by_gene.groups.keys()
+    genes = list(genes)
+    genes.sort()
+
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for gene in genes:
+        this_gene_dict = {}
+        print(counter, gene)
+        counter += 1
+        this_gene_df = by_gene.get_group(gene)
+        this_gene_image_id_list = this_gene_df['image_id']
+
+        for image_id in this_gene_image_id_list:
+            this_image_donor = this_gene_df[this_gene_df['image_id'] == image_id]['donor_id'].iloc[0]
 
 
-def temp(valid_patches_info_path):
+            same_donor = this_gene_df[this_gene_df['donor_id'] == this_image_donor]
 
-    df_pos_3 = pd.read_csv( os.path.join(valid_patches_info_path,"positive_pairs_level_3.csv"))
+            same_donor_image_ids = same_donor['image_id']
+            same_donor_image_ids = list(same_donor_image_ids)
+
+            if image_id in same_donor_image_ids:
+                same_donor_image_ids.remove(image_id)
+
+            this_gene_dict[image_id] = same_donor_image_ids
+
+        for item in this_gene_dict:
+            this_item_values = this_gene_dict[item]
+            for val in this_item_values:
+                col_2.append(val)
+                col_1.append(item)
+
+    positive_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    positive_pairs_level_2_df['col_1'] = col_1
+    positive_pairs_level_2_df['col_2'] = col_2
+
+    positive_pairs_path = os.path.join(image_info_path, "positive_pairs_level_2_on_images.csv")
+    positive_pairs_level_2_df.to_csv(positive_pairs_path, index=None)
+
+    print("Done generating level 2 positive pairs on images ...")
+
+
+def generate_level_3_negative_pairs_image_level(image_info_path):
+    """
+    This function generates level 3 negative pairs from the patches.
+    Negative means each pair has a different gene.
+    Level 3 means that each of the items in the pair are coming from different donors.
+
+    :return: None. Stores a csv file.
+    """
+
+    print("Generating level 3 negative pairs on images ...")
+
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+
+    image_id_list = list(images_info['image_id'])
+
+    negatives_for_each_image_dict = {}
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for image_id in image_id_list:
+        print(counter, image_id)
+        counter += 1
+
+        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
+        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
+
+        not_same_gene = images_info[images_info['gene_symbol'] != this_image_gene]
+
+
+        not_same_gene_not_same_donor = not_same_gene[not_same_gene['donor_id'] != this_image_donor]
+
+        not_same_gene_not_same_donor_image_id_list = not_same_gene_not_same_donor['image_id']
+
+
+        negatives_for_each_image_dict[image_id] = list(not_same_gene_not_same_donor_image_id_list)
+
+    for item in negatives_for_each_image_dict:
+        this_item_values = negatives_for_each_image_dict[item]
+        for val in this_item_values:
+            col_2.append(val)
+            col_1.append(item)
+
+    negative_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    negative_pairs_level_3_df['col_1'] = col_1
+    negative_pairs_level_3_df['col_2'] = col_2
+
+    negative_pairs_path = os.path.join(image_info_path, "negative_pairs_level_3_on_images.csv")
+    negative_pairs_level_3_df.to_csv(negative_pairs_path, index=None)
+
+    print("Done generating level 3 negative pairs on images ...")
+
+
+def generate_level_2_negative_pairs_image_level(image_info_path):
+    """
+    This function generates level 2 negative pairs from the patches.
+    Negative means each pair has a different gene.
+    Level 2 means that each of the items in the pair are from the same donor but from a different image.
+
+    :return: None. Stores a csv file.
+
+    """
+
+    print("Generating level 2 negative pairs on images ...")
+
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+    image_id_list = list(images_info['image_id'])
+
+    negatives_for_each_image_dict = {}
+    col_1 = []
+    col_2 = []
+
+    counter = 1
+    for image_id in image_id_list:
+        print(counter, image_id)
+        counter += 1
+
+        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
+        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
+
+        not_same_gene = images_info[images_info['gene_symbol'] != this_image_gene]
+
+
+        not_same_gene_same_donor = not_same_gene[not_same_gene['donor_id'] == this_image_donor]
+
+        not_same_gene_same_donor_image_id_list = not_same_gene_same_donor['image_id']
+
+        negatives_for_each_image_dict[image_id] = list(not_same_gene_same_donor_image_id_list)
+
+    for item in negatives_for_each_image_dict:
+        this_item_values = negatives_for_each_image_dict[item]
+        for val in this_item_values:
+            col_2.append(val)
+            col_1.append(item)
+
+    negative_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
+    negative_pairs_level_2_df['col_1'] = col_1
+    negative_pairs_level_2_df['col_2'] = col_2
+
+    negative_pairs_path = os.path.join(image_info_path, "negative_pairs_level_2_on_images.csv")
+    negative_pairs_level_2_df.to_csv(negative_pairs_path, index=None)
+
+    print("Done generating level 2 negative pairs on images ...")
+
+
+
+
+def temp(image_info_path):
+
+    pass
+    """
+    df_pos_3 = pd.read_csv(os.path.join(valid_patches_info_path, "positive_pairs_level_3.csv"))
     df_pos_2 = pd.read_csv(os.path.join(valid_patches_info_path, "positive_pairs_level_2.csv"))
-    #df_neg_3 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_3.csv"))
+    # df_neg_3 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_3.csv"))
     df_neg_2 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_2.csv"))
-
 
     print("pos level 3 # of row: ", len(df_pos_3))
     print("pos level 2 # of row: ", len(df_pos_2))
-    #print("neg level 3 # of row: ", len(df_neg_3))
+    # print("neg level 3 # of row: ", len(df_neg_3))
     print("neg level 2 # of row: ", len(df_neg_2))
-
-
-
-        
-
-
+    """
 
 
 def build_distance_matrix(path_to_embeddings):
@@ -754,5 +968,12 @@ if __name__ == '__main__':
     #generate_level_2_negative_pairs(valid_patches_info_path)
     
 
-    temp(valid_patches_info_path)
+    #temp(valid_patches_info_path)
+
+    image_info_path = os.path.join(DATA_DIR, STUDY)
+    generate_level_3_positive_pairs_image_level(image_info_path)
+    generate_level_2_positive_pairs_image_level(image_info_path)
+    generate_level_3_negative_pairs_image_level(image_info_path)
+    generate_level_2_negative_pairs_image_level(image_info_path)
+
 
