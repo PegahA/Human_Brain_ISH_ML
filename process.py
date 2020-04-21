@@ -926,7 +926,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
 
     if standardize:
 
-        embed_folder_name = model_name + "_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_standardized"
+        embed_folder_name = model_name + "_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_standardized_2"
         if chunk_ID:
             embeddings_csv_file_name = model_name + "_standardized_embeddings_" + str(chunk_ID) +".csv"
         else:
@@ -1137,7 +1137,7 @@ def concatenate_embedding_chunks(embed_folder_name, number_of_chunks =10):
     general_csv_name = general_csv_name +".csv"
 
     final_embed_csv = pd.concat(embed_csv_files, ignore_index=True)
-    #final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
+    final_embed_csv.to_csv(os.path.join(embed_folder_path, general_csv_name),index=None)
 
 
     # ------
@@ -1197,9 +1197,9 @@ if __name__ == '__main__':
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
-    #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
-    merge_embeddings_to_gene_level("resnet50_10_patches_standardized")
-    merge_embeddings_to_image_level("resnet50_10_patches_standardized")
+    concatenate_embedding_chunks("resnet50_10_patches_standardized_2", number_of_chunks=10)
+    merge_embeddings_to_gene_level("resnet50_10_patches_standardized_2")
+    merge_embeddings_to_image_level("resnet50_10_patches_standardized_2")
 
     
 
