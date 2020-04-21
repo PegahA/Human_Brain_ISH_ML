@@ -421,18 +421,18 @@ def generate_level_2_negative_pairs_image_level(image_info_path):
 
 def temp(image_info_path):
 
-    pass
-    """
-    df_pos_3 = pd.read_csv(os.path.join(valid_patches_info_path, "positive_pairs_level_3.csv"))
-    df_pos_2 = pd.read_csv(os.path.join(valid_patches_info_path, "positive_pairs_level_2.csv"))
-    # df_neg_3 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_3.csv"))
-    df_neg_2 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_2.csv"))
+
+
+    df_pos_3 = pd.read_csv(os.path.join(image_info_path, "positive_pairs_level_3_on_images.csv"))
+    df_pos_2 = pd.read_csv(os.path.join(image_info_path, "positive_pairs_level_2_on_images.csv"))
+    df_neg_3 = pd.read_csv(os.path.join(image_info_path, "negative_pairs_level_3_on_images.csv"))
+    df_neg_2 = pd.read_csv(os.path.join(image_info_path, "negative_pairs_level_2_on_images.csv"))
 
     print("pos level 3 # of row: ", len(df_pos_3))
     print("pos level 2 # of row: ", len(df_pos_2))
-    # print("neg level 3 # of row: ", len(df_neg_3))
+    print("neg level 3 # of row: ", len(df_neg_3))
     print("neg level 2 # of row: ", len(df_neg_2))
-    """
+
 
 
 def build_distance_matrix(path_to_embeddings):
@@ -968,7 +968,7 @@ if __name__ == '__main__':
     #generate_level_2_negative_pairs(valid_patches_info_path)
     
 
-    #temp(valid_patches_info_path)
+
 
     image_info_path = os.path.join(DATA_DIR, STUDY)
     print ("image info path is: ", image_info_path)
@@ -977,4 +977,5 @@ if __name__ == '__main__':
     generate_level_3_negative_pairs_image_level(image_info_path)
     generate_level_2_negative_pairs_image_level(image_info_path)
 
+    temp(image_info_path)
 
