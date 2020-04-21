@@ -1,6 +1,6 @@
 from human_ISH_config import *
 #import extract_data
-#import process
+import process
 #import  ISH_segmentation
 #import crop_and_rotate
 #import evaluate_embeddings
@@ -168,13 +168,13 @@ parser.add_argument(
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    #process.make_sets() 
+    process.make_sets() 
 
 
        
     print ("i am here in main!")
 
-    
+    """
     args = parser.parse_args()
     print ("\n------- Arguments:")
     print ("experiment root: ", args.experiment_root)
@@ -254,13 +254,13 @@ if __name__ == "__main__":
                                 (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
-     
+         
     if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
         shutil.rmtree(EXPERIMENT_ROOT)
 
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
-    
+   
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file(TIMESTAMP)
     
@@ -286,7 +286,7 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
-
+    """
      
    
     
