@@ -201,10 +201,20 @@ def generate_level_2_negative_pairs(valid_patches_info_path):
 
 
 
-def temp():
+def temp(valid_patches_info_path):
 
-    df = pd.read_csv( "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/positive_pairs_level_2.csv")
-    print (len(df))
+    df_pos_3 = pd.read_csv( os.path.join(valid_patches_info_path,"positive_pairs_level_3.csv"))
+    df_pos_2 = pd.read_csv(os.path.join(valid_patches_info_path, "positive_pairs_level_2.csv"))
+    df_neg_3 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_3.csv"))
+    df_neg_2 = pd.read_csv(os.path.join(valid_patches_info_path, "negative_pairs_level_2.csv"))
+
+
+    print("pos level 3 # of row: ", len(df_pos_3))
+    print("pos level 2 # of row: ", len(df_pos_2))
+    print("neg level 3 # of row: ", len(df_neg_3))
+    print("neg level 2 # of row: ", len(df_neg_2))
+
+
 
         
 
@@ -741,6 +751,8 @@ if __name__ == '__main__':
     generate_level_3_positive_pairs(valid_patches_info_path)
     generate_level_2_positive_pairs(valid_patches_info_path)
     generate_level_3_negative_pairs(valid_patches_info_path)
-    """
     generate_level_2_negative_pairs(valid_patches_info_path)
+    """
+
+    temp(valid_patches_info_path)
 
