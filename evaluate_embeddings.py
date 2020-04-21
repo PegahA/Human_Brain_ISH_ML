@@ -171,7 +171,7 @@ def generate_level_2_negative_pairs(valid_patches_info_path):
     col_2 = []
 
     counter = 1
-    for patch_id in patch_id_list[:1]:
+    for patch_id in patch_id_list:
         print (counter, patch_id)
         counter += 1
 
