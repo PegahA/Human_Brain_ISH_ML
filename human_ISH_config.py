@@ -22,10 +22,10 @@ NUMBER_OF_CIRCLES_IN_HEIGHT = 2
 NUMBER_OF_CIRCLES_IN_WIDTH = 1
 
 
-PATCH_COUNT_PER_IMAGE = 5
+PATCH_COUNT_PER_IMAGE = 10
 FOREGROUND_THRESHOLD = 90
 SEGMENTATION_PATCH_SIZE = 1024
-SEGMENTATION_TRAINING_SAMPLES = 40
+SEGMENTATION_TRAINING_SAMPLES = 20
 
 current_time  = int(time.time())
 TIMESTAMP = str(current_time)
@@ -43,7 +43,6 @@ elif  PATCH_TYPE == 'r_overall' :
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
 elif PATCH_TYPE == 'segmentation':
-    #IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data", "results","final_patches")
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
