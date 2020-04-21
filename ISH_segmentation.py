@@ -27,8 +27,8 @@ cv.__version__)
 
 
 
-#iSEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES))
-SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
+SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES))
+
 ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = SEGMENTATION_PATCH_SIZE
@@ -443,7 +443,6 @@ def check_predicted_masks():
     mask for every image.
     :return: python list of strings
     """
-    #path_to_masks = os.path.join(SEGMENTATION_DATA_PATH, "predicted_masks")
     path_to_masks = os.path.join(SEGMENTATION_DATA_PATH,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "predicted_masks")
     path_contents = os.listdir(path_to_masks)
     masks = [item for item in path_contents if item.endswith("_pred.jpg")]
@@ -459,7 +458,6 @@ def check_final_patches():
     :return: python list of strings
     """
     path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "final_patches_"+ str(PATCH_COUNT_PER_IMAGE))
-    #path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),"results", "final_patches_"+ str(PATCH_COUNT_PER_IMAGE))
     path_contents = os.listdir(path_to_final_patches)
     final_patches = [item for item in path_contents if item.endswith(".jpg")]
 
