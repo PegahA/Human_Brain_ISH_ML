@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 
 random.seed(1)
 
-#if (not os.path.exists(os.path.join(DATA_DIR, STUDY, "sets"))):
-    #os.mkdir(os.path.join(DATA_DIR, STUDY, "sets"))
+
 
 
 
@@ -166,10 +165,15 @@ def define_sets_with_no_shared_genes(images_info_df):
     train_val_df = pd.concat([training_df, validation_df], ignore_index=True)
     train_val_df = train_val_df.sort_values(by=['image_id'])
 
-    training_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training.csv"), index=None)
-    validation_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "validation.csv"), index=None)
-    test_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "test.csv"), index=None)
-    train_val_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training_validation.csv"), index=None)
+
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE)+"_patches")
+    if (not os.path.exists(sets_path)):
+        os.mkdir(sets_path)
+
+    training_df.to_csv(os.path.join(sets_path, "training.csv"), index=None)
+    validation_df.to_csv(os.path.join(sets_path, "validation.csv"), index=None)
+    test_df.to_csv(os.path.join(sets_path, "test.csv"), index=None)
+    train_val_df.to_csv(os.path.join(sets_path, "training_validation.csv"), index=None)
 
     return training_df, validation_df, test_df, train_val_df
 
@@ -269,9 +273,14 @@ def define_sets_with_no_shared_donors(images_info_df):
     validation_df = validation_df.sort_values(by=['image_id'])
     test_df = test_df.sort_values(by=['image_id'])
 
-    training_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "training.csv"), index=None)
-    validation_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "validation.csv"), index=None)
-    test_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", "test.csv"), index=None)
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches")
+    if (not os.path.exists(sets_path)):
+        os.mkdir(sets_path)
+
+
+    training_df.to_csv(os.path.join(sets_path, "training.csv"), index=None)
+    validation_df.to_csv(os.path.join(sets_path, "validation.csv"), index=None)
+    test_df.to_csv(os.path.join(sets_path, "test.csv"), index=None)
 
 
     return training_df, validation_df, test_df
@@ -509,7 +518,8 @@ def make_triplet_csv_with_segmentation(df, out_file):
 
 def make_triplet_csvs(dfs):
 
-    out_base = os.path.join(DATA_DIR, STUDY, "sets") + "/triplet"
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches")
+    out_base = sets_path + "/triplet"
 
     if PATCH_TYPE=="segmentation":
         return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
@@ -524,6 +534,8 @@ def make_triplet_csvs(dfs):
 
 def convert_h5_to_csv():
 
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches")
+
     exp_root_contents = os.listdir(EXPERIMENT_ROOT)
     for item in exp_root_contents:
         if item.endswith(".h5"):
@@ -532,7 +544,7 @@ def convert_h5_to_csv():
             print ("set csv file name is: ", set_csv_file_name)
             print ("item is: ", item)
 
-            set_csv_file = os.path.join(DATA_DIR, STUDY, "sets", set_csv_file_name)
+            set_csv_file = os.path.join(sets_path, set_csv_file_name)
             df = pd.read_csv(set_csv_file, names=['gene', 'image_id'])
             f = h5py.File(os.path.join(EXPERIMENT_ROOT, item), 'r')['emb']
             df['image_id']= df.apply(lambda x: x['image_id'].split('.')[0], axis =  1)
@@ -682,8 +694,9 @@ def merge_embeddings_to_image_level(filename):
 
 
 def filter_out_common_genes(df_file_name,threshold = 3):
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches")
 
-    df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
+    df = pd.read_csv(os.path.join(sets_path, df_file_name))
     print(len(df))
 
     genes = df.iloc[:, 0]
@@ -721,13 +734,15 @@ def filter_out_common_genes(df_file_name,threshold = 3):
     print(sorted_dict)
 
     new_df_file_name = df_file_name.split(".")[0] + "_filtered.csv"
-    new_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", new_df_file_name), index=None)
+    new_df.to_csv(os.path.join(sets_path, new_df_file_name), index=None)
 
 
 def filter_out_genes_out_of_mean_and_std(df_file_name):
 
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches")
+
     in_range = []
-    df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
+    df = pd.read_csv(os.path.join(sets_path, df_file_name))
     print(len(df))
 
     genes = df.iloc[:, 0]
@@ -786,14 +801,15 @@ def filter_out_genes_out_of_mean_and_std(df_file_name):
     print(sorted_dict)
 
     new_df_file_name = df_file_name.split(".")[0] + "_in_range.csv"
-    new_df.to_csv(os.path.join(DATA_DIR, STUDY, "sets", new_df_file_name), index=None)
+    new_df.to_csv(os.path.join(sets_path, new_df_file_name), index=None)
 
 
 
 
 
 def draw_hist(df_file_name):
-    df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "sets", df_file_name))
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches")
+    df = pd.read_csv(os.path.join(sets_path, df_file_name))
     print(len(df))
 
     genes = df.iloc[:, 0]
@@ -819,7 +835,7 @@ def draw_hist(df_file_name):
     plt.show()
 
 def images_wiht_no_valid_patches():
-    path_to_outliers = os.path.join(DATA_DIR,STUDY,"segmentation_data","outlier_images")
+    path_to_outliers = os.path.join(DATA_DIR,STUDY,"segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),"outlier_images")
     less_than_thresh_df = pd.read_csv(os.path.join(path_to_outliers, "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"))
     no_valid_patch_list = list(less_than_thresh_df[less_than_thresh_df["count"] == 0]["image_id"])
     no_valid_patch_list = [str(item) for item in no_valid_patch_list]
@@ -1198,9 +1214,17 @@ if __name__ == '__main__':
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
-    merge_embeddings_to_gene_level("resnet50_10_patches_standardized")
-    merge_embeddings_to_image_level("resnet50_10_patches_standardized")
+    #merge_embeddings_to_gene_level("resnet50_10_patches_standardized")
+    #merge_embeddings_to_image_level("resnet50_10_patches_standardized")
 
+    l =["10s", "20s", "30s", "40s"]
+    for i in range(len(l)):
+        print (l[i])
+        l[i] = l[i][:-1]
+        print (l[i])
+        l[i] = int(l[i])
+
+    print (l)
     
 
 
