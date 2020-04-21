@@ -27,7 +27,8 @@ cv.__version__)
 
 
 
-SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES))
+#iSEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES))
+SEGMENTATION_DATA_PATH = os.path.join(DATA_DIR,STUDY, "segmentation_data")
 ORIGINAL_IMAGES_PATH =  os.path.join(DATA_DIR,STUDY, "images")
 TRAIN_INPUT_IMAGE_SIZE = 224
 PATCH_SIZE = SEGMENTATION_PATCH_SIZE
@@ -442,7 +443,8 @@ def check_predicted_masks():
     mask for every image.
     :return: python list of strings
     """
-    path_to_masks = os.path.join(SEGMENTATION_DATA_PATH, "predicted_masks")
+    #path_to_masks = os.path.join(SEGMENTATION_DATA_PATH, "predicted_masks")
+    path_to_masks = os.path.join(SEGMENTATION_DATA_PATH,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "predicted_masks")
     path_contents = os.listdir(path_to_masks)
     masks = [item for item in path_contents if item.endswith("_pred.jpg")]
     
@@ -457,6 +459,7 @@ def check_final_patches():
     :return: python list of strings
     """
     path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "results", "final_patches_"+ str(PATCH_COUNT_PER_IMAGE))
+    #path_to_final_patches = os.path.join(SEGMENTATION_DATA_PATH, "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),"results", "final_patches_"+ str(PATCH_COUNT_PER_IMAGE))
     path_contents = os.listdir(path_to_final_patches)
     final_patches = [item for item in path_contents if item.endswith(".jpg")]
 
@@ -554,8 +557,8 @@ def check_masks_and_patches_info():
     not_enough_patches_df["count"] = final_patches_less_than_thresh_count
 
     csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
-    not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images", csv_file_name), index=None)
-
+    #not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images", csv_file_name), index=None)
+    not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name), index=None)
 
 
 def check_genes_in_images_with_not_enough_patches(file_name):
@@ -635,13 +638,13 @@ def main():
 if __name__ == "__main__":
 
 
-    preprocess()
+    #preprocess()
     #create_valid_patches_info_csv_file()
     #main()
 
-    use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
+    #use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
 
-    #check_masks_and_patches_info()
+    check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
