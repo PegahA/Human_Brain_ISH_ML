@@ -250,8 +250,7 @@ def generate_level_3_positive_pairs_image_level(image_info_path):
 
     positive_pairs_path = os.path.join(image_info_path, "positive_pairs_level_3_on_images.csv")
     positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
-
-    print( "Done generating level 3 positive pairs on images ...")
+    print("Done generating level 3 positive pairs on images ...")
 
 def generate_level_2_positive_pairs_image_level(image_info_path):
     """
@@ -468,6 +467,7 @@ def build_distance_matrix(path_to_embeddings):
     distances_df.values[[np.arange(distances_df.shape[0])] * 2] = float("inf")
 
     print ("finished building the distance matrix ...")
+
     return distances_df
 
 
@@ -902,6 +902,89 @@ def evaluate(ts, level):
 
 
 
+def build_label_matrix_level_3(image_info_path):
+
+    print ("started building label matrix level 3 ...")
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+
+    image_id_list = list(images_info['image_id'])
+
+
+    label_matrix_df = pd.DataFrame(columns=image_id_list)
+
+    counter = 1
+    for image_id in image_id_list:
+        print(counter, image_id)
+        counter += 1
+        negative_positive_labels = [-1] * len(image_id_list)
+
+        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
+        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
+
+        not_same_donor = images_info[images_info['donor_id'] != this_image_donor]
+        not_same_donor_not_same_gene = not_same_donor[not_same_donor['gene_symbol'] != this_image_gene]
+        not_same_donor_same_gene=  not_same_donor[not_same_donor['gene_symbol'] == this_image_gene]
+
+        not_same_donor_not_same_gene_image_id_list = list(not_same_donor_not_same_gene['image_id'])
+        not_same_donor_same_gene_image_id_list = list(not_same_donor_same_gene['image_id'])
+
+        for i in range(len(image_id_list)):
+            image = image_id_list[i]
+            if image in not_same_donor_not_same_gene_image_id_list:
+                negative_positive_labels[i] = 0
+            if image in not_same_donor_same_gene_image_id_list:
+                negative_positive_labels[i] =1
+
+        label_matrix_df[image_id] = negative_positive_labels
+
+    label_matrix_df.index = image_id_list
+
+    label_matrix_df.to_csv(os.path.join(image_info_path, "label_matrix_level_3.csv"))
+    print ("finished building label matrix level 3 ...")
+
+def build_label_matrix_level_2(image_info_path):
+
+    print ("started building label matrix level 2 ...")
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+
+    image_id_list = list(images_info['image_id'])
+
+    label_matrix_df = pd.DataFrame(columns=image_id_list)
+
+    counter = 1
+    for image_id in image_id_list:
+        print(counter, image_id)
+        counter += 1
+        negative_positive_labels = [-1] * len(image_id_list)
+        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
+        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
+
+        same_donor = images_info[images_info['donor_id'] == this_image_donor]
+        same_donor_not_same_gene = same_donor[same_donor['gene_symbol'] != this_image_gene]
+        same_donor_same_gene=  same_donor[same_donor['gene_symbol'] == this_image_gene]
+
+        same_donor_not_same_gene_image_id_list = list(same_donor_not_same_gene['image_id'])
+        same_donor_same_gene_image_id_list = list(same_donor_same_gene['image_id'])
+
+        for i in range(len(image_id_list)):
+            image = image_id_list[i]
+            if image in same_donor_not_same_gene_image_id_list:
+                negative_positive_labels[i] = 0
+            if image in same_donor_same_gene_image_id_list:
+                negative_positive_labels[i] = 1
+
+        #print (negative_positive_labels)
+        label_matrix_df[image_id] = negative_positive_labels
+
+    label_matrix_df.index = image_id_list
+
+    label_matrix_df.to_csv(os.path.join(image_info_path,"label_matrix_level_2.csv"))
+    print ("finished building label matrix level 2 ...")
+
+
+
+
+
 def main():
     ts_list = ["1587462051"]
     #ts_list =  ["resnet50_10_patches_standardized_2"]
@@ -966,10 +1049,7 @@ if __name__ == '__main__':
     #generate_level_2_positive_pairs(valid_patches_info_path)
     #generate_level_3_negative_pairs(valid_patches_info_path)
     #generate_level_2_negative_pairs(valid_patches_info_path)
-    
-
-
-
+   
     #image_info_path = os.path.join(DATA_DIR, STUDY)
     #print ("image info path is: ", image_info_path)
     #generate_level_3_positive_pairs_image_level(image_info_path)
@@ -978,7 +1058,22 @@ if __name__ == '__main__':
     #generate_level_2_negative_pairs_image_level(image_info_path)
 
     #temp(image_info_path)
-    main()
+    #main()
+    """
+    image_info_path = os.path.join(DATA_DIR, STUDY)
+    print ("image info path is: ", image_info_path)
+    generate_level_3_positive_pairs_image_level(image_info_path)
+    generate_level_2_positive_pairs_image_level(image_info_path)
+    generate_level_3_negative_pairs_image_level(image_info_path)
+    generate_level_2_negative_pairs_image_level(image_info_path)
 
+    temp(image_info_path)
+    """
 
+    #path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level.csv"
+    #build_distance_matrix(path)
+
+    path = os.path.join(DATA_DIR, STUDY)
+    build_label_matrix_level_3(path)
+    #build_label_matrix_level_2(path)
 
