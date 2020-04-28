@@ -904,7 +904,7 @@ def evaluate(ts, level):
 
 def build_label_matrix_level_3(image_info_path):
 
-
+    print ("started building label matrix level 3 ...")
     images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
 
     image_id_list = list(images_info['image_id'])
@@ -944,12 +944,13 @@ def build_label_matrix_level_3(image_info_path):
     label_matrix_df.index = image_id_list
 
     label_matrix_df.to_csv(os.path.join(image_info_path, "label_matrix_level_3.csv"))
-
+    print ("finished building label matrix level 3 ...")
 
 def build_label_matrix_level_2(image_info_path):
 
+    print ("started building label matrix level 2 ...")
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
 
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_info_sample.csv"))
 
     image_id_list = list(images_info['image_id'])
     #label_matrix_df = pd.DataFrame(columns=image_id_list)
@@ -978,21 +979,22 @@ def build_label_matrix_level_2(image_info_path):
                 negative_positive_labels[i] = 1
 
 
-        label_matrix_array[:,counter-2] = negative_positive_labels
+        label_matrix_array[:, counter - 2] = negative_positive_labels
         #label_matrix_df[image_id] = negative_positive_labels
+
     label_matrix_df = pd.DataFrame(label_matrix_array)
     label_matrix_df.columns = image_id_list
     label_matrix_df.index = image_id_list
 
     label_matrix_df.to_csv(os.path.join(image_info_path,"label_matrix_level_2.csv"))
-
+    print ("finished building label matrix level 2 ...")
 
 
 
 
 
 def main():
-    ts_list = ["1586740776"]
+    ts_list = ["1587462051"]
     #ts_list =  ["resnet50_10_patches_standardized_2"]
 
     for ts in ts_list:
@@ -1055,9 +1057,16 @@ if __name__ == '__main__':
     #generate_level_2_positive_pairs(valid_patches_info_path)
     #generate_level_3_negative_pairs(valid_patches_info_path)
     #generate_level_2_negative_pairs(valid_patches_info_path)
-    
+   
+    #image_info_path = os.path.join(DATA_DIR, STUDY)
+    #print ("image info path is: ", image_info_path)
+    #generate_level_3_positive_pairs_image_level(image_info_path)
+    #generate_level_2_positive_pairs_image_level(image_info_path)
+    #generate_level_3_negative_pairs_image_level(image_info_path)
+    #generate_level_2_negative_pairs_image_level(image_info_path)
 
-
+    #temp(image_info_path)
+    #main()
     """
     image_info_path = os.path.join(DATA_DIR, STUDY)
     print ("image info path is: ", image_info_path)
@@ -1072,9 +1081,15 @@ if __name__ == '__main__':
     #path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level.csv"
     #build_distance_matrix(path)
 
+
     path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/"
     #build_label_matrix_level_3(path)
     build_label_matrix_level_2(path)
 
+
+
+    path = os.path.join(DATA_DIR, STUDY)
+    build_label_matrix_level_3(path)
+    #build_label_matrix_level_2(path)
 
 
