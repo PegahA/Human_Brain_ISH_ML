@@ -910,7 +910,8 @@ def build_label_matrix_level_3(image_info_path):
     image_id_list = list(images_info['image_id'])
 
 
-    label_matrix_df = pd.DataFrame(columns=image_id_list)
+    #label_matrix_df = pd.DataFrame(columns=image_id_list)
+    label_matrix_array = np.zeros((len(image_id_list), len(image_id_list)))
 
     counter = 1
     for image_id in image_id_list:
@@ -935,8 +936,11 @@ def build_label_matrix_level_3(image_info_path):
             if image in not_same_donor_same_gene_image_id_list:
                 negative_positive_labels[i] =1
 
-        label_matrix_df[image_id] = negative_positive_labels
+        label_matrix_array[:, counter - 2] = negative_positive_labels
+        #label_matrix_df[image_id] = negative_positive_labels
 
+    label_matrix_df = pd.DataFrame(label_matrix_array)
+    label_matrix_df.columns = image_id_list
     label_matrix_df.index = image_id_list
 
     label_matrix_df.to_csv(os.path.join(image_info_path, "label_matrix_level_3.csv"))
@@ -945,11 +949,11 @@ def build_label_matrix_level_3(image_info_path):
 def build_label_matrix_level_2(image_info_path):
 
 
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join(image_info_path, "human_info_sample.csv"))
 
     image_id_list = list(images_info['image_id'])
-
-    label_matrix_df = pd.DataFrame(columns=image_id_list)
+    #label_matrix_df = pd.DataFrame(columns=image_id_list)
+    label_matrix_array = np.zeros((len(image_id_list), len(image_id_list)))
 
     counter = 1
     for image_id in image_id_list:
@@ -973,9 +977,11 @@ def build_label_matrix_level_2(image_info_path):
             if image in same_donor_same_gene_image_id_list:
                 negative_positive_labels[i] = 1
 
-        print (negative_positive_labels)
-        label_matrix_df[image_id] = negative_positive_labels
 
+        label_matrix_array[:,counter-2] = negative_positive_labels
+        #label_matrix_df[image_id] = negative_positive_labels
+    label_matrix_df = pd.DataFrame(label_matrix_array)
+    label_matrix_df.columns = image_id_list
     label_matrix_df.index = image_id_list
 
     label_matrix_df.to_csv(os.path.join(image_info_path,"label_matrix_level_2.csv"))
@@ -1067,7 +1073,7 @@ if __name__ == '__main__':
     #build_distance_matrix(path)
 
     path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/"
-    build_label_matrix_level_3(path)
+    #build_label_matrix_level_3(path)
     build_label_matrix_level_2(path)
 
 
