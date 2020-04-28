@@ -1054,6 +1054,7 @@ if __name__ == '__main__':
 
     """
     image_info_path = os.path.join(DATA_DIR, STUDY)
+    print ("image info path is: ", image_info_path)
     generate_level_3_positive_pairs_image_level(image_info_path)
     generate_level_2_positive_pairs_image_level(image_info_path)
     generate_level_3_negative_pairs_image_level(image_info_path)
