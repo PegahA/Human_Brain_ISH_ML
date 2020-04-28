@@ -903,7 +903,7 @@ def evaluate(ts, level):
 
 
 def main():
-    ts_list = ["1586740776"]
+    ts_list = ["1587462051"]
     #ts_list =  ["resnet50_10_patches_standardized_2"]
 
     for ts in ts_list:
@@ -970,12 +970,15 @@ if __name__ == '__main__':
 
 
 
-    image_info_path = os.path.join(DATA_DIR, STUDY)
-    print ("image info path is: ", image_info_path)
-    generate_level_3_positive_pairs_image_level(image_info_path)
-    generate_level_2_positive_pairs_image_level(image_info_path)
-    generate_level_3_negative_pairs_image_level(image_info_path)
-    generate_level_2_negative_pairs_image_level(image_info_path)
+    #image_info_path = os.path.join(DATA_DIR, STUDY)
+    #print ("image info path is: ", image_info_path)
+    #generate_level_3_positive_pairs_image_level(image_info_path)
+    #generate_level_2_positive_pairs_image_level(image_info_path)
+    #generate_level_3_negative_pairs_image_level(image_info_path)
+    #generate_level_2_negative_pairs_image_level(image_info_path)
 
-    temp(image_info_path)
+    #temp(image_info_path)
+    main()
+
+
 
