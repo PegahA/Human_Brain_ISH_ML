@@ -50,10 +50,13 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings):
     """
     images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
 
+    image_level_embed_file_name = ""
+    contents = os.listdir(path_to_embeddings)
+    for item in contents:
+        if item.endswith("embeddings_image_level.csv"):
+            image_level_embed_file_name = item
 
-    dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings, "test_image_level.csv"))
-    dist_matrix_df.to_csv(os.path.join(path_to_embeddings, "dist.csv"))
-
+    dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings,  image_level_embed_file_name))
 
     dist_matrix_rows = list(dist_matrix_df.index)  # list of image IDs
     dist_matrix_columns = list(dist_matrix_df) # list of image IDs
@@ -64,12 +67,11 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings):
         return None
     # ------------------------------
 
-    genes = images_info[images_info['image_id'].isin(dist_matrix_rows)].gene_symbol
+
+    genes = images_info[images_info['image_id'].isin(dist_matrix_rows)]['gene_symbol']
 
     low_to_high_map = pd.DataFrame(list(zip(dist_matrix_rows, genes))) # create a 2-column df of image IDs and genes
     relationship_df = create_diagonal_mask(low_to_high_map, target_value=1)
-
-    relationship_df.to_csv(os.path.join(path_to_embeddings, "rel.csv"))
 
 
     # --- check to see if rows and columns of dist matrix match the relationship matrix. ---------------------
@@ -77,7 +79,6 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings):
 
     dist_matrix_df, relationship_df =  match_matrices(dist_matrix_df, relationship_df)
 
-    relationship_df.to_csv(os.path.join(path_to_embeddings, "new_rel.csv"))
     # ---------------------------------------------------------------------------------------------------------
 
     return dist_matrix_df,relationship_df
@@ -186,6 +187,7 @@ def AUC(dist_matrix_df, label_matrix_df):
         dist_matrix_flatten = dist_matrix_array.flatten()
         dist_matrix_flatten = dist_matrix_flatten[~np.isnan(dist_matrix_flatten)]  # remove NaNs
 
+
         label_matrix_flatten = label_matrix_array.flatten()
         label_matrix_flatten = label_matrix_flatten[~np.isnan(label_matrix_flatten)]  # remove NaNs
         label_matrix_flatten = label_matrix_flatten.astype(int) # convert values to int so they are binary {0,1}
@@ -218,7 +220,7 @@ def first_hit_percentage(dist_matrix_df):
 
     print ("Calculating first hit match percentage ...")
 
-    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
 
     min_indexes_df = find_closest_image(dist_matrix_df) # min_indexes_df has two columns: an image ID and the ID of the closest image to that image
 
@@ -240,20 +242,24 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
 
     general_distance_matrix , general_relationship_matrix = get_general_distance_and_relationship_matrix(path_to_embeddings)
 
+
+
     # ---- General ----------------------------------------------------------------------------------
     # General means only look at gene. Is it the same gene or different gene. Do not check donor_id.
 
+    print ("---------------------------------- General ---------------------------------- ")
     general_first_hit_percentage = first_hit_percentage(general_distance_matrix)
     general_AUC = AUC(general_distance_matrix, general_relationship_matrix)
 
     general_res = [general_first_hit_percentage, general_AUC]
 
-
     # ---- Among Other Donors ------------------------------------------------------------------------
-    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+
+    print ("---------------------------------- Other Donors ----------------------------------")
+    images_info = pd.read_csv(os.path.join( path_to_embeddings,"human_ISH_info.csv"))
     dist_matrix_rows = list(general_distance_matrix.index)
 
-    donors = images_info[images_info['image_id'].isin(dist_matrix_rows)].gene_symbol
+    donors = images_info[images_info['image_id'].isin(dist_matrix_rows)]['donor_id']
 
     low_to_high_map = pd.DataFrame(list(zip(dist_matrix_rows, donors)))  # create a 2-column df of image IDs and genes
     mask_df = create_diagonal_mask(low_to_high_map, target_value=1) # the pairs that have the same donor will have label 1
@@ -265,16 +271,21 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
     distance_matrix_after_masking = apply_mask(arranged_mask_df, general_distance_matrix)
     relationship_matrix_after_masking = apply_mask(arranged_mask_df, general_relationship_matrix)
 
+    distance_matrix_after_masking.to_csv(os.path.join(path_to_embeddings, "dist_after_mask.csv"))
+    relationship_matrix_after_masking.to_csv(os.path.join(path_to_embeddings, "rel_after_mask.csv"))
     among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
     among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking)
 
     among_other_donors_res = [among_other_donors_first_hit_percentage, among_other_donors_AUC]
+
 
     # ---- Within Donor ----------------------------------------------------------------------------
     # so far, in the masked_df, the pairs that have the same donor will have label 1, and when we use this as a mask,
     # these pairs will be set to Nan. But we need the opposite of that here.
     # we need the pairs that have a different donor to be 1, so later when we actually apply the mask, the corresponding pairs would be set to Na.
     # the idea is to convert every 0 into 1 and every 1 into 0
+
+    print("---------------------------------- Within Donor ----------------------------------")
 
     inverted_mask_df =  np.logical_not(mask_df).astype(int)
 
@@ -305,18 +316,6 @@ def build_distance_matrix(path_to_embeddings):
     print ("length is: ", len(embed_df))
     columns = list(embed_df)
 
-    # ------- these line are to convert the data types from float64 to float32.
-    # We need to create a dict. Keys will be column names and values will be types.
-    # The first column is name and remains as string. The rest should be converted to float32.
-
-
-    #type_dict = {}
-    #type_dict[columns[0]] = 'string'
-    #for column in columns[1:]:
-        #type_dict[column] = 'float32'
- 
-    #embed_df = embed_df.astype(type_dict)
-    # -------------------------------------------------------------------------
    
     distances = euclidean_distances(embed_df.iloc[:, 1:], embed_df.iloc[:, 1:])
     embed_df = embed_df.set_index([columns[0]])
@@ -324,7 +323,6 @@ def build_distance_matrix(path_to_embeddings):
     distances_df = pd.DataFrame(distances)
     distances_df.columns = list(embed_df.index)
     distances_df.index = list(embed_df.index)
-    distances_df.values[[np.arange(distances_df.shape[0])] * 2] = float("inf")
 
     print ("finished building the distance matrix ...")
 
@@ -341,15 +339,19 @@ def find_closest_image(distances_df):
 
     # find the closest image in each row
 
+    default_value_for_diagonal = distances_df.iloc[0,0]
+
+    # set the distance between each image to itself as inf to make sure it doesn't get picked as closest
+    distances_df.values[[np.arange(distances_df.shape[0])] * 2] = float("inf")
     min_indexes = distances_df.idxmin(axis=1, skipna=True)
     min_indexes_df = pd.DataFrame(min_indexes).reset_index()
     min_indexes_df.columns = ["id1", "id2"]
-    min_indexes_df = min_indexes_df.applymap(str)
+    #min_indexes_df = min_indexes_df.applymap(str)
 
+    # set the distance between each image to itself back to the default
+    distances_df.values[[np.arange(distances_df.shape[0])] * 2] = float(default_value_for_diagonal)
     print("finished finding the closest image ...")
     return min_indexes_df
-
-
 
 
 def not_the_same_gene(min_indexes_df, level):
@@ -378,7 +380,7 @@ def not_the_same_gene(min_indexes_df, level):
 
 
 def evaluate(ts):
-    path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, "image_level_embeddings.csv")
+    path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
     results = first_hit_match_percentage_and_AUC_results(path_to_embeddings)
 
     return results
@@ -396,6 +398,8 @@ def main():
         print ("ts is: ", ts)
         results = evaluate(ts)
 
+
+
         general_res = results[0]
         among_other_donors_res = results[1]
         within_donor_res = results[2]
@@ -408,6 +412,7 @@ def main():
         eval_path = os.path.join(EMBEDDING_DEST, ts)
         eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result.csv"), index=None)
         print (ts)
+    
 
 
 if __name__ == '__main__':
