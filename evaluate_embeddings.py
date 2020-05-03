@@ -4,434 +4,294 @@ from scipy.spatial.distance import pdist
 from human_ISH_config import *
 import pandas as pd
 import numpy as np
+import scipy
+from sklearn import metrics
 
-
-def generate_level_3_positive_pairs_patch_level(valid_patches_info_path):
+def create_diagonal_mask(low_to_high_map, target_value=1):
     """
-    This function generates level 3 positive pairs from the patches.
-    Positive means each pair has the same gene.
-    Level 3 means that each of the items in the pair are from a different donor.
+    Create a block diagonal mask matrix from the input mapping.
 
-    :return: None. Stores a csv file.
+    The input pandas data frame has only two columns, the first is the
+    low level id (image, sample, or probe_id) and the second is the
+    high level mapping (gene, region, donor). The target_value argument can
+    be set to np.nan.
+
+    The output will be a matrix sized the number of low level ID's squared.
+    The column and row order will have to be rearranged to match your distance matrix.
+
+    """
+    low_to_high_map.drop_duplicates()
+    grouped = low_to_high_map.groupby(low_to_high_map.columns[1])
+    ordered_low_level_names = list()
+    group_matrices = []
+    for name, group in grouped:
+        group_size = group.shape[0]
+        # build up row/col names, order doesn't matter within a group = they are all equal
+        ordered_low_level_names = ordered_low_level_names + group.iloc[:, 0].tolist()
+        # set the diagonal matrix to be the target value
+        single_group_matrix = np.full(shape=(group_size, group_size), fill_value=target_value)
+        group_matrices.append(single_group_matrix)
+    # add the individual matrices along the diagonal
+    relationship_matrix = scipy.linalg.block_diag(*group_matrices)
+    # convert to pandas dataframe and set names
+    relationship_df = pd.DataFrame(relationship_matrix, columns=ordered_low_level_names, index=ordered_low_level_names)
+
+    return relationship_df
+
+def get_general_distance_and_relationship_matrix(path_to_embeddings):
+    """
+    This function uses the image_level_embeddings to create a distance matrix. It also creates a relationship matrix
+    for images that we have an embedding for.
+    It calculates the euclidean distance for every possible pair of images and also gives the relationship
+    (same gene/different gene) for every possible pair of images.
+
+    :param path_to_embeddings:  path to the image_level_embeddings
+    :return: 2 pandas Data frames: distance matrix and the relationship matrix.
+    """
+    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
+
+
+    dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings, "test_image_level.csv"))
+    dist_matrix_df.to_csv(os.path.join(path_to_embeddings, "dist.csv"))
+
+
+    dist_matrix_rows = list(dist_matrix_df.index)  # list of image IDs
+    dist_matrix_columns = list(dist_matrix_df) # list of image IDs
+
+    # --- sanity check -------------
+    if dist_matrix_rows != dist_matrix_columns:
+        print ("Something is wrong, the number and order of image IDs in distance matrix's rows and columns should the same.")
+        return None
+    # ------------------------------
+
+    genes = images_info[images_info['image_id'].isin(dist_matrix_rows)].gene_symbol
+
+    low_to_high_map = pd.DataFrame(list(zip(dist_matrix_rows, genes))) # create a 2-column df of image IDs and genes
+    relationship_df = create_diagonal_mask(low_to_high_map, target_value=1)
+
+    relationship_df.to_csv(os.path.join(path_to_embeddings, "rel.csv"))
+
+
+    # --- check to see if rows and columns of dist matrix match the relationship matrix. ---------------------
+    # if they don't re-arrange them in the relationship matrix to match the dist matrix
+
+    dist_matrix_df, relationship_df =  match_matrices(dist_matrix_df, relationship_df)
+
+    relationship_df.to_csv(os.path.join(path_to_embeddings, "new_rel.csv"))
+    # ---------------------------------------------------------------------------------------------------------
+
+    return dist_matrix_df,relationship_df
+
+
+def match_matrices(first_matrix_df, second_matrix_df):
+    """
+    Checks to see if the two matrices match.
+    Matching means the number and order of rows and columns are the same.
+    If they do not match, the function re-arranges the order of rows and columns of the second matrix to make it similar
+    to the first matrix.
+
+    The function does not modify the values inside the matrices. It jus re-arranges the order of columns and rows.
+    :param first_matrix_df: pandas Dataframe.
+    :param second_matrix_df: pandas Dataframe.
+    :return: 2 pandas Dataframes.
     """
 
-    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
+    first_matrix_array = first_matrix_df.to_numpy()
+    second_matrix_array = second_matrix_df.to_numpy()
 
-    by_gene = valid_patches_info.groupby("gene_symbol")
-    genes = by_gene.groups.keys()
-    genes = list(genes)
-    genes.sort()
+    first_matrix_rows = list(first_matrix_df.index)
+    first_matrix_columns = list(first_matrix_df)
 
-    col_1 = []
-    col_2 = []
+    second_matrix_rows = list(second_matrix_df.index)
+    second_matrix_columns = list(second_matrix_df)
 
-    counter = 1
-    for gene in genes:
-        this_gene_dict = {}
-        print(counter, gene)
-        counter += 1
-        this_gene_df = by_gene.get_group(gene)
-        this_gene_patch_id_list = this_gene_df['patch_id']
-        # print ("This gene has {} patches associated with it.".format(len(this_gene_patch_id_list)))
+    if first_matrix_rows == second_matrix_rows and first_matrix_columns == second_matrix_columns:
+        print("They match!")
 
-        for patch_id in this_gene_patch_id_list:
-            this_patch_donor = this_gene_df[this_gene_df['patch_id'] == patch_id]['donor_id'].iloc[0]
+    else:
+        print("They don't match. Re-arranging ...")
 
-            not_this_donor = this_gene_df[this_gene_df['donor_id'] != this_patch_donor]
+        desired_permutation = []
+        for item in second_matrix_columns:
+            ind = first_matrix_columns.index(item)  # get the correct order of image IDs from distance matrix columns
+            desired_permutation.append(ind)
 
-            not_this_donor_patch_ids = not_this_donor['patch_id']
-            this_gene_dict[patch_id] = list(not_this_donor_patch_ids)
+        idx = np.empty_like(desired_permutation)
+        idx[desired_permutation] = np.arange(len(desired_permutation))
+        second_matrix_array[:] = second_matrix_array[:, idx]
+        second_matrix_array[:] = second_matrix_array[idx, :]
 
-        for item in this_gene_dict:
-            this_item_values = this_gene_dict[item]
-            for val in this_item_values:
-                col_2.append(val)
-                col_1.append(item)
+        second_matrix_df = pd.DataFrame(second_matrix_array, columns=first_matrix_columns, index=first_matrix_rows)
 
-    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    positive_pairs_level_3_df['col_1'] = col_1
-    positive_pairs_level_3_df['col_2'] = col_2
-
-    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_3_on_patches.csv")
-    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
+    return first_matrix_df, second_matrix_df
 
 
-
-def generate_level_2_positive_pairs_patch_level(valid_patches_info_path):
+def apply_mask(mask_matrix_df, original_matrix_df):
     """
-    This function generates level 2 positive pairs from the patches.
-    Positive means each pair has the same gene.
-    Level 2 means that each of the items in the pair are from the same donor but different image.
+   Changes elements of the original array based on the mask array.
+   The original array and the mask array should have the same shape.
 
-    :return: None. Stores a csv file.
-    """
-
-    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
-
-    by_gene = valid_patches_info.groupby("gene_symbol")
-    genes = by_gene.groups.keys()
-    genes = list(genes)
-    genes.sort()
-
-    col_1 = []
-    col_2 = []
-
-    counter = 1
-    for gene in genes:
-        this_gene_dict = {}
-        print(counter, gene)
-        counter += 1
-        this_gene_df = by_gene.get_group(gene)
-        this_gene_patch_id_list = this_gene_df['patch_id']
-        # print ("This gene has {} patches associated with it.".format(len(this_gene_patch_id_list)))
-
-        for patch_id in this_gene_patch_id_list:
-            this_patch_donor = this_gene_df[this_gene_df['patch_id'] == patch_id]['donor_id'].iloc[0]
-            this_patch_image = this_gene_df[this_gene_df['patch_id'] == patch_id]['image_id'].iloc[0]
-
-            same_donor = this_gene_df[this_gene_df['donor_id'] == this_patch_donor]
-            same_donor_not_this_image = same_donor[same_donor['image_id']!= this_patch_image]
-            same_donor_not_this_image_patch_ids = same_donor_not_this_image['patch_id']
-
-            this_gene_dict[patch_id] = list(same_donor_not_this_image_patch_ids)
-
-        for item in this_gene_dict:
-            this_item_values = this_gene_dict[item]
-            for val in this_item_values:
-                col_2.append(val)
-                col_1.append(item)
-
-    positive_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    positive_pairs_level_2_df['col_1'] = col_1
-    positive_pairs_level_2_df['col_2'] = col_2
-
-    positive_pairs_path = os.path.join(valid_patches_info_path, "positive_pairs_level_2_on_patches.csv")
-    positive_pairs_level_2_df.to_csv(positive_pairs_path, index=None)
-
-
-def generate_level_3_negative_pairs_patch_level(valid_patches_info_path):
-    """
-    This function generates level 3 negative pairs from the patches.
-    Negative means each pair has a different gene.
-    Level 3 means that each of the items in the pair are coming from different donors.
-
-   :return: None. Stores a csv file.
+   :param mask_matrix_df: pandas Data frame. Boolean mask. It has to be the same shape as the target array.
+   :param original_matrix_df: pandas Data frame. Original matrix that we want to apply the mask to.
+   :return: pandas data frame. This is the original array after masking. It is converted to pandas df.
    """
 
-    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
-    patch_id_list = list(valid_patches_info['patch_id'])
+    print("Applying the mask ...")
 
-    negatives_for_each_patch_dict= {}
-    col_1 = []
-    col_2 = []
+    original_matrix_columns = list(original_matrix_df)
+    original_matrix_rows = list(original_matrix_df.index)
 
-    counter = 1
-    for patch_id in patch_id_list:
-        print (counter, patch_id)
-        counter += 1
-
-        this_patch_gene = valid_patches_info[valid_patches_info['patch_id']== patch_id]['gene_symbol'].iloc[0]
-        this_patch_donor = valid_patches_info[valid_patches_info['patch_id']== patch_id]['donor_id'].iloc[0]
-
-        not_same_gene = valid_patches_info[valid_patches_info['gene_symbol']!= this_patch_gene]
-        not_same_gene_not_same_donor = not_same_gene[not_same_gene['donor_id']!=this_patch_donor]
-        not_same_gene_not_same_donor_patch_id_list = not_same_gene_not_same_donor['patch_id']
-
-        negatives_for_each_patch_dict[patch_id] = list(not_same_gene_not_same_donor_patch_id_list)
-
-    for item in negatives_for_each_patch_dict:
-        this_item_values = negatives_for_each_patch_dict[item]
-        for val in this_item_values:
-            col_2.append(val)
-            col_1.append(item)
-
-    negative_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    negative_pairs_level_3_df['col_1'] = col_1
-    negative_pairs_level_3_df['col_2'] = col_2
-
-    negative_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_3_on_patches.csv")
-    negative_pairs_level_3_df.to_csv(negative_pairs_path, index=None)
+    mask_array = mask_matrix_df.to_numpy()
+    original_array = original_matrix_df.to_numpy().astype(float)
 
 
+    # Note: np.nan cannot be inserted into an array of type int. The array needs to be float.
+    np.putmask(original_array, mask_array, np.nan)
 
-def generate_level_2_negative_pairs_patch_level(valid_patches_info_path):
+
+    after_masking_df = pd.DataFrame(original_array, columns=original_matrix_columns, index=original_matrix_rows)
+    return after_masking_df
+
+
+def AUC(dist_matrix_df, label_matrix_df):
     """
-    This function generates level 2 negative pairs from the patches.
-    Negative means each pair has a different gene.
-    Level 2 means that each of the items in the pair are from the same donor but from a different image.
+    Calculates the AUC using the positive and negative pairs.
+    It gets the actual labels of the pairs from the label matrix and the predicted labels based on the distance matrix.
+    It will ignore np.nan values in the two matrices.
+    :param dist_matrix_df: pandas data frame that has the euclidean distance between pairs of images. Some cells might be Nan.
+    :param label_matrix_df:  pandas data frame that has the actual labels of the pairs of images. Some cells might be Nan.
 
-    :return: None. Stores a csv file.
-
-    """
-    valid_patches_info = pd.read_csv(os.path.join(valid_patches_info_path, "valid_patches_info.csv"))
-    patch_id_list = list(valid_patches_info['patch_id'])
-
-    negatives_for_each_patch_dict= {}
-    col_1 = []
-    col_2 = []
-
-    counter = 1
-    for patch_id in patch_id_list:
-        print (counter, patch_id)
-        counter += 1
-
-        this_patch_gene = valid_patches_info[valid_patches_info['patch_id']== patch_id]['gene_symbol'].iloc[0]
-        this_patch_donor = valid_patches_info[valid_patches_info['patch_id']== patch_id]['donor_id'].iloc[0]
-        this_patch_image = valid_patches_info[valid_patches_info['patch_id'] == patch_id]['image_id'].iloc[0]
-
-        not_same_gene = valid_patches_info[valid_patches_info['gene_symbol']!= this_patch_gene]
-        not_same_gene_same_donor = not_same_gene[not_same_gene['donor_id']==this_patch_donor]
-        not_same_gene_same_donor_not_same_image = not_same_gene_same_donor[not_same_gene_same_donor['image_id']!=this_patch_image]
-        not_same_gene_same_donor_not_same_image_patch_id_list = not_same_gene_same_donor_not_same_image['patch_id']
-
-        negatives_for_each_patch_dict[patch_id] = list(not_same_gene_same_donor_not_same_image_patch_id_list)
-
-    for item in negatives_for_each_patch_dict:
-        this_item_values = negatives_for_each_patch_dict[item]
-        for val in this_item_values:
-            col_2.append(val)
-            col_1.append(item)
-
-    negative_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    negative_pairs_level_2_df['col_1'] = col_1
-    negative_pairs_level_2_df['col_2'] = col_2
-
-    negative_pairs_path = os.path.join(valid_patches_info_path, "negative_pairs_level_2_on_patches.csv")
-    negative_pairs_level_2_df.to_csv(negative_pairs_path, index=None)
-
-
-
-def generate_level_3_positive_pairs_image_level(image_info_path):
-    """
-    This function generates level 3 positive pairs from the images.
-    Positive means each pair has the same gene.
-    Level 3 means that each of the items in the pair are from a different donor.
-
-    :return: None. Stores a csv file.
+    These two matrices should completely match. Meaning they should have the same number of rows and columns, the order of rows and
+    columns should be the same, also any cell that is Nan in one matrix should also be Nan in the other one.
+    :return: float. The AUC value.
     """
 
-    print ("Generating level 3 positive pairs on images ...")
 
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+    print ("Calculating AUC ...")
 
-    by_gene = images_info.groupby("gene_symbol")
-    genes = by_gene.groups.keys()
-    genes = list(genes)
-    genes.sort()
+    dist_matrix_columns = list(dist_matrix_df)
+    dist_matrix_rows = list(dist_matrix_df.index)
 
-    col_1 = []
-    col_2 = []
+    label_matrix_columns = list(label_matrix_df)
+    label_matrix_rows = list(label_matrix_df.index)
 
-    counter = 1
-    for gene in genes:
-        this_gene_dict = {}
-        print(counter, gene)
-        counter += 1
-        this_gene_df = by_gene.get_group(gene)
-        this_gene_image_id_list = this_gene_df['image_id']
 
-        for image_id in this_gene_image_id_list:
-            this_image_donor = this_gene_df[this_gene_df['image_id'] == image_id]['donor_id'].iloc[0]
 
-            not_this_donor = this_gene_df[this_gene_df['donor_id'] != this_image_donor]
+    if dist_matrix_columns == label_matrix_columns and dist_matrix_rows == label_matrix_rows:
+        print ("The two matrix match. Well continue to calculate AUC ...")
 
-            not_this_donor_image_ids = not_this_donor['image_id']
-            this_gene_dict[image_id] = list(not_this_donor_image_ids)
+        dist_matrix_array = dist_matrix_df.to_numpy()
+        label_matrix_array = label_matrix_df.to_numpy()
 
-        for item in this_gene_dict:
-            this_item_values = this_gene_dict[item]
-            for val in this_item_values:
-                col_2.append(val)
-                col_1.append(item)
+        dist_matrix_flatten = dist_matrix_array.flatten()
+        dist_matrix_flatten = dist_matrix_flatten[~np.isnan(dist_matrix_flatten)]  # remove NaNs
 
-    positive_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    positive_pairs_level_3_df['col_1'] = col_1
-    positive_pairs_level_3_df['col_2'] = col_2
+        label_matrix_flatten = label_matrix_array.flatten()
+        label_matrix_flatten = label_matrix_flatten[~np.isnan(label_matrix_flatten)]  # remove NaNs
+        label_matrix_flatten = label_matrix_flatten.astype(int) # convert values to int so they are binary {0,1}
 
-    positive_pairs_path = os.path.join(image_info_path, "positive_pairs_level_3_on_images.csv")
-    positive_pairs_level_3_df.to_csv(positive_pairs_path, index=None)
-    print("Done generating level 3 positive pairs on images ...")
+        # #positive label is 0 because distance is closer for positive pairs.
+        fpr, tpr, thresholds = metrics.roc_curve(label_matrix_flatten, dist_matrix_flatten, pos_label=0)
+        auc_val = metrics.auc(fpr, tpr)
+        return auc_val
 
-def generate_level_2_positive_pairs_image_level(image_info_path):
+
+    else:
+        print ("The two matrices do not match.")
+        return None
+
+
+def first_hit_percentage(dist_matrix_df):
     """
-    This function generates level 2 positive pairs from the images.
-    Positive means each pair has the same gene.
-    Level 2 means that each of the items in the pair are from the same donor but different slice.
+    This function finds the image ID of the closest image to every image and then check to see what percentage of
+    these pairs are positive, meaning they have the same gene.
+    It finds the closest image by calling the 'find_closest_image()' function and passing the distance matrix to it.
+    The distance matrix may have np.nan values in some cells. Those cells will be ignored when looking for the closest image.
 
-    :return: None. Stores a csv file.
-    """
+    Which cells in the distance matrix might be np.nan? That depends on the criteria of the evaluation which determines the
+    universe of the genes to be considered.
 
-    print("Generating level 2 positive pairs on images ...")
-
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
-
-    by_gene = images_info.groupby("gene_symbol")
-    genes = by_gene.groups.keys()
-    genes = list(genes)
-    genes.sort()
-
-    col_1 = []
-    col_2 = []
-
-    counter = 1
-    for gene in genes:
-        this_gene_dict = {}
-        print(counter, gene)
-        counter += 1
-        this_gene_df = by_gene.get_group(gene)
-        this_gene_image_id_list = this_gene_df['image_id']
-
-        for image_id in this_gene_image_id_list:
-            this_image_donor = this_gene_df[this_gene_df['image_id'] == image_id]['donor_id'].iloc[0]
-
-
-            same_donor = this_gene_df[this_gene_df['donor_id'] == this_image_donor]
-
-            same_donor_image_ids = same_donor['image_id']
-            same_donor_image_ids = list(same_donor_image_ids)
-
-            if image_id in same_donor_image_ids:
-                same_donor_image_ids.remove(image_id)
-
-            this_gene_dict[image_id] = same_donor_image_ids
-
-        for item in this_gene_dict:
-            this_item_values = this_gene_dict[item]
-            for val in this_item_values:
-                col_2.append(val)
-                col_1.append(item)
-
-    positive_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    positive_pairs_level_2_df['col_1'] = col_1
-    positive_pairs_level_2_df['col_2'] = col_2
-
-    positive_pairs_path = os.path.join(image_info_path, "positive_pairs_level_2_on_images.csv")
-    positive_pairs_level_2_df.to_csv(positive_pairs_path, index=None)
-
-    print("Done generating level 2 positive pairs on images ...")
-
-
-def generate_level_3_negative_pairs_image_level(image_info_path):
-    """
-    This function generates level 3 negative pairs from the patches.
-    Negative means each pair has a different gene.
-    Level 3 means that each of the items in the pair are coming from different donors.
-
-    :return: None. Stores a csv file.
+    :param dist_matrix_df: data frame that has the euclidean distance between every possible pair of images in the dataset.
+    The euclidean distances are calculated from the embedding vectors of each images.
+    :return: float. The percentage of images for which the closest image has the same gene.
     """
 
-    print("Generating level 3 negative pairs on images ...")
+    print ("Calculating first hit match percentage ...")
 
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
 
-    image_id_list = list(images_info['image_id'])
+    min_indexes_df = find_closest_image(dist_matrix_df) # min_indexes_df has two columns: an image ID and the ID of the closest image to that image
 
-    negatives_for_each_image_dict = {}
-    col_1 = []
-    col_2 = []
+    total_count = len(min_indexes_df)  #total number of rows (== number of images)
 
-    counter = 1
-    for image_id in image_id_list:
-        print(counter, image_id)
-        counter += 1
+    image_gene_mapping = images_info[['image_id', 'gene_symbol']]
+    min_indexes_df = pd.merge(min_indexes_df, image_gene_mapping, left_on='id1', right_on='image_id')
+    min_indexes_df = pd.merge(min_indexes_df, image_gene_mapping, left_on='id2', right_on='image_id')
 
-        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
-        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
+    same_gene = min_indexes_df.query('gene_symbol_x == gene_symbol_y') # definition of positive
 
-        not_same_gene = images_info[images_info['gene_symbol'] != this_image_gene]
+    match_count = len(same_gene)
+    proportion = (match_count / total_count) * 100.0
 
-
-        not_same_gene_not_same_donor = not_same_gene[not_same_gene['donor_id'] != this_image_donor]
-
-        not_same_gene_not_same_donor_image_id_list = not_same_gene_not_same_donor['image_id']
+    return proportion
 
 
-        negatives_for_each_image_dict[image_id] = list(not_same_gene_not_same_donor_image_id_list)
+def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
 
-    for item in negatives_for_each_image_dict:
-        this_item_values = negatives_for_each_image_dict[item]
-        for val in this_item_values:
-            col_2.append(val)
-            col_1.append(item)
+    general_distance_matrix , general_relationship_matrix = get_general_distance_and_relationship_matrix(path_to_embeddings)
 
-    negative_pairs_level_3_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    negative_pairs_level_3_df['col_1'] = col_1
-    negative_pairs_level_3_df['col_2'] = col_2
+    # ---- General ----------------------------------------------------------------------------------
+    # General means only look at gene. Is it the same gene or different gene. Do not check donor_id.
 
-    negative_pairs_path = os.path.join(image_info_path, "negative_pairs_level_3_on_images.csv")
-    negative_pairs_level_3_df.to_csv(negative_pairs_path, index=None)
+    general_first_hit_percentage = first_hit_percentage(general_distance_matrix)
+    general_AUC = AUC(general_distance_matrix, general_relationship_matrix)
 
-    print("Done generating level 3 negative pairs on images ...")
+    general_res = [general_first_hit_percentage, general_AUC]
 
 
-def generate_level_2_negative_pairs_image_level(image_info_path):
-    """
-    This function generates level 2 negative pairs from the patches.
-    Negative means each pair has a different gene.
-    Level 2 means that each of the items in the pair are from the same donor but from a different image.
+    # ---- Among Other Donors ------------------------------------------------------------------------
+    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    dist_matrix_rows = list(general_distance_matrix.index)
 
-    :return: None. Stores a csv file.
+    donors = images_info[images_info['image_id'].isin(dist_matrix_rows)].gene_symbol
 
-    """
+    low_to_high_map = pd.DataFrame(list(zip(dist_matrix_rows, donors)))  # create a 2-column df of image IDs and genes
+    mask_df = create_diagonal_mask(low_to_high_map, target_value=1) # the pairs that have the same donor will have label 1
 
-    print("Generating level 2 negative pairs on images ...")
+    general_relationship_matrix, arranged_mask_df = match_matrices(general_relationship_matrix, mask_df)
 
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
-    image_id_list = list(images_info['image_id'])
+    # after applying the mask, any cell that corresponds to a pair with the same donor will be Nan.
+    # therefore, we are limiting our universe of pairs to those that have different donors.
+    distance_matrix_after_masking = apply_mask(arranged_mask_df, general_distance_matrix)
+    relationship_matrix_after_masking = apply_mask(arranged_mask_df, general_relationship_matrix)
 
-    negatives_for_each_image_dict = {}
-    col_1 = []
-    col_2 = []
+    among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
+    among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking)
 
-    counter = 1
-    for image_id in image_id_list:
-        print(counter, image_id)
-        counter += 1
+    among_other_donors_res = [among_other_donors_first_hit_percentage, among_other_donors_AUC]
 
-        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
-        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
+    # ---- Within Donor ----------------------------------------------------------------------------
+    # so far, in the masked_df, the pairs that have the same donor will have label 1, and when we use this as a mask,
+    # these pairs will be set to Nan. But we need the opposite of that here.
+    # we need the pairs that have a different donor to be 1, so later when we actually apply the mask, the corresponding pairs would be set to Na.
+    # the idea is to convert every 0 into 1 and every 1 into 0
 
-        not_same_gene = images_info[images_info['gene_symbol'] != this_image_gene]
+    inverted_mask_df =  np.logical_not(mask_df).astype(int)
 
+    general_relationship_matrix, arranged_inverted_mask_df = match_matrices(general_relationship_matrix, inverted_mask_df)
 
-        not_same_gene_same_donor = not_same_gene[not_same_gene['donor_id'] == this_image_donor]
+    # after applying the mask, any cell that corresponds to a pair with the same donor will be Nan.
+    # therefore, we are limiting our universe of pairs to those that have different donors.
+    distance_matrix_after_masking = apply_mask(arranged_inverted_mask_df, general_distance_matrix)
+    relationship_matrix_after_masking = apply_mask(arranged_inverted_mask_df, general_relationship_matrix)
 
-        not_same_gene_same_donor_image_id_list = not_same_gene_same_donor['image_id']
+    withing_donor_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
+    within_donor_brains_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking)
 
-        negatives_for_each_image_dict[image_id] = list(not_same_gene_same_donor_image_id_list)
-
-    for item in negatives_for_each_image_dict:
-        this_item_values = negatives_for_each_image_dict[item]
-        for val in this_item_values:
-            col_2.append(val)
-            col_1.append(item)
-
-    negative_pairs_level_2_df = pd.DataFrame(columns=['col_1', 'col_2'])
-    negative_pairs_level_2_df['col_1'] = col_1
-    negative_pairs_level_2_df['col_2'] = col_2
-
-    negative_pairs_path = os.path.join(image_info_path, "negative_pairs_level_2_on_images.csv")
-    negative_pairs_level_2_df.to_csv(negative_pairs_path, index=None)
-
-    print("Done generating level 2 negative pairs on images ...")
+    within_donor_res = [withing_donor_first_hit_percentage, within_donor_brains_AUC]
 
 
-
-
-def temp(image_info_path):
-
-
-
-    df_pos_3 = pd.read_csv(os.path.join(image_info_path, "positive_pairs_level_3_on_images.csv"))
-    df_pos_2 = pd.read_csv(os.path.join(image_info_path, "positive_pairs_level_2_on_images.csv"))
-    df_neg_3 = pd.read_csv(os.path.join(image_info_path, "negative_pairs_level_3_on_images.csv"))
-    df_neg_2 = pd.read_csv(os.path.join(image_info_path, "negative_pairs_level_2_on_images.csv"))
-
-    print("pos level 3 # of row: ", len(df_pos_3))
-    print("pos level 2 # of row: ", len(df_pos_2))
-    print("neg level 3 # of row: ", len(df_neg_3))
-    print("neg level 2 # of row: ", len(df_neg_2))
-
+    return [general_res, among_other_donors_res, within_donor_res]
 
 
 def build_distance_matrix(path_to_embeddings):
@@ -471,28 +331,6 @@ def build_distance_matrix(path_to_embeddings):
     return distances_df
 
 
-def build_distance_matrix_2(path_to_embeddings):
-    """
-    Distance from one item to itself shows up as 0. Could be misleading later when we are trying to find the closest image.
-    :param filename: String. This is the name of the folder in the EMBEDDING_DEST folder which contains the embeddings csv file
-    :return: pandas DataFrame. A distance matrix that has the euclidean distance between all the possible pairs of embedding vectors
-    """
-
-    embed_df = pd.read_csv(path_to_embeddings)
-    image_id_list = embed_df['image_id']
-    embed_df = embed_df.set_index(['image_id'])
-
-    dist_df =pd.DataFrame(
-        squareform(pdist(embed_df.loc[image_id_list])),
-        columns=image_id_list,
-        index=image_id_list
-    )
-
-
-    return dist_df
-
-
-
 def find_closest_image(distances_df):
     """
     :param distances_df: pandas DataFrame. A distance matrix that has the euclidean distance between all the possible
@@ -512,256 +350,7 @@ def find_closest_image(distances_df):
     return min_indexes_df
 
 
-def filter_dist_matrix_after_level_1(dist_matrix, level):
 
-
-    if level == 'image':
-        print ("skipping filtering after level 1 ...")
-        return dist_matrix
-
-    elif level == 'patch':
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-        patch_id_list = list(dist_matrix.index)
-
-
-        # for each patch_id row, I need to set some of the cells to nan.
-        for patch_id in patch_id_list:
-            this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
-            this_image_id = this_image_id.values[0]
-
-            this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
-            this_donor_id = this_donor_id.values[0]
-
-
-            not_same_donor_id = info_csv['donor_id'] != this_donor_id
-            same_image_id = info_csv['image_id'] == this_image_id
-            not_same_patch_id = info_csv['patch_id'] != patch_id
-            res1 = list(info_csv[not_same_donor_id].patch_id.values)
-            res2 = list(info_csv[same_image_id & not_same_patch_id].patch_id.values)
-            res = res1 + res2
-
-            res=[item for item in res if item in patch_id_list]
-
-
-            dist_matrix.loc[patch_id,res] = np.nan
-
-
-        return dist_matrix
-
-def filter_dist_matrix_after_level_2(dist_matrix, level):
-
-    #print ("filtering the distance matrix after level 2 ...")
-    if level == 'patch':
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-        patch_id_list = list(dist_matrix.index)
-
-        for patch_id in patch_id_list:
-            this_image_id = info_csv[info_csv['patch_id'] == patch_id].image_id
-            this_image_id = this_image_id.values[0]
-            this_donor_id = info_csv[info_csv['patch_id'] == patch_id].donor_id
-            this_donor_id = this_donor_id.values[0]
-
-            same_image_id = info_csv['image_id'] == this_image_id
-            same_donor_id = info_csv['donor_id'] == this_donor_id
-            not_same_patch_id = info_csv['patch_id'] != patch_id
-
-            res1 = list(info_csv[same_image_id | same_donor_id].patch_id.values)
-            res2 = list(info_csv[not_same_patch_id].patch_id.values)
-
-            res = res1 + res2
-            res = [item for item in res if item in patch_id_list]
-
-            dist_matrix.loc[patch_id, res] = np.nan
-
-
-
-        return dist_matrix
-
-    elif level == 'image':
-        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-        image_id_list = list(dist_matrix.index)
-        index = 0
-
-        for image_id in image_id_list:
-            #print (image_id)
-            #print (index)
-            #index = index +1 
-            #this_image_id = image_id
-            this_donor_id = info_csv[info_csv['image_id'] == image_id].donor_id
-            this_donor_id = this_donor_id.values[0]
-
-            #same_image_id = info_csv['image_id'] == this_image_id
-            same_donor_id = info_csv['donor_id'] == this_donor_id
-
-            #res1 = list(info_csv[same_image_id | same_donor_id].image_id.values)
-            res = list(info_csv[same_donor_id].image_id.values)   
-            #res = res1
-            res = [item for item in res if item in image_id_list]
-
-            dist_matrix.loc[image_id, res] = np.nan
-        
-        print ("finished")
-        return dist_matrix
-
-
-def level_1_evaluation(min_indexes_df, level):
-    """
-    The level 1 evaluation checks to see for how many of the patches, the closest patch is from the same brain image.
-    Which means the same gene, and the same donor, and the same brain tissue slice.
-    :param min_indexes_df: pandas DataFrame. Has 2 columns. The first column is an image_id, the second column is the image_id of
-    the corresponding closest image.
-    :return: float. The proportion of matches.
-    """
-
-    print ("in level 1 ...")
-    if level == 'image':
-        print ("skipping level 1 evaluation ...")
-        return None
-
-    elif level == 'patch':
-
-        total_count = len(min_indexes_df)
-
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-
-        gene_donor_mapping = info_csv[['patch_id', 'image_id']]
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
-
-        same_image = min_indexes_df.query('image_id_x == image_id_y')
-
-        match_count = len(same_image)
-        proportion = (match_count / total_count) * 100.0
-
-
-        min_indexes_df['id1'] = [id.split("_")[0] for id in min_indexes_df['id1']]
-        min_indexes_df['id2'] = [id.split("_")[0] for id in min_indexes_df['id2']]
-
-
-        print (match_count)
-        return  proportion
-
-
-
-def level_2_evaluation(min_indexes_df, level):
-    """
-    The level 2  evaluation checks to see for how many of the patches, the closest patch is not from the same brain image,
-    but is the same gene and comes from the same donor.
-    :param min_indexes_df: pandas DataFrame. Has 2 columns. The first column is an image_id, the second column is the image_id of
-    the corresponding closest image.
-    :return: float. The proportion of matches.
-    """
-
-    print ("in level 2 ... ")
-    if level == 'patch':
-        total_count = len(min_indexes_df)
-
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-
-        gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
-
-        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
-        same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
-        same_donor = same_gene.query('donor_id_x == donor_id_y')
-
-        print (same_donor)
-        match_count = len(same_donor)
-        proportion = (match_count / total_count) * 100.0
-
-        return proportion
-
-    elif level == 'image':
-
-        total_count = len(min_indexes_df)
-        print ("total number of images: ", total_count)
-
-        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-
-        gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
-        gene_donor_mapping['image_id']=gene_donor_mapping['image_id'].astype(str)
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
-
-        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
-        same_gene = not_the_same_image.query('gene_symbol_x == gene_symbol_y')
-        same_donor = same_gene.query('donor_id_x == donor_id_y')
-
-        print( same_donor)
-        match_count = len(same_donor)
-        print("number of matches with the same gene and the same donor: ", match_count)
-        proportion = (match_count / total_count) * 100.0
-     
-        print ("proportion: ", proportion)
-
-        return proportion
-
-
-
-def level_3_evaluation(min_indexes_df, level):
-    """
-    The level 3 evaluation checks to see for how many of the patches, the closest patch is from the same gene
-    but not from the same donor.
-    :param min_indexes_df: pandas DataFrame. Has 2 columns. The first column is an image_id, the second column is the image_id of
-    the corresponding closest image.
-    :return: float. The proportion of matches.
-    """
-
-    print ("in level 3 ...")
-
-    if level == 'patch':
-
-        total_count = len(min_indexes_df)
-
-        info_csv_path = os.path.join(IMAGE_ROOT, "valid_patches_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-
-        gene_donor_mapping = info_csv[['patch_id', 'gene_symbol', 'donor_id', 'image_id']]
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='patch_id')
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='patch_id')
-
-        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
-        not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
-        same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
-        print (same_gene)
-
-        match_count = len(same_gene)
-        print (match_count)
-        proportion = (match_count / total_count) * 100.0
-
-        return proportion
-
-    elif level == 'image':
-
-        total_count = len(min_indexes_df)
-        print ("total number of images: ", total_count)
-        info_csv_path = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
-        info_csv = pd.read_csv(info_csv_path, index_col=None)
-
-        gene_donor_mapping = info_csv[['gene_symbol', 'donor_id', 'image_id']]
-        gene_donor_mapping['image_id']=gene_donor_mapping['image_id'].astype(str)
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id1', right_on='image_id')
-        min_indexes_df = pd.merge(min_indexes_df, gene_donor_mapping, left_on='id2', right_on='image_id')
-
-        not_the_same_image = min_indexes_df.query('image_id_x != image_id_y')
-        not_the_same_donor = not_the_same_image.query('donor_id_x != donor_id_y')
-        same_gene = not_the_same_donor.query('gene_symbol_x == gene_symbol_y')
-        print(same_gene)
-
-        match_count = len(same_gene)
-        print("number of matches with the same gene and not the same donor: ", match_count)
-        proportion = (match_count / total_count) * 100.0
-     
-        print ("proportion: ", proportion)
- 
-        return proportion
 
 def not_the_same_gene(min_indexes_df, level):
     if level == 'image':
@@ -788,305 +377,43 @@ def not_the_same_gene(min_indexes_df, level):
         return proportion
 
 
-def evaluate_sum_100(path_to_embeddings, level):
-    """
-    In this case, I compute the distance matrix once, and take the closest image to every image.
-    Then, I check to see what percentage falls into condition of level 1,
-                         what percentage falls into condition of level 2,
-                     and what percentage falls into condition of level 3.
-
-
-    """
-
-
-    # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
-    # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
-    # path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
-
-    dist_df = build_distance_matrix(path_to_embeddings)
-    min_indexes_df = find_closest_image(dist_df)
-
-
-    print ("not the same gene")
-    not_the_same_gene(min_indexes_df, level)
-
-    print("level 1")
-    level_1_proportion = level_1_evaluation(min_indexes_df, level)
-    print(level_1_proportion)
-
-    print("level 2")
-    level_2_proportion = level_2_evaluation(min_indexes_df, level)
-    print(level_2_proportion)
-
-    print("level 3")
-    level_3_proportion = level_3_evaluation(min_indexes_df, level)
-    print(level_3_proportion)
-
-    return level_1_proportion, level_2_proportion, level_3_proportion
-
-
-def evaluate_with_filtering(path_to_embeddings, level):
-    """
-       In this case, I compute the distance matrix once, and take the closest image to every image to perform level 1.
-       Then, before moving to the next level, I modify the distance matrix by assigning nan to those cells that
-       met the conditions in the previous level, and calculate the closest images again using the new filtered distance matrix.
-
-
-       """
-
-    # embedding_file_name = EMBED_SET.split(".csv")[0] + "_embeddings.csv"
-    # path_to_embeddings = os.path.join(EMBEDDING_DEST, filename, embedding_file_name)
-    #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
-
-
-    #print ("not the same gene")
-    #not_the_same_gene(min_indexes_df, level)
-
-    print("level 1")
-    dist_df = build_distance_matrix(path_to_embeddings)
-    min_indexes_df = find_closest_image(dist_df)
-    print (min_indexes_df)
-    level_1_proportion = level_1_evaluation(min_indexes_df, level)
-    print(level_1_proportion)
-
-
-    print ("level 2")
-    new_dist_df = filter_dist_matrix_after_level_1(dist_df, level)
-    min_indexes_df = find_closest_image(new_dist_df)
-    print (min_indexes_df)
-    level_2_proportion = level_2_evaluation(min_indexes_df, level)
-    print(level_2_proportion)
-
-    print ("-level 3-")
-    new_dist_df = filter_dist_matrix_after_level_2(dist_df, level)
-    min_indexes_df = find_closest_image(new_dist_df)
-    print(min_indexes_df)
-    level_3_proportion = level_3_evaluation(min_indexes_df, level)
-    print(level_3_proportion)
-
-
-    return level_1_proportion, level_2_proportion, level_3_proportion
-
-
-
-def evaluate(ts, level):
-
-    base_path = os.path.join(EMBEDDING_DEST, ts)
-    contents = os.listdir(base_path)
-    embeddings_files = []
-
-    if level == 'patch':
-        for item in contents:
-            if item.endswith("embeddings.csv"):
-                embeddings_files.append(item)
-
-
-    elif level == 'image':
-        for item in contents:
-            if item.endswith("embeddings_image_level.csv"):
-                embeddings_files.append(item)
-
-    print ("list of embedding files is: ")
-    print (embeddings_files)
-
-    for item in embeddings_files:
-        path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, item)
-        print (item)
-        #print ("sum 100 -----------------")
-        #l_1, l_2, l_3 = evaluate_sum_100(path_to_embeddings, level)
-
-        print ("with filtering ----------------")
-        l_1, l_2, l_3 = evaluate_with_filtering(path_to_embeddings, level)
-
-    return l_1, l_2, l_3
-
-
-
-def build_label_matrix_level_3(image_info_path):
-
-    print ("started building label matrix level 3 ...")
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
-
-    image_id_list = list(images_info['image_id'])
-
-
-    #label_matrix_df = pd.DataFrame(columns=image_id_list)
-    label_matrix_array = np.zeros((len(image_id_list), len(image_id_list)))
-
-    counter = 1
-    for image_id in image_id_list:
-        print(counter, image_id)
-        counter += 1
-        negative_positive_labels = [-1] * len(image_id_list)
-
-        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
-        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
-
-        not_same_donor = images_info[images_info['donor_id'] != this_image_donor]
-        not_same_donor_not_same_gene = not_same_donor[not_same_donor['gene_symbol'] != this_image_gene]
-        not_same_donor_same_gene=  not_same_donor[not_same_donor['gene_symbol'] == this_image_gene]
-
-        not_same_donor_not_same_gene_image_id_list = list(not_same_donor_not_same_gene['image_id'])
-        not_same_donor_same_gene_image_id_list = list(not_same_donor_same_gene['image_id'])
-
-        for i in range(len(image_id_list)):
-            image = image_id_list[i]
-            if image in not_same_donor_not_same_gene_image_id_list:
-                negative_positive_labels[i] = 0
-            if image in not_same_donor_same_gene_image_id_list:
-                negative_positive_labels[i] =1
-
-        label_matrix_array[:, counter - 2] = negative_positive_labels
-        #label_matrix_df[image_id] = negative_positive_labels
-
-    label_matrix_df = pd.DataFrame(label_matrix_array)
-    label_matrix_df.columns = image_id_list
-    label_matrix_df.index = image_id_list
-
-    label_matrix_df.to_csv(os.path.join(image_info_path, "label_matrix_level_3.csv"))
-    print ("finished building label matrix level 3 ...")
-
-def build_label_matrix_level_2(image_info_path):
-
-    print ("started building label matrix level 2 ...")
-    images_info = pd.read_csv(os.path.join(image_info_path, "human_ISH_info.csv"))
-
-
-    image_id_list = list(images_info['image_id'])
-    #label_matrix_df = pd.DataFrame(columns=image_id_list)
-    label_matrix_array = np.zeros((len(image_id_list), len(image_id_list)))
-
-    counter = 1
-    for image_id in image_id_list:
-        print(counter, image_id)
-        counter += 1
-        negative_positive_labels = [-1] * len(image_id_list)
-        this_image_gene = images_info[images_info['image_id'] == image_id]['gene_symbol'].iloc[0]
-        this_image_donor = images_info[images_info['image_id'] == image_id]['donor_id'].iloc[0]
-
-        same_donor = images_info[images_info['donor_id'] == this_image_donor]
-        same_donor_not_same_gene = same_donor[same_donor['gene_symbol'] != this_image_gene]
-        same_donor_same_gene=  same_donor[same_donor['gene_symbol'] == this_image_gene]
-
-        same_donor_not_same_gene_image_id_list = list(same_donor_not_same_gene['image_id'])
-        same_donor_same_gene_image_id_list = list(same_donor_same_gene['image_id'])
-
-        for i in range(len(image_id_list)):
-            image = image_id_list[i]
-            if image in same_donor_not_same_gene_image_id_list:
-                negative_positive_labels[i] = 0
-            if image in same_donor_same_gene_image_id_list:
-                negative_positive_labels[i] = 1
-
-
-        label_matrix_array[:, counter - 2] = negative_positive_labels
-        #label_matrix_df[image_id] = negative_positive_labels
-
-    label_matrix_df = pd.DataFrame(label_matrix_array)
-    label_matrix_df.columns = image_id_list
-    label_matrix_df.index = image_id_list
-
-    label_matrix_df.to_csv(os.path.join(image_info_path,"label_matrix_level_2.csv"))
-    print ("finished building label matrix level 2 ...")
-
-
-
+def evaluate(ts):
+    path_to_embeddings = os.path.join(EMBEDDING_DEST, ts, "image_level_embeddings.csv")
+    results = first_hit_match_percentage_and_AUC_results(path_to_embeddings)
+
+    return results
 
 
 def main():
     ts_list = ["1587686591"]
-    #ts_list =  ["resnet50_10_patches_standardized_2"]
 
     for ts in ts_list:
 
-        columns = ["ts", "level_1", "level_2", "level_3"]
+        columns = ["ts", "general_first_hit_percentage","general_AUC", "among_other_donors_first_hit_percentage",
+                   "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
         eval_results_df = pd.DataFrame(columns=columns)
 
         print ("ts is: ", ts)
-        l_1, l_2, l_3 = evaluate(ts, 'image')
+        results = evaluate(ts)
 
-        print (l_1, l_2, l_3)
+        general_res = results[0]
+        among_other_donors_res = results[1]
+        within_donor_res = results[2]
+
          
-        eval_results_df.loc[0] = [ts, l_1, l_2, l_3]
-        #eval_results_df["ts"] = ts
-        #eval_results_df["level_1"] = l_1
-        #eval_results_df["level_2"] = l_2
-        #eval_results_df["level_3"] = l_3
-       
+        eval_results_df.loc[0] = [general_res[0], general_res[1], among_other_donors_res[0], among_other_donors_res[1],
+                                  within_donor_res[0], within_donor_res[1]]
+
         print (eval_results_df)
         eval_path = os.path.join(EMBEDDING_DEST, ts)
         eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result.csv"), index=None)
-        
         print (ts)
-    #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/test_df.csv"
-   # path_to_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation", ts, "mini_embeddings.csv")
-    #dist = build_distance_matrix(path_to_embeddings)
-
-    #find_closest_image(dist)
-
-    #evaluate_sum_100(path_to_embeddings)
-
-
-    """
-    embed_file_name = "triplet_training_validation_embeddings.csv"
-    embed_dir = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
-    ts_list = os.listdir(embed_dir) 
-
-    for ts in ts_list:
-        path_to_embeddings = os.path.join(embed_dir, ts, embed_file_name)
-        print (path_to_embeddings)
-        print ("{} --------------".format(ts))
-        evaluate(path_to_embeddings)
-
-        print ("________________________")
-   
-    #path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/cortex/embed.csv"
-    #embed_df = pd.read_csv(path_to_embeddings)
-
-    #dist_df = build_distance_matrix(path_to_embeddings)
-    #new_dist_df = filter_dist_matrix_after_level_1(dist_df)
-    """
 
 
 if __name__ == '__main__':
-    #valid_patches_info_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2"
-    #valid_patches_info_path = IMAGE_ROOT
-    #print ("path is: ", valid_patches_info_path)
-   
-    #generate_level_3_positive_pairs(valid_patches_info_path)
-    #generate_level_2_positive_pairs(valid_patches_info_path)
-    #generate_level_3_negative_pairs(valid_patches_info_path)
-    #generate_level_2_negative_pairs(valid_patches_info_path)
-   
-    #image_info_path = os.path.join(DATA_DIR, STUDY)
-    #print ("image info path is: ", image_info_path)
-    #generate_level_3_positive_pairs_image_level(image_info_path)
-    #generate_level_2_positive_pairs_image_level(image_info_path)
-    #generate_level_3_negative_pairs_image_level(image_info_path)
-    #generate_level_2_negative_pairs_image_level(image_info_path)
 
-    #temp(image_info_path)
+
     main()
-    """
-    image_info_path = os.path.join(DATA_DIR, STUDY)
-    print ("image info path is: ", image_info_path)
-    generate_level_3_positive_pairs_image_level(image_info_path)
-    generate_level_2_positive_pairs_image_level(image_info_path)
-    generate_level_3_negative_pairs_image_level(image_info_path)
-    generate_level_2_negative_pairs_image_level(image_info_path)
 
-    temp(image_info_path)
-    """
-
-    #path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level.csv"
-    #build_distance_matrix(path)
-
-
-   
-
-
-    #path = os.path.join(DATA_DIR, STUDY)
-    #build_label_matrix_level_3(path)
-    #build_label_matrix_level_2(path)
 
 
