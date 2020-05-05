@@ -385,6 +385,22 @@ def evaluate(ts):
     return results
 
 
+def concat_all_evaluation_results():
+
+    list_of_folders = ["1584753511","1583770480","1585521837","1584025762","1586831151","1586740776","1587686591",
+                       "1587462051", "random_10_patches", "resnet50_10_patches" ]
+    pd_df_list = []
+    for item in list_of_folders:
+        path_to_eval_res = os.paht.join(EMBEDDING_DEST, item, "evaluation_result.csv")
+        df = pd.read_csv(path_to_eval_res)
+        pd_df_list.append(df)
+
+    concatenated_df = pd.concat(pd_df_list)
+
+    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, "all_evaluation_result.csv"))
+
+
+
 def main():
     ts_list = ["1586740776","1587686591", "1587462051", "random_10_patches", "resnet50_10_patches" ]
 
@@ -416,8 +432,8 @@ def main():
 
 if __name__ == '__main__':
 
-
-    main()
+    concat_all_evaluation_results()
+    #main()
 
 
 
