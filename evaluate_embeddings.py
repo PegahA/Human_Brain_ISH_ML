@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import scipy
 from sklearn import metrics
-
+print (pd.show_versions())
 def create_diagonal_mask(low_to_high_map, target_value=1):
     """
     Create a block diagonal mask matrix from the input mapping.
@@ -179,7 +179,7 @@ def AUC(dist_matrix_df, label_matrix_df):
 
 
     if dist_matrix_columns == label_matrix_columns and dist_matrix_rows == label_matrix_rows:
-        print ("The two matrix match. Well continue to calculate AUC ...")
+        print ("The two matrix match. Will continue to calculate AUC ...")
 
         dist_matrix_array = dist_matrix_df.to_numpy()
         label_matrix_array = label_matrix_df.to_numpy()
@@ -255,8 +255,8 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
 
     # ---- Among Other Donors ------------------------------------------------------------------------
 
-    print ("---------------------------------- Other Donors ----------------------------------")
-    images_info = pd.read_csv(os.path.join( path_to_embeddings,"human_ISH_info.csv"))
+    print ("---------------------------------- Other Donors ----------------------------- ")
+    images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
     dist_matrix_rows = list(general_distance_matrix.index)
 
     donors = images_info[images_info['image_id'].isin(dist_matrix_rows)]['donor_id']
@@ -271,8 +271,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
     distance_matrix_after_masking = apply_mask(arranged_mask_df, general_distance_matrix)
     relationship_matrix_after_masking = apply_mask(arranged_mask_df, general_relationship_matrix)
 
-    distance_matrix_after_masking.to_csv(os.path.join(path_to_embeddings, "dist_after_mask.csv"))
-    relationship_matrix_after_masking.to_csv(os.path.join(path_to_embeddings, "rel_after_mask.csv"))
+  
     among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
     among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking)
 
@@ -285,7 +284,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
     # we need the pairs that have a different donor to be 1, so later when we actually apply the mask, the corresponding pairs would be set to Na.
     # the idea is to convert every 0 into 1 and every 1 into 0
 
-    print("---------------------------------- Within Donor ----------------------------------")
+    print("---------------------------------- Within Donor ------------------------------ ")
 
     inverted_mask_df =  np.logical_not(mask_df).astype(int)
 
@@ -387,7 +386,7 @@ def evaluate(ts):
 
 
 def main():
-    ts_list = ["1587686591"]
+    ts_list = ["1586740776","1587686591", "1587462051", "random_10_patches", "resnet50_10_patches" ]
 
     for ts in ts_list:
 
@@ -405,7 +404,7 @@ def main():
         within_donor_res = results[2]
 
          
-        eval_results_df.loc[0] = [general_res[0], general_res[1], among_other_donors_res[0], among_other_donors_res[1],
+        eval_results_df.loc[0] = [ts,general_res[0], general_res[1], among_other_donors_res[0], among_other_donors_res[1],
                                   within_donor_res[0], within_donor_res[1]]
 
         print (eval_results_df)
