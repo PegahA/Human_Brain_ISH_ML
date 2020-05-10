@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import scipy
 from sklearn import metrics
-print (pd.show_versions())
+#print (pd.show_versions())
 def create_diagonal_mask(low_to_high_map, target_value=1):
     """
     Create a block diagonal mask matrix from the input mapping.
@@ -50,11 +50,13 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings):
     """
     images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
 
+
     image_level_embed_file_name = ""
     contents = os.listdir(path_to_embeddings)
     for item in contents:
         if item.endswith("embeddings_image_level.csv"):
             image_level_embed_file_name = item
+
 
     dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings,  image_level_embed_file_name))
 
@@ -184,10 +186,28 @@ def AUC(dist_matrix_df, label_matrix_df):
         dist_matrix_array = dist_matrix_df.to_numpy()
         label_matrix_array = label_matrix_df.to_numpy()
 
+
+        top_tri_ind_list = np.triu_indices(len(dist_matrix_columns),1)
+        top_tri_dist_matrix = dist_matrix_array[top_tri_ind_list]
+        top_tri_dist_matrix = top_tri_dist_matrix[~np.isnan(top_tri_dist_matrix)]  # remove NaNs
+        print ("top triangle of dist matrix without NaNs:", len(top_tri_dist_matrix))
+
+        top_tri_ind_list = np.triu_indices(len(label_matrix_array), 1)
+        top_tri_label_matrix = label_matrix_array[top_tri_ind_list]
+        top_tri_label_matrix = top_tri_label_matrix [~np.isnan(top_tri_label_matrix)]  # remove NaNs
+        print ("top triangle of label matrix without NaNs:",len(top_tri_label_matrix))
+
+        top_tri_label_matrix = top_tri_label_matrix.astype(int)  # convert values to int so they are binary {0,1}
+
+        # #positive label is 0 because distance is closer for positive pairs.
+        fpr, tpr, thresholds = metrics.roc_curve(top_tri_label_matrix, top_tri_dist_matrix, pos_label=0)
+        auc_val = metrics.auc(fpr, tpr)
+
+
+        """
         dist_matrix_flatten = dist_matrix_array.flatten()
         dist_matrix_flatten = dist_matrix_flatten[~np.isnan(dist_matrix_flatten)]  # remove NaNs
-
-
+        
         label_matrix_flatten = label_matrix_array.flatten()
         label_matrix_flatten = label_matrix_flatten[~np.isnan(label_matrix_flatten)]  # remove NaNs
         label_matrix_flatten = label_matrix_flatten.astype(int) # convert values to int so they are binary {0,1}
@@ -196,7 +216,9 @@ def AUC(dist_matrix_df, label_matrix_df):
         fpr, tpr, thresholds = metrics.roc_curve(label_matrix_flatten, dist_matrix_flatten, pos_label=0)
         auc_val = metrics.auc(fpr, tpr)
         return auc_val
+        """
 
+        return auc_val
 
     else:
         print ("The two matrices do not match.")
@@ -304,6 +326,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
     return [general_res, among_other_donors_res, within_donor_res]
 
 
+
 def build_distance_matrix(path_to_embeddings):
     """
     Distance from one item to itself shows up as inf.
@@ -391,13 +414,13 @@ def concat_all_evaluation_results():
                        "1587462051", "random_10_patches", "resnet50_10_patches" ]
     pd_df_list = []
     for item in list_of_folders:
-        path_to_eval_res = os.paht.join(EMBEDDING_DEST, item, "evaluation_result.csv")
+        path_to_eval_res = os.path.join(EMBEDDING_DEST, item, "evaluation_result_top_tri.csv")
         df = pd.read_csv(path_to_eval_res)
         pd_df_list.append(df)
 
     concatenated_df = pd.concat(pd_df_list)
 
-    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, "all_evaluation_result.csv"))
+    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, "all_evaluation_result_top_tri.csv"))
 
 
 
@@ -425,15 +448,21 @@ def main():
 
         print (eval_results_df)
         eval_path = os.path.join(EMBEDDING_DEST, ts)
-        eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result.csv"), index=None)
+        eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result_top_tri.csv"), index=None)
         print (ts)
     
 
 
+
+
 if __name__ == '__main__':
 
+
+    main()
     concat_all_evaluation_results()
-    #main()
+
+
+
 
 
 
