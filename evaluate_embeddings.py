@@ -202,8 +202,7 @@ def AUC(dist_matrix_df, label_matrix_df):
         # #positive label is 0 because distance is closer for positive pairs.
         fpr, tpr, thresholds = metrics.roc_curve(top_tri_label_matrix, top_tri_dist_matrix, pos_label=0)
         auc_val = metrics.auc(fpr, tpr)
-
-
+        
         """
         dist_matrix_flatten = dist_matrix_array.flatten()
         dist_matrix_flatten = dist_matrix_flatten[~np.isnan(dist_matrix_flatten)]  # remove NaNs
