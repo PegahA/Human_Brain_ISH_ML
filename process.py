@@ -15,13 +15,14 @@ random.seed(1)
 
 
 
-def get_stats(images_info_df):
+def get_stats(path_to_images_info):
     """
     Uses the images_info_df and calculates some stats.
     :param images_info_df: pandas dataframe that has the information of all image
     :return: a dictionary containing stats.
     """
 
+    images_info_df = pd.read_csv(path_to_images_info)
     stats_dict = {'image_count':None, 'donor_count':None, 'female_donor_count':None, 'male_donor_count':None,
                   'unique_genes_count': None, 'unique_entrez_id_count' : None}
 
@@ -126,6 +127,33 @@ def get_stats(images_info_df):
     stats_dict['male_donor_count'] = male_donors_count
     stats_dict['unique_genes_count'] = gene_count
     stats_dict['unique_entrez_id_count'] = entrez_id_count
+
+
+
+    # -------------------
+    # I want to group by donor, in each donor, see on average, how many images there are per gene
+    # and then average over all the donors
+    group_by_donor = images_info_df.groupby('donor_id')
+    avg_num_of_imaes_per_gene_list = []
+    for key, item in group_by_donor:
+        # for each donor
+        this_group_genes = list(group_by_donor.get_group(key)['gene_symbol'])  # get a list of its genes (has duplicates)
+
+        # for each unique genes, see how many times it appears in the list (== how many images we have of it in this donor)
+        this_group_genes_count_list = [[x,this_group_genes.count(x)] for x in set(this_group_genes)]
+        sum = 0
+        for item in this_group_genes_count_list:
+            sum += item[1]
+
+        # in this donor, on average, we have 'avg' number of images per each gene.
+        avg = sum / len(this_group_genes_count_list)
+
+        # append it to the list
+        avg_num_of_imaes_per_gene_list.append(avg)
+
+    avg_num_of_images_per_gene_in_each_donor_over_all = np.mean(avg_num_of_imaes_per_gene_list)
+    print ("Average number of images per each gene in each donor, Over all donors: ",avg_num_of_images_per_gene_in_each_donor_over_all)
+
 
     return stats_dict
 
@@ -1207,6 +1235,13 @@ def run():
         merge_embeddings_to_image_level(ts)
 
 
+def convert_to_tsv(path_to_csv):
+
+    path_to_tsv = path_to_csv.split(".")[0] + ".tsv"
+    csv_read = pd.read_csv(path_to_csv)
+    with open(path_to_tsv, 'w') as write_tsv:
+        write_tsv.write(csv_read.to_csv(sep='\t', index=False))
+
 
 if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
@@ -1218,13 +1253,9 @@ if __name__ == '__main__':
     #merge_embeddings_to_gene_level("resnet50_10_patches_standardized")
     #merge_embeddings_to_image_level("resnet50_10_patches_standardized")
 
-    l =["10s", "20s", "30s", "40s"]
-    for i in range(len(l)):
-        print (l[i])
-        l[i] = l[i][:-1]
-        print (l[i])
-        l[i] = int(l[i])
-    print (l)
+    #get_stats("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/human_ISH_info.csv")
+    path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level_copy_2.csv"
+    convert_to_tsv(path_to_csv)
     
 
 
