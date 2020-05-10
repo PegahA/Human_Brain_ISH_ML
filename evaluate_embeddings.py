@@ -391,7 +391,7 @@ def concat_all_evaluation_results():
                        "1587462051", "random_10_patches", "resnet50_10_patches" ]
     pd_df_list = []
     for item in list_of_folders:
-        path_to_eval_res = os.paht.join(EMBEDDING_DEST, item, "evaluation_result.csv")
+        path_to_eval_res = os.path.join(EMBEDDING_DEST, item, "evaluation_result.csv")
         df = pd.read_csv(path_to_eval_res)
         pd_df_list.append(df)
 
@@ -434,6 +434,5 @@ if __name__ == '__main__':
 
     concat_all_evaluation_results()
     #main()
-
 
 
