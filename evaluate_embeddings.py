@@ -415,6 +415,7 @@ def concat_all_evaluation_results():
     pd_df_list = []
     for item in list_of_folders:
         path_to_eval_res = os.path.join(EMBEDDING_DEST, item, "evaluation_result_top_tri.csv")
+
         df = pd.read_csv(path_to_eval_res)
         pd_df_list.append(df)
 
@@ -460,7 +461,6 @@ if __name__ == '__main__':
 
     main()
     concat_all_evaluation_results()
-
 
 
 
