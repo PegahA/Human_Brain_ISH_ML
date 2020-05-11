@@ -443,7 +443,7 @@ def check_predicted_masks():
     mask for every image.
     :return: python list of strings
     """
-    path_to_masks = os.path.join(SEGMENTATION_DATA_PATH,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "predicted_masks")
+    path_to_masks = os.path.join(SEGMENTATION_DATA_PATH, "predicted_masks")
     path_contents = os.listdir(path_to_masks)
     masks = [item for item in path_contents if item.endswith("_pred.jpg")]
     
@@ -556,7 +556,7 @@ def check_masks_and_patches_info():
 
     csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
     #not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images", csv_file_name), index=None)
-    not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name), index=None)
+    not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH ,"outlier_images", csv_file_name), index=None)
 
 
 def check_genes_in_images_with_not_enough_patches(file_name):
