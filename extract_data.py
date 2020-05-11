@@ -31,7 +31,7 @@ if (os.path.exists(os.path.join(DATA_DIR, STUDY, "images"))):
     print ("images folder already exists.")
 else:
     os.mkdir(os.path.join(DATA_DIR, STUDY, "images"))
-IMAGES_DIR = os.path.join(DATA_DIR, STUDY, 'human_ish_images_subcortex') #"images")
+IMAGES_DIR = os.path.join(DATA_DIR, STUDY, "images")
 
 
 #IMAGES_DIR = "/genome/scratch/Neuroinformatics/pabed/human_ish_images"
@@ -58,7 +58,7 @@ def get_study_xml_file():
     :return: the path to the xml file of the chosen study if the xml files exists. If not, it will return None.
     """
 
-    study_xml_file = os.path.join(XML_DIR, STUDY + ".xml")
+    study_xml_file = os.path.join(DATA_DIR, STUDY, STUDY.lower()+".xml")
 
     if (not os.path.exists(study_xml_file)):
         return None
