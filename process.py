@@ -1235,6 +1235,33 @@ def run():
         merge_embeddings_to_image_level(ts)
 
 
+def specific_donor_embeddings(donor_id, embed_folder_name):
+
+
+    images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    this_donor = images_info_df[images_info_df['donor_id']==donor_id]
+    this_donor_image_id_gene = this_donor[['image_id', 'gene_symbol']]
+
+    embed_dir = os.path.join(EMBEDDING_DEST, embed_folder_name)
+    
+    embed_file_name  = ""
+    for item in os.listdir(embed_dir):
+        if item.endswith("embeddings_image_level.csv"):
+            embed_file_name = item
+    
+    embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, embed_file_name))
+
+
+
+    merged_df = pd.merge(this_donor_image_id_gene, embed_df, on='image_id')
+    merged_df = merged_df.drop(columns=['image_id'])
+
+
+    merged_df.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_id+".csv"), index=None)
+    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_id+".csv"))
+
+
+
 def convert_to_tsv(path_to_csv):
 
     path_to_tsv = path_to_csv.split(".")[0] + ".tsv"
@@ -1254,8 +1281,12 @@ if __name__ == '__main__':
     #merge_embeddings_to_image_level("resnet50_10_patches_standardized")
 
     #get_stats("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/human_ISH_info.csv")
-    path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level_copy_2.csv"
-    convert_to_tsv(path_to_csv)
+    #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level_copy_2.csv"
+    #convert_to_tsv(path_to_csv)
+
+
+    specific_donor_embeddings('H08-0025', '1587462051')
+
     
 
 
