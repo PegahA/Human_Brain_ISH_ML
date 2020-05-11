@@ -15,14 +15,14 @@ random.seed(1)
 
 
 
-def get_stats(path_to_images_info):
+def get_stats(images_info_df):
     """
     Uses the images_info_df and calculates some stats.
     :param images_info_df: pandas dataframe that has the information of all image
     :return: a dictionary containing stats.
     """
 
-    images_info_df = pd.read_csv(path_to_images_info)
+  
     stats_dict = {'image_count':None, 'donor_count':None, 'female_donor_count':None, 'male_donor_count':None,
                   'unique_genes_count': None, 'unique_entrez_id_count' : None}
 
@@ -507,7 +507,7 @@ def make_triplet_csv_with_segmentation(df, out_file):
 
 
     csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
-    not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data", "outlier_images", csv_file_name))
+    not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name))
 
     not_enough_patches_dict = dict(zip(not_enough_patches_df["image_id"], not_enough_patches_df["count"]))
 
@@ -1255,10 +1255,14 @@ def specific_donor_embeddings(donor_id, embed_folder_name):
 
     merged_df = pd.merge(this_donor_image_id_gene, embed_df, on='image_id')
     merged_df = merged_df.drop(columns=['image_id'])
-
+    
+    merged_df_no_meta = merged_df.drop(columns=['gene_symbol'])
 
     merged_df.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_id+".csv"), index=None)
     convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_id+".csv"))
+
+    merged_df_no_meta.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_id+"_no_meta.csv"), header=False, index=None)
+    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_id+"_no_meta.csv"))
 
 
 
