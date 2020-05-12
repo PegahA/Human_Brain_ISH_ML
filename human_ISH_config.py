@@ -48,8 +48,8 @@ elif PATCH_TYPE == 'segmentation':
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
 
-TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg", "triplet_training.csv")
-EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE)+"_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg", "triplet_training_validation.csv")
+TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg", "triplet_training.csv")
+EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE)+"_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg", "triplet_training_validation.csv")
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
@@ -71,7 +71,7 @@ TRAIN_ITERATIONS = 30000
 DECAY_START_ITERATION = 25000
 CHECKPOINT_FREQUENCY = 1000
 TRAIN_STANDARDIZE = False
-TRAIN_FLIP_AUGMENT = False
+TRAIN_FLIP_AUGMENT = True
 EMBED_FLIP_AUGMENT = False
 TRAIN_CROP_AUGMENT = False
 EMBED_CROP_AUGMENT = None
