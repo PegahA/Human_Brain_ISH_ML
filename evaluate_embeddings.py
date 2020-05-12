@@ -410,7 +410,7 @@ def evaluate(ts):
 def concat_all_evaluation_results():
 
     list_of_folders = ["1584753511","1583770480","1585521837","1584025762","1586831151","1586740776","1587686591",
-                       "1587462051", "random_10_patches", "resnet50_10_patches" ]
+                       "1587462051", "1589259198", "1589258734","1589222258", "random_10_patches", "resnet50_10_patches" ]
     pd_df_list = []
     for item in list_of_folders:
         path_to_eval_res = os.path.join(EMBEDDING_DEST, item, "evaluation_result_top_tri.csv")
@@ -425,7 +425,7 @@ def concat_all_evaluation_results():
 
 
 def main():
-    ts_list = ["1586740776","1587686591", "1587462051", "random_10_patches", "resnet50_10_patches" ]
+    ts_list = ["1589222258" ]
 
     for ts in ts_list:
 
@@ -458,8 +458,9 @@ def main():
 if __name__ == '__main__':
 
 
-    main()
+    #main()
     concat_all_evaluation_results()
+    
 
 
 
