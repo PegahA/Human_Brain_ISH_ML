@@ -194,7 +194,7 @@ def define_sets_with_no_shared_genes(images_info_df):
     train_val_df = train_val_df.sort_values(by=['image_id'])
 
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE)+"_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE)+"_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
     if (not os.path.exists(sets_path)):
         os.mkdir(sets_path)
 
@@ -301,7 +301,7 @@ def define_sets_with_no_shared_donors(images_info_df):
     validation_df = validation_df.sort_values(by=['image_id'])
     test_df = test_df.sort_values(by=['image_id'])
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
     if (not os.path.exists(sets_path)):
         os.mkdir(sets_path)
 
@@ -546,7 +546,7 @@ def make_triplet_csv_with_segmentation(df, out_file):
 
 def make_triplet_csvs(dfs):
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
     out_base = sets_path + "/triplet"
 
     if PATCH_TYPE=="segmentation":
@@ -562,7 +562,7 @@ def make_triplet_csvs(dfs):
 
 def convert_h5_to_csv():
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
     exp_root_contents = os.listdir(EXPERIMENT_ROOT)
     for item in exp_root_contents:
@@ -722,7 +722,7 @@ def merge_embeddings_to_image_level(filename):
 
 
 def filter_out_common_genes(df_file_name,threshold = 3):
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
     df = pd.read_csv(os.path.join(sets_path, df_file_name))
     print(len(df))
@@ -767,7 +767,7 @@ def filter_out_common_genes(df_file_name,threshold = 3):
 
 def filter_out_genes_out_of_mean_and_std(df_file_name):
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
     in_range = []
     df = pd.read_csv(os.path.join(sets_path, df_file_name))
@@ -836,7 +836,7 @@ def filter_out_genes_out_of_mean_and_std(df_file_name):
 
 
 def draw_hist(df_file_name):
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
     df = pd.read_csv(os.path.join(sets_path, df_file_name))
     print(len(df))
 
