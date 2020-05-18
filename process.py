@@ -1281,8 +1281,8 @@ if __name__ == '__main__':
     #get_embeddings_from_pre_trained_model_in_chunks()
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
-    merge_embeddings_to_gene_level("1589222258")
-    merge_embeddings_to_image_level("1589222258")
+    merge_embeddings_to_gene_level("1589259198")
+    merge_embeddings_to_image_level("1589259198")
 
     #get_stats("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/human_ISH_info.csv")
     #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level_copy_2.csv"
