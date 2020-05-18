@@ -6,6 +6,7 @@ import process
 #import evaluate_embeddings
 from argparse import ArgumentParser
 import os
+import json
 
 
 TRAIN = True
@@ -263,6 +264,21 @@ if __name__ == "__main__":
    
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file(TIMESTAMP)
+
+
+    # --------
+    # to add extra parameters in the args.json file
+
+    args_file = os.path.join( EXPERIMENT_ROOT, "args.json")
+    if os.path.isfile(args_file):
+        with open(args_file, 'r+') as f:
+            args_resumed = json.load(f)
+            args_resumed["patch_count_per_image"] = PATCH_COUNT_PER_IMAGE
+            args_resumed["segmentation_training_samples"] = SEGMENTATION_TRAINING_SAMPLES
+
+            f.truncate(0)
+            json.dump(args_resumed, f, ensure_ascii=False, indent=2, sort_keys=True)
+    #---------
     
 
     process.merge_embeddings_to_gene_level(filename)
