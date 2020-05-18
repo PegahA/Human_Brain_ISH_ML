@@ -168,13 +168,13 @@ parser.add_argument(
 if __name__ == "__main__":
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    process.make_sets() 
+    #process.make_sets() 
 
-
-       
+ 
+     
     print ("i am here in main!")
 
-    """
+    
     args = parser.parse_args()
     print ("\n------- Arguments:")
     print ("experiment root: ", args.experiment_root)
@@ -286,7 +286,7 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
-    """
+        
      
    
     
