@@ -1274,6 +1274,45 @@ def convert_to_tsv(path_to_csv):
         write_tsv.write(csv_read.to_csv(sep='\t', index=False))
 
 
+
+
+def get_image_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["training", "validation"]):
+
+    embeddings_path = os.path.join(EMBEDDING_DEST, ts)
+    contents = os.listdir(embeddings_path)
+
+    image_level_embeddings_file_name = ""
+
+    for item in contents:
+        if item.endswith("training_validation_embeddings_image_level.csv"):
+            image_level_embeddings_file_name = item
+            break
+
+    image_level_embeddings = pd.read_csv(os.path.join(embeddings_path, image_level_embeddings_file_name))
+
+    for target in target_sets:
+
+        print ("Getting embeddings of the " + target + " set...")
+        path_to_target_set = os.path.join(path_to_sets, target +".csv")
+        target_df = pd.read_csv(path_to_target_set)
+        target_image_id = target_df['image_id']
+
+        target_embeddings = image_level_embeddings[image_level_embeddings['image_id'] in target_image_id]
+
+        target_embeddings_file_name = target +"_embeddings_image_level.csv"
+        target_embeddings.to_csv(os.path.join(embeddings_path, target_embeddings_file_name), index=None)
+
+
+
+
+    print ("Finished getting embeddings of target sets.")
+
+
+
+
+
+
+
 if __name__ == '__main__':
     #generate_random_embeddings("valid_patches_info.csv", 128)
     #merge_embeddings_to_image_level("resnet50")
