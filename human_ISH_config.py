@@ -22,10 +22,10 @@ NUMBER_OF_CIRCLES_IN_HEIGHT = 2
 NUMBER_OF_CIRCLES_IN_WIDTH = 1
 
 
-PATCH_COUNT_PER_IMAGE = 20
+PATCH_COUNT_PER_IMAGE = 10
 FOREGROUND_THRESHOLD = 90
 SEGMENTATION_PATCH_SIZE = 1024
-SEGMENTATION_TRAINING_SAMPLES = 40
+SEGMENTATION_TRAINING_SAMPLES = 20
 
 current_time  = int(time.time())
 TIMESTAMP = str(current_time)
@@ -47,9 +47,9 @@ elif PATCH_TYPE == 'segmentation':
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
     EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
-
-TRAIN_SET =  os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg", "triplet_training.csv")
-EMBED_SET = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE)+"_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg", "triplet_training_validation.csv")
+SETS_DIR = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
+EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
@@ -67,11 +67,11 @@ MARGIN = 'soft'
 METRIC = 'euclidean'
 LOSS = 'batch_hard'
 LEARNING_RATE = 1e-5
-TRAIN_ITERATIONS = 30000
+TRAIN_ITERATIONS = 30
 DECAY_START_ITERATION = 25000
 CHECKPOINT_FREQUENCY = 1000
 TRAIN_STANDARDIZE = False
-TRAIN_FLIP_AUGMENT = True
+TRAIN_FLIP_AUGMENT = False
 EMBED_FLIP_AUGMENT = False
 TRAIN_CROP_AUGMENT = False
 EMBED_CROP_AUGMENT = None
