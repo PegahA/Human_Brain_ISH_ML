@@ -1295,9 +1295,9 @@ def get_image_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["t
         print ("Getting embeddings of the " + target + " set...")
         path_to_target_set = os.path.join(path_to_sets, target +".csv")
         target_df = pd.read_csv(path_to_target_set)
-        target_image_id = target_df['image_id']
+        target_image_id = list(target_df['image_id'])
 
-        target_embeddings = image_level_embeddings[image_level_embeddings['image_id'] in target_image_id]
+        target_embeddings = image_level_embeddings[image_level_embeddings['image_id'].isin(target_image_id)]
 
         target_embeddings_file_name = target +"_embeddings_image_level.csv"
         target_embeddings.to_csv(os.path.join(embeddings_path, target_embeddings_file_name), index=None)
