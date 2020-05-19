@@ -425,7 +425,7 @@ def concat_all_evaluation_results():
 
 
 def main():
-    ts_list = ["1589222258" ]
+    ts_list = ["1589858575"]
 
     for ts in ts_list:
 
@@ -458,8 +458,8 @@ def main():
 if __name__ == '__main__':
 
 
-    #main()
-    concat_all_evaluation_results()
+    main()
+    #concat_all_evaluation_results()
     
 
 
