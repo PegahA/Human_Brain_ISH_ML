@@ -260,12 +260,8 @@ if __name__ == "__main__":
         shutil.rmtree(EXPERIMENT_ROOT)
 
     os.system(train_command_line_string)
-    os.system(embed_command_line_string)
-   
-    process.convert_h5_to_csv()
-    filename = process.save_embedding_info_into_file(TIMESTAMP)
-
-
+    #os.system(embed_command_line_string)
+  
     # --------
     # to add extra parameters in the args.json file
 
@@ -273,16 +269,22 @@ if __name__ == "__main__":
     if os.path.isfile(args_file):
         with open(args_file, 'r+') as f:
             args_resumed = json.load(f)
-            args_resumed["patch_count_per_image"] = PATCH_COUNT_PER_IMAGE
-            args_resumed["segmentation_training_samples"] = SEGMENTATION_TRAINING_SAMPLES
+            f.close()
 
-            f.truncate(0)
+        args_resumed["patch_count_per_image"] = PATCH_COUNT_PER_IMAGE
+        args_resumed["segmentation_training_samples"] = SEGMENTATION_TRAINING_SAMPLES
+        with open(args_file, 'w') as f:
             json.dump(args_resumed, f, ensure_ascii=False, indent=2, sort_keys=True)
+            f.close()
     #---------
-    
+ 
+    process.convert_h5_to_csv()
+    filename = process.save_embedding_info_into_file(TIMESTAMP)
+
 
     process.merge_embeddings_to_gene_level(filename)
     process.merge_embeddings_to_image_level(filename)
+    process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
     #evaluate_embeddings.evaluate(filename)
 
 
