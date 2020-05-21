@@ -38,7 +38,7 @@ def create_diagonal_mask(low_to_high_map, target_value=1):
 
     return relationship_df
 
-def get_general_distance_and_relationship_matrix(path_to_embeddings):
+def get_general_distance_and_relationship_matrix(path_to_embeddings,image_level_embed_file_name):
     """
     This function uses the image_level_embeddings to create a distance matrix. It also creates a relationship matrix
     for images that we have an embedding for.
@@ -49,14 +49,6 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings):
     :return: 2 pandas Data frames: distance matrix and the relationship matrix.
     """
     images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
-
-
-    image_level_embed_file_name = ""
-    contents = os.listdir(path_to_embeddings)
-    for item in contents:
-        if item.endswith("embeddings_image_level.csv"):
-            image_level_embed_file_name = item
-
 
     dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings,  image_level_embed_file_name))
 
@@ -259,9 +251,9 @@ def first_hit_percentage(dist_matrix_df):
     return proportion
 
 
-def first_hit_match_percentage_and_AUC_results(path_to_embeddings):
+def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_embed_file_name):
 
-    general_distance_matrix , general_relationship_matrix = get_general_distance_and_relationship_matrix(path_to_embeddings)
+    general_distance_matrix , general_relationship_matrix = get_general_distance_and_relationship_matrix(path_to_embeddings, image_level_embed_file_name)
 
 
 
@@ -402,9 +394,38 @@ def not_the_same_gene(min_indexes_df, level):
 
 def evaluate(ts):
     path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
-    results = first_hit_match_percentage_and_AUC_results(path_to_embeddings)
 
-    return results
+    image_level_files_list = []
+
+    contents = os.listdir(path_to_embeddings)
+    for item in contents:
+        if item.endswith("embeddings_image_level.csv"):
+           image_level_files_list.append(item)
+
+    for item in image_level_files_list:
+        image_level_embed_file_name = item
+        results = first_hit_match_percentage_and_AUC_results(path_to_embeddings,image_level_embed_file_name)
+
+
+        # ---------
+        columns = ["ts", "general_first_hit_percentage", "general_AUC", "among_other_donors_first_hit_percentage",
+                   "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
+        eval_results_df = pd.DataFrame(columns=columns)
+
+        general_res = results[0]
+        among_other_donors_res = results[1]
+        within_donor_res = results[2]
+
+        eval_results_df.loc[0] = [ts, general_res[0], general_res[1], among_other_donors_res[0],
+                                  among_other_donors_res[1],
+                                  within_donor_res[0], within_donor_res[1]]
+
+        eval_result_file_name = item.split(".")[0] + "evaluation_result_top_tri.csv"
+        eval_path = os.path.join(EMBEDDING_DEST, ts)
+        eval_results_df.to_csv(os.path.join(eval_path, eval_result_file_name), index=None)
+
+        #----------
+
 
 
 def concat_all_evaluation_results():
@@ -428,30 +449,8 @@ def main():
     ts_list = ["1589858575"]
 
     for ts in ts_list:
-
-        columns = ["ts", "general_first_hit_percentage","general_AUC", "among_other_donors_first_hit_percentage",
-                   "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
-        eval_results_df = pd.DataFrame(columns=columns)
-
         print ("ts is: ", ts)
-        results = evaluate(ts)
-
-
-
-        general_res = results[0]
-        among_other_donors_res = results[1]
-        within_donor_res = results[2]
-
-         
-        eval_results_df.loc[0] = [ts,general_res[0], general_res[1], among_other_donors_res[0], among_other_donors_res[1],
-                                  within_donor_res[0], within_donor_res[1]]
-
-        print (eval_results_df)
-        eval_path = os.path.join(EMBEDDING_DEST, ts)
-        eval_results_df.to_csv(os.path.join(eval_path, "evaluation_result_top_tri.csv"), index=None)
-        print (ts)
-    
-
+        evaluate(ts)
 
 
 
@@ -459,7 +458,6 @@ if __name__ == '__main__':
 
 
     main()
-    #concat_all_evaluation_results()
     
 
 
