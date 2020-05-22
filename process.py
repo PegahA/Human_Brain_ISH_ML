@@ -1309,6 +1309,28 @@ def get_image_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["t
 
 
 
+def helper_function_to_get_embeddings_of_target_sets():
+
+    ts_set_list = [("1584753511", "sets_10_patches_20_seg"),
+                   ("1583770480", "sets_10_patches_20_seg"),
+                   ("1585521837", "sets_10_patches_20_seg"),
+                   ("1584025762", "sets_10_patches_20_seg"),
+                   ("1586831151", "sets_5_patches_20_seg"),
+                   ("1586740776", "sets_5_patches_20_seg"),
+                   ("1587686591", "sets_20_patches_20_seg"),
+                   ("1587462051", "sets_20_patches_20_seg"),
+                   ("1589259198", "sets_10_patches_40_seg"),
+                   ("1589258734", "sets_20_patches_40_seg"),
+                   ("1589222258", "sets_20_patches_40_seg")]
+
+
+    for item in ts_set_list:
+        ts = item [0]
+        set = item[1]
+
+        print ("ts is: ", ts)
+        path_to_set = os.path.join(DATA_DIR, STUDY, set)
+        get_image_level_embeddings_of_a_target_set(path_to_set, ts)
 
 
 
