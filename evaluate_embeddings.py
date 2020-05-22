@@ -428,7 +428,44 @@ def evaluate(ts):
 
 
 
+
 def concat_all_evaluation_results():
+    list_of_folders = ["1584753511","1583770480","1585521837","1584025762","1586831151","1586740776","1587686591",
+                       "1587462051", "1589259198", "1589258734","1589222258"]
+
+    train_eval_df_list = []
+    val_eval_df_list = []
+    train_val_eval_df_list = []
+
+
+    for item in list_of_folders:
+        path_to_eval_folder = os.path.join(EMBEDDING_DEST, item)
+        files = os.listdir(path_to_eval_folder)
+
+        for f in files:
+            if f.endswith("image_level_evaluation_result_top_tri.csv"):
+
+                if "triplet" in f:
+                    df = pd.read_csv(path_to_eval_folder, f)
+                    train_val_eval_df_list.append(df)
+
+                elif "training" in f:
+                    df = pd.read_csv(path_to_eval_folder, f)
+                    train_eval_df_list.append(df)
+
+                elif "validation" in f:
+                    df = pd.read_csv(path_to_eval_folder, f)
+                    val_eval_df_list.append(df)
+
+    print (len(train_eval_df_list))
+    print (len(val_eval_df_list))
+    print (len(train_val_eval_df_list))
+
+
+
+
+
+def concat_all_evaluation_results_old():
 
     list_of_folders = ["1584753511","1583770480","1585521837","1584025762","1586831151","1586740776","1587686591",
                        "1587462051", "1589259198", "1589258734","1589222258", "random_10_patches", "resnet50_10_patches" ]
@@ -458,7 +495,8 @@ def main():
 if __name__ == '__main__':
 
 
-    main()
+    #main()
+    concat_all_evaluation_results()
     
 
 
