@@ -457,9 +457,9 @@ def concat_all_evaluation_results():
                     df = pd.read_csv(os.path.join(path_to_eval_folder, f))
                     val_eval_df_list.append(df)
 
-    print (len(train_eval_df_list))
-    print (len(val_eval_df_list))
-    print (len(train_val_eval_df_list))
+
+    columns = list(train_val_eval_df_list[0])
+    print (columns)
 
 
 
