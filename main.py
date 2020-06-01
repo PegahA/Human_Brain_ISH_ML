@@ -212,7 +212,8 @@ if __name__ == "__main__":
     print ("embed crop augment: ", args.embed_crop_augment)
     print ('embed aggregator: ', args.embed_aggregator)
    
-    
+
+    """
 
     train_py_path = os.path.join(TRIPLET_DIR, "train.py")
     train_command_line_string = "python " + train_py_path + \
@@ -254,6 +255,9 @@ if __name__ == "__main__":
                                 (" --flip_augment" if args.embed_flip_augment else "") + \
                                 (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
+                                
+    """
+
 
     """     
     if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
@@ -288,6 +292,9 @@ if __name__ == "__main__":
     #evaluate_embeddings.evaluate(filename)
 
     """
+
+
+    """
     for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "experiment_files")):
         for d in dirs:
             os.chmod(os.path.join(root, d), 0o777)
@@ -304,6 +311,9 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
+    
+    
+    """
         
      
    
