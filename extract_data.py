@@ -383,8 +383,8 @@ def run():
             # total_invalid_experiments = dict(total_invalid_experiments.items() + invalid_experiments.items())
             total_invalid_experiments.update(invalid_experiments)
 
-        # download_images(image_list_to_download)
-        # redownload_small_images()
+        download_images(image_list_to_download)
+        redownload_small_images()
 
         # image_info_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "human_ISH_info.csv"), index=None)
         image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"), index=None)
