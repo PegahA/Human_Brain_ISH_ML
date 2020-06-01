@@ -431,7 +431,7 @@ def evaluate(ts):
 
 def concat_all_evaluation_results():
     list_of_folders = ["1584753511","1583770480","1585521837","1584025762","1586831151","1586740776","1587686591",
-                       "1587462051", "1589259198", "1589258734","1589222258"]
+                       "1587462051", "1589259198", "1589258734","1589222258","1590447596", "1590447299"]
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -459,10 +459,44 @@ def concat_all_evaluation_results():
 
 
     columns = list(train_val_eval_df_list[0])
-    print (columns)
+    train_columns = ["training_"+item for item in columns[1:]]
+    train_columns = [columns[0]] + train_columns
+    train_columns_dict ={}
+    
+    val_columns = ["validation_"+item for item in columns[1:]]
+    val_columns = [columns[0]] + val_columns
+    val_columns_dict ={}
+
+    #train_and_val_columns = ["train_and_validation_"+item for item in columns[1:]]
+    #train_and_val_columns = [columns[0]] + train_and_val_columns
+    #train_and_val_columns_dict ={}
+
+
+    for i in range(len(columns)):
+        train_columns_dict[columns[i]] = train_columns[i]
+        val_columns_dict[columns[i]] = val_columns[i]
+        #train_and_val_columns_dict[columns[i]] = train_and_val_columns[i]
+
+
+    concatenated_training_df = pd.concat(train_eval_df_list)
+    concatenated_training_df = concatenated_training_df.rename(columns=train_columns_dict)
+
+    concatenated_validation_df = pd.concat(val_eval_df_list)
+    concatenated_validation_df = concatenated_validation_df.rename(columns=val_columns_dict)
+    
+    concatenated_train_and_validation_df = pd.concat(train_val_eval_df_list)
+    #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
+
+
+    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"training_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"validation_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
 
 
 
+    all_three_df_list = [concatenated_training_df, concatenated_validation_df, concatenated_train_and_validation_df]
+    concatenated_all_df = pd.concat(all_three_df_list, axis=1)
+    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"all_evaluation_result_top_tri.csv"), index=None)
 
 
 def concat_all_evaluation_results_old():
@@ -483,9 +517,10 @@ def concat_all_evaluation_results_old():
 
 
 def main():
-    ts_list = ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",
-               "1587686591", "1587462051", "1589259198", "1589258734" , "1589222258"]
+    #ts_list = ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",
+               #"1587686591", "1587462051", "1589259198", "1589258734" , "1589222258"]
 
+    ts_list = ["random"]
     for ts in ts_list:
         print ("ts is: ", ts)
         evaluate(ts)
@@ -495,8 +530,8 @@ def main():
 if __name__ == '__main__':
 
 
-    #main()
-    concat_all_evaluation_results()
+    main()
+    #concat_all_evaluation_results()
     
 
 
