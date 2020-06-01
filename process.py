@@ -911,8 +911,8 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     """
 
 
-
-    path_to_info_csv = os.path.join(IMAGE_ROOT,info_csv_file)
+    path_to_info_csv = os.path.join(DATA_DIR,STUDY, "sets_20_patches_20_seg/validation.csv")
+    #path_to_info_csv = os.path.join(IMAGE_ROOT,info_csv_file)
     info_csv = pd.read_csv(path_to_info_csv,)
 
     columns = list(info_csv)
@@ -936,7 +936,7 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     if (not os.path.exists(path_to_random)):
         os.mkdir(path_to_random)
 
-    random_embed_file.to_csv(os.path.join(path_to_random, "random_embeddings.csv"),index=None)
+    random_embed_file.to_csv(os.path.join(path_to_random, "random_validation_embeddings_image_level.csv"),index=None)
 
     print ("finished generating random embeddings...")
 
@@ -1336,14 +1336,16 @@ def helper_function_to_get_embeddings_of_target_sets():
 
 
 if __name__ == '__main__':
-    #generate_random_embeddings("valid_patches_info.csv", 128)
+    generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
-    merge_embeddings_to_gene_level("1589259198")
-    merge_embeddings_to_image_level("1589259198")
+    #merge_embeddings_to_gene_level("1589259198")
+    #merge_embeddings_to_image_level("1589259198")
+
+    #helper_function_to_get_embeddings_of_target_sets()
 
     #get_stats("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/human_ISH_info.csv")
     #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level_copy_2.csv"
