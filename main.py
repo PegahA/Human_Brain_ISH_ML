@@ -255,12 +255,12 @@ if __name__ == "__main__":
                                 (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
-         
+    """     
     if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
         shutil.rmtree(EXPERIMENT_ROOT)
 
     os.system(train_command_line_string)
-    #os.system(embed_command_line_string)
+    os.system(embed_command_line_string)
   
     # --------
     # to add extra parameters in the args.json file
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
     #evaluate_embeddings.evaluate(filename)
 
-
+    """
     for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "experiment_files")):
         for d in dirs:
             os.chmod(os.path.join(root, d), 0o777)
