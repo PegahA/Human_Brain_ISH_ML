@@ -420,7 +420,7 @@ def evaluate(ts):
                                   among_other_donors_res[1],
                                   within_donor_res[0], within_donor_res[1]]
 
-        eval_result_file_name = item.split(".")[0] + "evaluation_result_top_tri.csv"
+        eval_result_file_name = item.split(".")[0] + "_evaluation_result_top_tri.csv"
         eval_path = os.path.join(EMBEDDING_DEST, ts)
         eval_results_df.to_csv(os.path.join(eval_path, eval_result_file_name), index=None)
 
@@ -520,7 +520,7 @@ def main():
     #ts_list = ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",
                #"1587686591", "1587462051", "1589259198", "1589258734" , "1589222258"]
 
-    ts_list = ["random"]
+    ts_list = ["1591063659"]
     for ts in ts_list:
         print ("ts is: ", ts)
         evaluate(ts)
