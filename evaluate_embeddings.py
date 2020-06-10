@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import scipy
 from sklearn import metrics
+import json
 #print (pd.show_versions())
 
 
@@ -447,18 +448,30 @@ def evaluate(ts):
         results = first_hit_match_percentage_and_AUC_results(path_to_embeddings,image_level_embed_file_name)
 
 
-        # ---------
+        # from args.json :
+        args_names, args_val = get_arguments_from_json(ts)
+
+
         columns = ["ts", "general_first_hit_percentage", "general_AUC", "among_other_donors_first_hit_percentage",
                    "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
+
+        if args_names != None and args_val != None:
+            columns = columns[0] + args_names + columns[1:]
+
         eval_results_df = pd.DataFrame(columns=columns)
 
         general_res = results[0]
         among_other_donors_res = results[1]
         within_donor_res = results[2]
 
-        eval_results_df.loc[0] = [ts, general_res[0], general_res[1], among_other_donors_res[0],
-                                  among_other_donors_res[1],
-                                  within_donor_res[0], within_donor_res[1]]
+        if args_names != None and args_val != None:
+            eval_results_df.loc[0] = [ts] + args_val + [general_res[0], general_res[1], among_other_donors_res[0],
+                                      among_other_donors_res[1],
+                                      within_donor_res[0], within_donor_res[1]]
+        else:
+            eval_results_df.loc[0] = [ts, general_res[0], general_res[1], among_other_donors_res[0],
+                                                        among_other_donors_res[1],
+                                                        within_donor_res[0], within_donor_res[1]]
 
         eval_result_file_name = item.split(".")[0] + "_evaluation_result_top_tri.csv"
         eval_path = os.path.join(EMBEDDING_DEST, ts)
@@ -467,6 +480,29 @@ def evaluate(ts):
         #----------
 
 
+
+
+def get_arguments_from_json(ts):
+    list_of_arguments_to_get = ["segmentation_training_samples","patch_count_per_image", "learning_rate", "batch_k",
+                                "batch_p", "flip_augment", "standardize"]
+
+    args_val_list = []
+
+    path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
+    args_file = os.path.join(path_to_embeddings, "args.json")
+    if not os.path.exists(args_file):
+        print ("There is no args.json file in ", path_to_embeddings)
+        return None, None
+
+    if os.path.isfile(args_file):
+        with open(args_file, 'r+') as f:
+            args_resumed = json.load(f)
+            for arg in list_of_arguments_to_get:
+                args_val_list.append(args_resumed[arg])
+
+            f.close()
+
+    return list_of_arguments_to_get, args_val_list
 
 
 def concat_all_evaluation_results():
@@ -580,9 +616,10 @@ def main():
                #"1587686591", "1587462051", "1589259198", "1589258734" , "1589222258"]
 
 
-    ts_list = ["1591130418", "1591130635", "1591132845", "1591188766", "1591234815", "1591250445", 
-              "1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031", 
-               "1591490025", "1591509560", "1591521386", "1591588276"]
+    #ts_list = ["1591130418", "1591130635", "1591132845", "1591188766", "1591234815", "1591250445",
+              #"1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031",
+               #"1591490025", "1591509560", "1591521386", "1591588276"]
+    ts_list = ["1591588276"]
 
     for ts in ts_list:
         print ("ts is: ", ts)
@@ -597,7 +634,9 @@ if __name__ == '__main__':
     # n_results()
 
     #main()
-    concat_all_evaluation_results()
+    #concat_all_evaluation_results()
+
+
 
     
 
