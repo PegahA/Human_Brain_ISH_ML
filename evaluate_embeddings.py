@@ -12,7 +12,7 @@ import json
 
 
 
-EMBEDDING_DEST = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/"
+#EMBEDDING_DEST = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/"
 
 def create_diagonal_mask(low_to_high_map, target_value=1):
     """
@@ -55,8 +55,8 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings,image_level_
     :param path_to_embeddings:  path to the image_level_embeddings
     :return: 2 pandas Data frames: distance matrix and the relationship matrix.
     """
-    #images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
-    images_info = pd.read_csv(os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
+    #images_info = pd.read_csv(os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
 
     dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings,  image_level_embed_file_name))
 
@@ -269,9 +269,8 @@ def first_hit_percentage(dist_matrix_df):
 
     print ("Calculating first hit match percentage ...")
 
-    #images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
-    images_info = pd.read_csv(
-        os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
+    #images_info = pd.read_csv( os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
 
     min_indexes_df = find_closest_image(dist_matrix_df) # min_indexes_df has two columns: an image ID and the ID of the closest image to that image
 
@@ -307,10 +306,9 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     # ---- Among Other Donors ------------------------------------------------------------------------
 
     print ("---------------------------------- Other Donors ----------------------------- ")
-    #images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
 
-    images_info = pd.read_csv(
-        os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
+    #images_info = pd.read_csv(os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
 
     dist_matrix_rows = list(general_distance_matrix.index)
 
@@ -456,7 +454,7 @@ def evaluate(ts):
                    "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
 
         if args_names != None and args_val != None:
-            columns = columns[0] + args_names + columns[1:]
+            columns = [columns[0]] + args_names + columns[1:]
 
         eval_results_df = pd.DataFrame(columns=columns)
 
