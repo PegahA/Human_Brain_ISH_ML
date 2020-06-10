@@ -7,6 +7,12 @@ import numpy as np
 import scipy
 from sklearn import metrics
 #print (pd.show_versions())
+
+
+
+
+EMBEDDING_DEST = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/"
+
 def create_diagonal_mask(low_to_high_map, target_value=1):
     """
     Create a block diagonal mask matrix from the input mapping.
@@ -48,7 +54,8 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings,image_level_
     :param path_to_embeddings:  path to the image_level_embeddings
     :return: 2 pandas Data frames: distance matrix and the relationship matrix.
     """
-    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
+    #images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
+    images_info = pd.read_csv(os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
 
     dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings,  image_level_embed_file_name))
 
@@ -148,7 +155,7 @@ def apply_mask(mask_matrix_df, original_matrix_df):
     return after_masking_df
 
 
-def AUC(dist_matrix_df, label_matrix_df):
+def AUC(dist_matrix_df, label_matrix_df, label):
     """
     Calculates the AUC using the positive and negative pairs.
     It gets the actual labels of the pairs from the label matrix and the predicted labels based on the distance matrix.
@@ -160,6 +167,8 @@ def AUC(dist_matrix_df, label_matrix_df):
     columns should be the same, also any cell that is Nan in one matrix should also be Nan in the other one.
     :return: float. The AUC value.
     """
+
+
 
 
     print ("Calculating AUC ...")
@@ -184,6 +193,7 @@ def AUC(dist_matrix_df, label_matrix_df):
         top_tri_dist_matrix = top_tri_dist_matrix[~np.isnan(top_tri_dist_matrix)]  # remove NaNs
         print ("top triangle of dist matrix without NaNs:", len(top_tri_dist_matrix))
 
+
         top_tri_ind_list = np.triu_indices(len(label_matrix_array), 1)
         top_tri_label_matrix = label_matrix_array[top_tri_ind_list]
         top_tri_label_matrix = top_tri_label_matrix [~np.isnan(top_tri_label_matrix)]  # remove NaNs
@@ -194,6 +204,31 @@ def AUC(dist_matrix_df, label_matrix_df):
         # #positive label is 0 because distance is closer for positive pairs.
         fpr, tpr, thresholds = metrics.roc_curve(top_tri_label_matrix, top_tri_dist_matrix, pos_label=0)
         auc_val = metrics.auc(fpr, tpr)
+
+
+
+
+        # --------
+
+        #plot_roc_curve_2(fpr, tpr,label)
+
+        # ----
+
+        l = len(top_tri_dist_matrix)
+        print (l)
+        l_sub = len(top_tri_dist_matrix) // 10
+        res = np.random.choice(l, l_sub)
+
+        top_tri_dist_matrix = [top_tri_dist_matrix[i] for i in res]
+        top_tri_label_matrix = [top_tri_label_matrix[i] for i in res]
+
+        print (len(top_tri_label_matrix))
+
+        # ----
+
+        plot_roc_curve_2(top_tri_label_matrix, top_tri_dist_matrix, label)
+
+        # --------
         
         """
         dist_matrix_flatten = dist_matrix_array.flatten()
@@ -233,7 +268,9 @@ def first_hit_percentage(dist_matrix_df):
 
     print ("Calculating first hit match percentage ...")
 
-    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
+    #images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
+    images_info = pd.read_csv(
+        os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
 
     min_indexes_df = find_closest_image(dist_matrix_df) # min_indexes_df has two columns: an image ID and the ID of the closest image to that image
 
@@ -262,14 +299,18 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
 
     print ("---------------------------------- General ---------------------------------- ")
     general_first_hit_percentage = first_hit_percentage(general_distance_matrix)
-    general_AUC = AUC(general_distance_matrix, general_relationship_matrix)
+    general_AUC = AUC(general_distance_matrix, general_relationship_matrix, "General")
 
     general_res = [general_first_hit_percentage, general_AUC]
 
     # ---- Among Other Donors ------------------------------------------------------------------------
 
     print ("---------------------------------- Other Donors ----------------------------- ")
-    images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
+    #images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
+
+    images_info = pd.read_csv(
+        os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
+
     dist_matrix_rows = list(general_distance_matrix.index)
 
     donors = images_info[images_info['image_id'].isin(dist_matrix_rows)]['donor_id']
@@ -286,7 +327,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
 
   
     among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
-    among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking)
+    among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Other Donors")
 
     among_other_donors_res = [among_other_donors_first_hit_percentage, among_other_donors_AUC]
 
@@ -309,7 +350,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     relationship_matrix_after_masking = apply_mask(arranged_inverted_mask_df, general_relationship_matrix)
 
     withing_donor_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
-    within_donor_brains_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking)
+    within_donor_brains_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Within Donor")
 
     within_donor_res = [withing_donor_first_hit_percentage, within_donor_brains_AUC]
 
@@ -394,7 +435,6 @@ def not_the_same_gene(min_indexes_df, level):
 
 def evaluate(ts):
     path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
-
     image_level_files_list = []
 
     contents = os.listdir(path_to_embeddings)
@@ -516,11 +556,45 @@ def concat_all_evaluation_results_old():
 
 
 
+
+
+def plot_roc_curve_2(x, y, label):
+
+    print ("here in plotting ...")
+    import matplotlib.pyplot as plt
+
+    plt.scatter(x, y)
+    plt.title(label+" - Training")
+    plt.xlabel("label")
+    plt.ylabel("distance")
+    plt.show()
+
+def plot_roc_curve(label_matrix, dist_matrix):
+
+    print ("Here in plotting ...")
+    import scikitplot as skplt
+    import matplotlib.pyplot as plt
+
+    y_true =  label_matrix
+    y_pred=  dist_matrix
+
+    print (type(y_true))
+    print (type(y_pred))
+
+    print (y_true.shape)
+    print (y_pred.shape)
+    skplt.metrics.plot_roc_curve(y_true, y_pred)
+    plt.show()
+
+
+
+
+
 def main():
     #ts_list = ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",
                #"1587686591", "1587462051", "1589259198", "1589258734" , "1589222258"]
 
-    ts_list = ["1591063659"]
+    ts_list = ["latest_training"]
     for ts in ts_list:
         print ("ts is: ", ts)
         evaluate(ts)
@@ -531,7 +605,8 @@ if __name__ == '__main__':
 
 
     main()
-    #concat_all_evaluation_results()
+    #concat_all_evaluatio
+    # n_results()
     
 
 
