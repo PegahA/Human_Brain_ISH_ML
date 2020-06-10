@@ -542,24 +542,6 @@ def concat_all_evaluation_results():
     concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","all_evaluation_result_top_tri.csv"), index=None)
 
 
-def concat_all_evaluation_results_old():
-
-    list_of_folders = ["1584753511","1583770480","1585521837","1584025762","1586831151","1586740776","1587686591",
-                       "1587462051", "1589259198", "1589258734","1589222258", "random_10_patches", "resnet50_10_patches" ]
-    pd_df_list = []
-    for item in list_of_folders:
-        path_to_eval_res = os.path.join(EMBEDDING_DEST, item, "evaluation_result_top_tri.csv")
-
-        df = pd.read_csv(path_to_eval_res)
-        pd_df_list.append(df)
-
-    concatenated_df = pd.concat(pd_df_list)
-
-    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, "all_evaluation_result_top_tri.csv"))
-
-
-
-
 
 def plot_roc_curve_2(x, y, label):
 
