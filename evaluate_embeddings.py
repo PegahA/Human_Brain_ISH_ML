@@ -227,7 +227,7 @@ def AUC(dist_matrix_df, label_matrix_df, label):
 
         # ----
 
-        plot_roc_curve_2(top_tri_label_matrix, top_tri_dist_matrix, label)
+        #plot_roc_curve_2(top_tri_label_matrix, top_tri_dist_matrix, label)
 
         # --------
         
@@ -510,7 +510,8 @@ def concat_all_evaluation_results():
              # "1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031",
              #  "1591490025", "1591509560", "1591521386", "1591588276"]
 
-    list_of_folders= ["1591588276"]
+    list_of_folders= ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",              "1587686591", "1587462051", "1589259198", "1589258734" , "1589222258""1591130418", "1591130635", "1591132845", "1591188766", "1591234815", "1591250445","1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031","1591490025", "1591509560", "1591521386", "1591588276","1591600820", "1591615341", "1591684726", "1591695239"]
+
     train_eval_df_list = []
     val_eval_df_list = []
     train_val_eval_df_list = []
@@ -566,24 +567,28 @@ def concat_all_evaluation_results():
     #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
 
 
-    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"args","training_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"args","validation_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"args","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","training_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","validation_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
 
     # ---------
     # If you have columns on arguments, keep them in training but drop them in validation and train_and_val to prevent duplicates
     list_of_cols_in_validation_df = list(concatenated_validation_df)
     list_of_cols_in_train_val_df = list(concatenated_train_and_validation_df)
+    args_cols = ["segmentation_training_samples","patch_count_per_image", "learning_rate", "batch_k",
+                                "batch_p", "flip_augment", "standardize"]
+    args_cols_val = ["validation_"+item for item in args_cols]
+    
     if len(list_of_cols_in_train_val_df) == len(list_of_cols_in_validation_df) and len(list_of_cols_in_train_val_df) > 7:
-        concatenated_validation_df = concatenated_validation_df.drop([1,2,3,4,5,6,7], axis=1)
-        concatenated_train_and_validation_df = concatenated_train_and_validation_df.drop([1,2,3,4,5,6,7], axis=1)
+        concatenated_validation_df = concatenated_validation_df.drop(args_cols_val, axis=1)
+        concatenated_train_and_validation_df = concatenated_train_and_validation_df.drop(args_cols, axis=1)
 
 
     # ---------
 
     all_three_df_list = [concatenated_training_df, concatenated_validation_df, concatenated_train_and_validation_df]
     concatenated_all_df = pd.concat(all_three_df_list, axis=1)
-    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"args","all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","all_evaluation_result_top_tri.csv"), index=None)
 
 
 
@@ -620,14 +625,9 @@ def plot_roc_curve(label_matrix, dist_matrix):
 
 
 def main():
-    #ts_list = ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",
-               #"1587686591", "1587462051", "1589259198", "1589258734" , "1589222258"]
-
-
-    #ts_list = ["1591130418", "1591130635", "1591132845", "1591188766", "1591234815", "1591250445",
-              #"1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031",
-               #"1591490025", "1591509560", "1591521386", "1591588276"]
-    ts_list = ["1591588276"]
+    ts_list = ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776",
+              "1587686591", "1587462051", "1589259198", "1589258734" , "1589222258""1591130418", "1591130635", "1591132845", "1591188766", "1591234815", "1591250445","1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031","1591490025", "1591509560", "1591521386", "1591588276","1591600820", "1591615341", "1591684726", "1591695239"]
+   
 
     for ts in ts_list:
         print ("ts is: ", ts)
@@ -641,7 +641,7 @@ if __name__ == '__main__':
     #concat_all_evaluatio
     # n_results()
 
-    #main()
+    main()
     concat_all_evaluation_results()
 
 
