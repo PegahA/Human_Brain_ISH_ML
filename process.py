@@ -1268,10 +1268,25 @@ def specific_donor_embeddings(donor_id, embed_folder_name):
 
 def convert_to_tsv(path_to_csv):
 
+
+    # With meta
+
     path_to_tsv = path_to_csv.split(".")[0] + ".tsv"
     csv_read = pd.read_csv(path_to_csv)
+
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False))
+
+
+    # Without meta data
+
+    path_to_tsv = path_to_csv.split(".")[0] + "_no_meta.tsv"
+    csv_read = pd.read_csv(path_to_csv)
+
+    csv_read = csv_read.drop(columns=['gene_symbol', 'Cortical.marker..human.', 'Expression.level'])
+
+    with open(path_to_tsv, 'w') as write_tsv:
+        write_tsv.write(csv_read.to_csv(sep='\t', index=False, header=False))
 
 
 
@@ -1335,8 +1350,74 @@ def helper_function_to_get_embeddings_of_target_sets():
 
 
 
+def preprocess_zeng_layer_marker_and_expression(path_to_zeng):
+
+    acceptable_layer_names = {"layer 1", "layer 1", "layer 3", "layer 4", "layer 5", "layer 6"}
+    zeng_df = pd.read_csv(path_to_zeng)
+    layer_marker_list = list(zeng_df['Cortical.marker..human.'])
+
+    for i in range(len(layer_marker_list)):
+        if layer_marker_list[i] not in acceptable_layer_names:
+            layer_marker_list[i] = float("NaN")
+
+    zeng_df['Cortical.marker..human.'] = layer_marker_list
+
+    new_zeng_path = path_to_zeng.split(".")[0] + "_processed.csv"
+    zeng_df.to_csv(new_zeng_path, index= None, na_rep='NA')
+
+
+
+def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level_embeddings):
+
+    zeng_df = pd.read_csv(path_to_zeng)
+    gene_level_embed_df = pd.read_csv(path_to_gene_level_embeddings)
+
+    zeng_gene_symbol_list = list(zeng_df['gene_symbol'])
+    embed_gene_symbol_list = list(gene_level_embed_df['gene_symbol'])
+
+    zeng_gene_symbol_list_unique =  set(zeng_gene_symbol_list)
+    embed_gene_symbol_list_unique = set(embed_gene_symbol_list)
+
+
+    in_zeng_not_in_embed = []
+    in_embed_not_in_zeng = []
+
+
+    for item in zeng_gene_symbol_list_unique:
+        if item not in embed_gene_symbol_list_unique:
+            in_zeng_not_in_embed.append(item)
+
+    for item in embed_gene_symbol_list_unique:
+        if item not in zeng_gene_symbol_list_unique:
+            in_embed_not_in_zeng.append(item)
+
+    print ("There are {} genes in Zeng that are not in the embeddings file.".format(len(in_zeng_not_in_embed)))
+    print (in_zeng_not_in_embed)
+
+    print ("----")
+    print ("There are {} genes in the embeddings file that are not in Zeng.".format(len(in_embed_not_in_zeng)))
+    print (in_embed_not_in_zeng)
+
+
+    merged_with_markers_df = gene_level_embed_df.merge(zeng_df, how='left', on='gene_symbol')
+    columns = list(merged_with_markers_df)
+    columns = [columns[0]] + [columns[-2]] + [columns[-1] ] + columns[1:-2]
+    merged_with_markers_df = merged_with_markers_df[columns]
+    new_path = path_to_gene_level_embeddings.split(".")[0] + "_with_marker.csv"
+    merged_with_markers_df.to_csv(new_path, index=None, na_rep='NA')
+
+
+    return new_path
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
-    generate_random_embeddings("", 128)
+    #generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
@@ -1354,6 +1435,15 @@ if __name__ == '__main__':
 
     #specific_donor_embeddings('H08-0025', '1587462051')
 
+
+
+    #path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset.csv"
+    #preprocess_zeng_layer_marker_and_expression(path_to_zeng)
+
+    new_path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset_processed.csv"
+    path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591329662/triplet_training_validation_embeddings_gene_level.csv"
+    new_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
+    convert_to_tsv(new_path)
     
 
 
