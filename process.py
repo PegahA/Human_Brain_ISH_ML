@@ -1429,7 +1429,17 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
                                                                                    len(layer_marker_col) - na_count,
                                                                                    len(layer_marker_col)))
 
-    return new_path
+
+
+    # ------ remove NA values
+
+    merged_with_markers_df_no_na = merged_with_markers_df[merged_with_markers_df['Cortical.marker..human.'].notna()]
+
+    no_na_path = path_to_gene_level_embeddings.split(".")[0] + "_with_marker_no_na.csv"
+    merged_with_markers_df_no_na.to_csv(no_na_path, index=None)
+
+
+    return new_path, no_na_path
 
 
 
@@ -1459,13 +1469,14 @@ if __name__ == '__main__':
 
 
 
-    path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset.csv"
-    preprocess_zeng_layer_marker_and_expression(path_to_zeng)
+    #path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset.csv"
+    #preprocess_zeng_layer_marker_and_expression(path_to_zeng)
 
     new_path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset_processed.csv"
-    path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591329662/triplet_training_validation_embeddings_gene_level.csv"
-    new_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
-    #convert_to_tsv(new_path)
+    path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591132845/triplet_training_validation_embeddings_gene_level.csv"
+    new_path, no_na_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
+    convert_to_tsv(new_path)
+    convert_to_tsv(no_na_path)
     
 
 
