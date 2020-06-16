@@ -8,8 +8,9 @@ import time
 from shutil import copyfile
 import operator
 import matplotlib.pyplot as plt
-
+import math
 random.seed(1)
+
 
 
 
@@ -1360,14 +1361,23 @@ def preprocess_zeng_layer_marker_and_expression(path_to_zeng):
         if layer_marker_list[i] not in acceptable_layer_names:
             layer_marker_list[i] = float("NaN")
 
+    na_count = 0
+
+    for item in layer_marker_list:
+        if item not in acceptable_layer_names:
+            na_count +=1
+
+    #print ("There are {} NA values and {} layer markers from a total of {}.".format(na_count, len(layer_marker_list)-na_count,len(layer_marker_list)))
+
     zeng_df['Cortical.marker..human.'] = layer_marker_list
 
     new_zeng_path = path_to_zeng.split(".")[0] + "_processed.csv"
-    zeng_df.to_csv(new_zeng_path, index= None, na_rep='NA')
+    #zeng_df.to_csv(new_zeng_path, index= None, na_rep='NA')
 
 
 
 def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level_embeddings):
+
 
     zeng_df = pd.read_csv(path_to_zeng)
     gene_level_embed_df = pd.read_csv(path_to_gene_level_embeddings)
@@ -1406,6 +1416,18 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
     new_path = path_to_gene_level_embeddings.split(".")[0] + "_with_marker.csv"
     merged_with_markers_df.to_csv(new_path, index=None, na_rep='NA')
 
+    acceptable_layer_names = {"layer 1", "layer 1", "layer 3", "layer 4", "layer 5", "layer 6"}
+    na_count = 0
+
+    layer_marker_col = list(merged_with_markers_df['Cortical.marker..human.'])
+    for item in layer_marker_col:
+        if item not in acceptable_layer_names:
+            na_count += 1
+
+    print("----")
+    print("There are {} NA values and {} layer markers from a total of {}.".format(na_count,
+                                                                                   len(layer_marker_col) - na_count,
+                                                                                   len(layer_marker_col)))
 
     return new_path
 
@@ -1437,13 +1459,13 @@ if __name__ == '__main__':
 
 
 
-    #path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset.csv"
-    #preprocess_zeng_layer_marker_and_expression(path_to_zeng)
+    path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset.csv"
+    preprocess_zeng_layer_marker_and_expression(path_to_zeng)
 
     new_path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset_processed.csv"
     path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591329662/triplet_training_validation_embeddings_gene_level.csv"
     new_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
-    convert_to_tsv(new_path)
+    #convert_to_tsv(new_path)
     
 
 
