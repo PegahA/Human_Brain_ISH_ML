@@ -172,7 +172,7 @@ if __name__ == "__main__":
     #process.make_sets() 
 
  
-     
+    
     print ("i am here in main!")
 
     
@@ -211,9 +211,9 @@ if __name__ == "__main__":
     print ("embed flip augment: ", args.embed_flip_augment)
     print ("embed crop augment: ", args.embed_crop_augment)
     print ('embed aggregator: ', args.embed_aggregator)
-   
+    
 
-    """
+    
 
     train_py_path = os.path.join(TRIPLET_DIR, "train.py")
     train_command_line_string = "python " + train_py_path + \
@@ -256,10 +256,10 @@ if __name__ == "__main__":
                                 (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
                                 
-    """
+    
 
 
-    """     
+        
     if os.path.exists(EXPERIMENT_ROOT) and os.path.isdir(EXPERIMENT_ROOT):
         shutil.rmtree(EXPERIMENT_ROOT)
 
@@ -291,10 +291,10 @@ if __name__ == "__main__":
     process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
     #evaluate_embeddings.evaluate(filename)
 
-    """
+   
 
 
-    """
+    
     for root, dirs, files in os.walk(os.path.join(DATA_DIR,STUDY, "experiment_files")):
         for d in dirs:
             os.chmod(os.path.join(root, d), 0o777)
@@ -313,7 +313,7 @@ if __name__ == "__main__":
     print ("permissions fixed for segmentation embeddings")
     
     
-    """
+   
         
      
    
