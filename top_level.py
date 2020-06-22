@@ -23,7 +23,8 @@ if __name__ == "__main__":
                                             " --train_batch_p=" + str(batch_p) + \
                                             " --train_batch_k=" + str(batch_k) +\
                                             " --learning_rate=" +  str(lr) +\
-                                            " --train_flip_augment=" + str(flip)
+                                            (" --flip_augment" if flip else "")
+
 
                 os.system(main_command_line_string)
 
