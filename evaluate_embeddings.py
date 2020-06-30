@@ -440,13 +440,16 @@ def get_creation_time(ts):
 
     path_to_embed_file = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
 
-    stat = os.stat(path_to_embed_file)
-    try:
-        return stat.st_birthtime
-    except AttributeError:
-        # We're probably on Linux. No easy way to get creation dates here,
-        # so we'll settle for when its content was last modified.
-        return stat.st_mtime
+    if os.path.exists(path_to_embed_file):
+        stat = os.stat(path_to_embed_file)
+        try:
+            return stat.st_birthtime
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            return stat.st_mtime
+    else:
+        return None
 
 def evaluate(ts):
     path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
@@ -474,8 +477,12 @@ def evaluate(ts):
         df = pd.read_csv(os.path.join(path_to_embeddings, image_level_embed_file_name))
         number_of_embeddings = len(df)
 
-        creation_time  = int(get_creation_time(ts))
-        duration = creation_time - int(ts)
+        creation_time  = get_creation_time(ts)
+        if creation_time != None:
+            creation_time = int(creation_time)
+            duration = creation_time - int(ts)
+        else:
+            duration = 0
         # ---------------------------------------------
 
         if args_names != None and args_val != None:
@@ -670,8 +677,10 @@ def main():
     #ts_list = ["1591712071", "1591783517", "1591793952", "1591813151", "1591881335", "1591897361", "1591914659", "1591986392" ,
                #"1591997885", "1592014294", "1592079079", "1592090557", "1592105924", "1592178919" ]
 
-    ts_list = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
-               "1593244389", "1593245325", "1593349242", "1593353302", "1593355864"]
+    #ts_list = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
+               #"1593244389", "1593245325", "1593349242", "1593353302", "1593355864"]
+
+    ts_list = ["random"]
     for ts in ts_list:
         print ("ts is: ", ts)
         evaluate(ts)
@@ -687,7 +696,7 @@ if __name__ == '__main__':
     # n_results()
 
     main()
-    concat_all_evaluation_results()
+    #concat_all_evaluation_results()
 
 
     
