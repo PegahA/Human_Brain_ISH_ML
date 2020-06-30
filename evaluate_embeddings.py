@@ -479,7 +479,7 @@ def evaluate(ts):
         # ---------------------------------------------
 
         if args_names != None and args_val != None:
-            columns = [columns[0]] + args_names + columns[1:]
+            columns = [columns[0:3]] + args_names + columns[3:]
 
         eval_results_df = pd.DataFrame(columns=columns)
 
