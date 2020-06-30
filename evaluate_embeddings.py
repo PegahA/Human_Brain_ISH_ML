@@ -555,7 +555,7 @@ def concat_all_evaluation_results():
     """
 
     list_of_folders = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
-               "1593244389", "1593245325", "1593349242", "1593353302", "1593355864"]
+               "1593244389", "1593245325", "1593349242", "1593353302", "1593355864", "random"]
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -695,8 +695,8 @@ if __name__ == '__main__':
     #concat_all_evaluatio
     # n_results()
 
-    main()
-    #concat_all_evaluation_results()
+    #main()
+    concat_all_evaluation_results()
 
 
     
