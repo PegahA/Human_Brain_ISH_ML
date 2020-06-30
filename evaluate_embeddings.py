@@ -569,17 +569,33 @@ def concat_all_evaluation_results():
         for f in files:
             if f.endswith("image_level_evaluation_result_top_tri.csv"):
 
-                if "triplet" in f:
-                    df = pd.read_csv(os.path.join(path_to_eval_folder, f))
-                    train_val_eval_df_list.append(df)
+                if "random" in f:
+                    if "random_training_validation" in f:
+                        df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                        train_val_eval_df_list.append(df)
 
-                elif "training" in f:
-                    df = pd.read_csv(os.path.join(path_to_eval_folder, f))
-                    train_eval_df_list.append(df)
+                    elif "random_training" in f:
+                        df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                        train_eval_df_list.append(df)
 
-                elif "validation" in f:
-                    df = pd.read_csv(os.path.join(path_to_eval_folder, f))
-                    val_eval_df_list.append(df)
+
+                    elif "random_validation" in f:
+                        df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                        val_eval_df_list.append(df)
+
+
+                else:
+                    if "triplet" in f:
+                        df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                        train_val_eval_df_list.append(df)
+
+                    elif "training" in f:
+                        df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                        train_eval_df_list.append(df)
+
+                    elif "validation" in f:
+                        df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                        val_eval_df_list.append(df)
 
 
     columns = list(train_val_eval_df_list[0])
