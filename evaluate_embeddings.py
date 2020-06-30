@@ -438,7 +438,7 @@ def not_the_same_gene(min_indexes_df, level):
 
 def get_creation_time(ts):
 
-    path_to_embed_file = os.path.join(EXPERIMENT_ROOT, "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
+    path_to_embed_file = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
 
     stat = os.stat(path_to_embed_file)
     try:
