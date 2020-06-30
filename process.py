@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-import h5py
+#import h5py
 import time
 from shutil import copyfile
 import operator
@@ -1454,9 +1454,9 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
 
 if __name__ == '__main__':
 
-    generate_random_embeddings("", 128)
+    #generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
-    #get_embeddings_from_pre_trained_model(standardize=True)
+    get_embeddings_from_pre_trained_model(standardize=False)
     #get_embeddings_from_pre_trained_model_in_chunks()
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
