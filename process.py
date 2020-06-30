@@ -911,35 +911,39 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     :return: None
     """
 
+    set_name_list = ["training.csv", "training_validation.cs", "validation.csv"]
+    for set_name in set_name_list:
 
-    path_to_info_csv = os.path.join(DATA_DIR,STUDY, "sets_20_patches_20_seg/validation.csv")
-    #path_to_info_csv = os.path.join(IMAGE_ROOT,info_csv_file)
-    info_csv = pd.read_csv(path_to_info_csv,)
+        print ("set: ", set_name)
 
-    columns = list(info_csv)
-    id_column = info_csv[columns[0]]
+        path_to_info_csv = os.path.join(DATA_DIR,STUDY, "sets_50_patches_40_seg/" + set_name)
+        #path_to_info_csv = os.path.join(IMAGE_ROOT,info_csv_file)
+        info_csv = pd.read_csv(path_to_info_csv,)
 
-    n_images = len(info_csv)
+        columns = list(info_csv)
+        id_column = info_csv[columns[0]]
+    
+        n_images = len(info_csv)
 
-    cols = np.arange(0, embeddings_length)
-    cols = list(map(str, cols))
-    cols = ['id'] + cols
+        cols = np.arange(0, embeddings_length)
+        cols = list(map(str, cols))
+        cols = ['id'] + cols
 
-    random_embed_file = pd.DataFrame(columns=cols)
-    random_embed_file['id'] = id_column
+        random_embed_file = pd.DataFrame(columns=cols)
+        random_embed_file['id'] = id_column
 
-    for i in range(embeddings_length):
-        sample = np.random.uniform(size=(n_images,))
-        random_embed_file[str(i)] = sample
+        for i in range(embeddings_length):
+            sample = np.random.uniform(size=(n_images,))
+            random_embed_file[str(i)] = sample
 
 
-    path_to_random = os.path.join(EMBEDDING_DEST, "random")
-    if (not os.path.exists(path_to_random)):
-        os.mkdir(path_to_random)
+        path_to_random = os.path.join(EMBEDDING_DEST, "random")
+        if (not os.path.exists(path_to_random)):
+            os.mkdir(path_to_random)
 
-    random_embed_file.to_csv(os.path.join(path_to_random, "random_validation_embeddings_image_level.csv"),index=None)
+        random_embed_file.to_csv(os.path.join(path_to_random, "random_" + set_name +"_embeddings_image_level.csv"),index=None)
 
-    print ("finished generating random embeddings...")
+        print ("finished generating random embeddings...")
 
 
 def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128, standardize=False,
@@ -1449,7 +1453,8 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
 
 
 if __name__ == '__main__':
-    #generate_random_embeddings("", 128)
+
+    generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=True)
     #get_embeddings_from_pre_trained_model_in_chunks()
@@ -1472,11 +1477,11 @@ if __name__ == '__main__':
     #path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset.csv"
     #preprocess_zeng_layer_marker_and_expression(path_to_zeng)
 
-    new_path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset_processed.csv"
-    path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591132845/triplet_training_validation_embeddings_gene_level.csv"
-    new_path, no_na_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
-    convert_to_tsv(new_path)
-    convert_to_tsv(no_na_path)
+    #new_path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset_processed.csv"
+    #path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591132845/triplet_training_validation_embeddings_gene_level.csv"
+    #new_path, no_na_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
+    #convert_to_tsv(new_path)
+    #convert_to_tsv(no_na_path)
     
 
 
