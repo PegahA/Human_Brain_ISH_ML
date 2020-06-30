@@ -1446,6 +1446,42 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
     return new_path, no_na_path
 
 
+def get_creation_time(ts):
+
+    path_to_embed_file = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
+
+    if os.path.exists(path_to_embed_file):
+        stat = os.stat(path_to_embed_file)
+        try:
+            return stat.st_birthtime
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            return stat.st_mtime
+    else:
+        return None
+
+
+def get_duration_for_files():
+
+    files_dir = os.path.join(EMBEDDING_DEST, "old_files")
+
+    items = os.listdir(files_dir)
+
+    for item in items:
+        if item[0:2] == "15":
+
+            creation_time = get_creation_time(item)
+            creation_time = int(creation_time)
+
+            duration = creation_time - int(item)
+
+            print ("ts: {} -- duration: {}  (hours: {})".format(item, duration, duration /3600))
+
+
+
+
+
 
 
 
@@ -1456,7 +1492,7 @@ if __name__ == '__main__':
 
     #generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
-    get_embeddings_from_pre_trained_model(standardize=False)
+    #get_embeddings_from_pre_trained_model(standardize=False)
     #get_embeddings_from_pre_trained_model_in_chunks()
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
@@ -1482,7 +1518,8 @@ if __name__ == '__main__':
     #new_path, no_na_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
     #convert_to_tsv(new_path)
     #convert_to_tsv(no_na_path)
-    
+
+    def get_duration_for_files()
 
 
 
