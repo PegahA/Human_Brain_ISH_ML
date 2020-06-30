@@ -7,6 +7,8 @@ import numpy as np
 import scipy
 from sklearn import metrics
 import json
+import os
+import datetime
 #print (pd.show_versions())
 
 
@@ -432,6 +434,20 @@ def not_the_same_gene(min_indexes_df, level):
         return proportion
 
 
+
+
+def get_creation_time(ts):
+
+    path_to_embed_file = os.path.join(EXPERIMENT_ROOT, "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
+
+    stat = os.stat(path_to_embed_file)
+    try:
+        return stat.st_birthtime
+    except AttributeError:
+        # We're probably on Linux. No easy way to get creation dates here,
+        # so we'll settle for when its content was last modified.
+        return stat.st_mtime
+
 def evaluate(ts):
     path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
     image_level_files_list = []
@@ -450,8 +466,17 @@ def evaluate(ts):
         args_names, args_val = get_arguments_from_json(ts)
 
 
-        columns = ["ts", "general_first_hit_percentage", "general_AUC", "among_other_donors_first_hit_percentage",
+        columns = ["ts", "number of embeddings", "duration", "general_first_hit_percentage", "general_AUC", "among_other_donors_first_hit_percentage",
                    "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
+
+
+        # ------ number of embeddings and duration ----
+        df = pd.read_csv(os.path.join(path_to_embeddings, image_level_embed_file_name))
+        number_of_embeddings = len(df)
+
+        creation_time  = int(get_creation_time(ts))
+        duration = creation_time - int(ts)
+        # ---------------------------------------------
 
         if args_names != None and args_val != None:
             columns = [columns[0]] + args_names + columns[1:]
@@ -463,11 +488,11 @@ def evaluate(ts):
         within_donor_res = results[2]
 
         if args_names != None and args_val != None:
-            eval_results_df.loc[0] = [ts] + args_val + [general_res[0], general_res[1], among_other_donors_res[0],
+            eval_results_df.loc[0] = [ts, number_of_embeddings, duration] + args_val + [general_res[0], general_res[1], among_other_donors_res[0],
                                       among_other_donors_res[1],
                                       within_donor_res[0], within_donor_res[1]]
         else:
-            eval_results_df.loc[0] = [ts, general_res[0], general_res[1], among_other_donors_res[0],
+            eval_results_df.loc[0] = [ts, number_of_embeddings, duration, general_res[0], general_res[1], among_other_donors_res[0],
                                                         among_other_donors_res[1],
                                                         within_donor_res[0], within_donor_res[1]]
 
@@ -634,12 +659,15 @@ def main():
               #"1587686591", "1587462051", "1589259198", "1589258734" , 
     #ts_list = ["1589222258","1591130418", "1591130635", "1591132845", "1591188766", "1591234815", "1591250445","1591297149", "1591329662", "1591342075", "1591395395", "1591423439", "1591434031","1591490025", "1591509560", "1591521386", "1591588276","1591600820", "1591615341", "1591684726", "1591695239"]
 
-    ts_list = ["1591712071", "1591783517", "1591793952", "1591813151", "1591881335", "1591897361", "1591914659", "1591986392" ,
-               "1591997885", "1592014294", "1592079079", "1592090557", "1592105924", "1592178919" ]
+    #ts_list = ["1591712071", "1591783517", "1591793952", "1591813151", "1591881335", "1591897361", "1591914659", "1591986392" ,
+               #"1591997885", "1592014294", "1592079079", "1592090557", "1592105924", "1592178919" ]
 
+    ts_list = ["1589222258"]
     for ts in ts_list:
         print ("ts is: ", ts)
         evaluate(ts)
+
+
 
 
 
@@ -650,8 +678,7 @@ if __name__ == '__main__':
     # n_results()
 
     main()
-    concat_all_evaluation_results()
-
+    #concat_all_evaluation_results()
 
 
     
