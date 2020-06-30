@@ -911,7 +911,7 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
     :return: None
     """
 
-    set_name_list = ["training.csv", "training_validation.cs", "validation.csv"]
+    set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
     for set_name in set_name_list:
 
         print ("set: ", set_name)
@@ -922,7 +922,7 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
 
         columns = list(info_csv)
         id_column = info_csv[columns[0]]
-    
+
         n_images = len(info_csv)
 
         cols = np.arange(0, embeddings_length)
@@ -941,7 +941,7 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
         if (not os.path.exists(path_to_random)):
             os.mkdir(path_to_random)
 
-        random_embed_file.to_csv(os.path.join(path_to_random, "random_" + set_name +"_embeddings_image_level.csv"),index=None)
+        random_embed_file.to_csv(os.path.join(path_to_random, "random_" + set_name.split(".")[0] +"_embeddings_image_level.csv"),index=None)
 
         print ("finished generating random embeddings...")
 
