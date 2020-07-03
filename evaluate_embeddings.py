@@ -1,6 +1,4 @@
 from sklearn.metrics.pairwise import euclidean_distances
-from scipy.spatial.distance import squareform
-from scipy.spatial.distance import pdist
 from human_ISH_config import *
 import pandas as pd
 import numpy as np
@@ -8,13 +6,9 @@ import scipy
 from sklearn import metrics
 import json
 import os
-import datetime
 #print (pd.show_versions())
 
 
-
-
-#EMBEDDING_DEST = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/"
 
 def create_diagonal_mask(low_to_high_map, target_value=1):
     """
@@ -158,7 +152,7 @@ def apply_mask(mask_matrix_df, original_matrix_df):
     return after_masking_df
 
 
-def AUC(dist_matrix_df, label_matrix_df, label):
+def AUC(dist_matrix_df, label_matrix_df, title, image_level_embed_file_name):
     """
     Calculates the AUC using the positive and negative pairs.
     It gets the actual labels of the pairs from the label matrix and the predicted labels based on the distance matrix.
@@ -209,31 +203,34 @@ def AUC(dist_matrix_df, label_matrix_df, label):
         auc_val = metrics.auc(fpr, tpr)
 
 
-
-
-        # --------
-
-        #plot_roc_curve_2(fpr, tpr,label)
-
-        # ----
+        """
+        
+        if 'training_validation' in image_level_embed_file_name:
+            set_type = 'Training and Validation'
+        elif 'training' in image_level_embed_file_name:
+            set_type = 'Training'
+        elif 'validation' in image_level_embed_file_name:
+            set_type = 'Validation'
+        else:
+            set_type = None
+            
+        #plot_curve(fpr, tpr, title, ['fpr', 'tpr'], set_type)  #to generate tpr over fpr graphs
 
         l = len(top_tri_dist_matrix)
-        print (l)
         l_sub = len(top_tri_dist_matrix) // 10
         res = np.random.choice(l, l_sub)
 
         top_tri_dist_matrix = [top_tri_dist_matrix[i] for i in res]
         top_tri_label_matrix = [top_tri_label_matrix[i] for i in res]
-
-        print (len(top_tri_label_matrix))
-
-        # ----
-
-        #plot_roc_curve_2(top_tri_label_matrix, top_tri_dist_matrix, label)
-
-        # --------
-        
+        #plot_curve(top_tri_label_matrix, top_tri_dist_matrix, title, ['label', 'distance'], set_type) # to generate distance over actual label graphs
         """
+
+
+
+        """
+        # This piece of code will use the whole dist and label matrix and not just the top triangle.
+        # This is less efficient because we know that the matrices are symmetric. 
+        
         dist_matrix_flatten = dist_matrix_array.flatten()
         dist_matrix_flatten = dist_matrix_flatten[~np.isnan(dist_matrix_flatten)]  # remove NaNs
         
@@ -301,7 +298,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
 
     print ("---------------------------------- General ---------------------------------- ")
     general_first_hit_percentage = first_hit_percentage(general_distance_matrix)
-    general_AUC = AUC(general_distance_matrix, general_relationship_matrix, "General")
+    general_AUC = AUC(general_distance_matrix, general_relationship_matrix, "General", image_level_embed_file_name)
 
     general_res = [general_first_hit_percentage, general_AUC]
 
@@ -309,8 +306,6 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
 
     print ("---------------------------------- Other Donors ----------------------------- ")
     images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
-
-    #images_info = pd.read_csv(os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
 
     dist_matrix_rows = list(general_distance_matrix.index)
 
@@ -328,7 +323,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
 
   
     among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
-    among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Other Donors")
+    among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Other Donors", image_level_embed_file_name)
 
     among_other_donors_res = [among_other_donors_first_hit_percentage, among_other_donors_AUC]
 
@@ -351,7 +346,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     relationship_matrix_after_masking = apply_mask(arranged_inverted_mask_df, general_relationship_matrix)
 
     withing_donor_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
-    within_donor_brains_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Within Donor")
+    within_donor_brains_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Within Donor", image_level_embed_file_name)
 
     within_donor_res = [withing_donor_first_hit_percentage, within_donor_brains_AUC]
 
@@ -410,6 +405,16 @@ def find_closest_image(distances_df):
 
 
 def not_the_same_gene(min_indexes_df, level):
+    """
+    This function returns the proportion of images for which the closest image (based on the distance matrix) has a different gene.
+
+    This is a helper function to better understand the metrics and results.
+
+    Ideally, the closest image to an image should have the same gene. (same gene ==> same pattern ==> less distance)
+    :param min_indexes_df: a dataframe with two columns: image id, and image id of the closest image
+    :param level: the integration level in at which we are comparing the embeddings.
+    :return: float.
+    """
     if level == 'image':
 
         total_count = len(min_indexes_df)
@@ -437,7 +442,20 @@ def not_the_same_gene(min_indexes_df, level):
 
 
 def get_creation_time(ts):
+    """
+    This function gets the creation time of the embedding csv file.
+    It is designed to be used for embeddings that are generated by the triplet model.
 
+    I am using the embedding file in the experiment_files folder. The reason is that in linux, there is no simple way
+    of getting the creation time of a file. Instead, we can get the last time it was modifies.
+    Every embedding file generated by the triplet model is saved in EXPERIMENT_ROOT. From there, it is also copied inside
+    EMBEDDING_DEST.
+    After copying, I use the copied version in EMBEDDING_DEST so the initial one in EXPERIMENT_ROOT is probably never
+    accessed and modified and its last-access-time will be almost the same as its creation time.
+
+    :param ts: folder name.
+    :return:  creation time stamp.
+    """
     path_to_embed_file = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
 
     if os.path.exists(path_to_embed_file):
@@ -452,6 +470,16 @@ def get_creation_time(ts):
         return None
 
 def evaluate(ts):
+    """
+    The function evaluates the embeddings. It gets a folder name as input. If embeddings are generated by the triplet model,
+    the input folder name is a time stamp.
+
+    The function then reads all the image level embedding csv files within that folder. Normally, there should be 3 files:
+    One for training set embeddings, one for validation set embeddings, and one for training+validation.
+
+    :param ts: Folder name
+    :return: None. For every image level embedding file inside this folder, the function creates an evaluation csv file.
+    """
     path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
     image_level_files_list = []
 
@@ -461,14 +489,16 @@ def evaluate(ts):
            image_level_files_list.append(item)
 
     for item in image_level_files_list:
+
+        # for every image level embedding file, call another function to calculate first hit match percentage and AUC
         image_level_embed_file_name = item
         results = first_hit_match_percentage_and_AUC_results(path_to_embeddings,image_level_embed_file_name)
-
 
         # from args.json :
         args_names, args_val = get_arguments_from_json(ts)
 
 
+        # list of columns to have in the evaluation table.
         columns = ["ts", "number of embeddings", "duration", "general_first_hit_percentage", "general_AUC", "among_other_donors_first_hit_percentage",
                    "among_other_donors_AUC", "within_donor_first_hit_percentage", "within_donor_AUC"]
 
@@ -477,12 +507,15 @@ def evaluate(ts):
         df = pd.read_csv(os.path.join(path_to_embeddings, image_level_embed_file_name))
         number_of_embeddings = len(df)
 
+        # duration means the amount of time between when the folder was created and when the embeddings were generated.
+        # it is the amount of time that it took the model to generate these embeddings.
+        # this argument is valid for embeddings that were generated by the triplet model.
         creation_time  = get_creation_time(ts)
         if creation_time != None:
             creation_time = int(creation_time)
             duration = creation_time - int(ts)
         else:
-            duration = 0
+            duration = -1
         # ---------------------------------------------
 
         if args_names != None and args_val != None:
@@ -510,11 +543,30 @@ def evaluate(ts):
         #----------
 
 
+def get_json_argument_list():
+    """
+    Returns a list of arguments from json files that we are interested in and we want to keep as columns in the evaluation tables.
+    :return: list of arguments
+    """
+    list_of_arguments_to_get = ["segmentation_training_samples", "patch_count_per_image", "learning_rate", "batch_k",
+                                "batch_p", "flip_augment", "standardize"]
+
+    return list_of_arguments_to_get
+
 
 
 def get_arguments_from_json(ts):
-    list_of_arguments_to_get = ["segmentation_training_samples","patch_count_per_image", "learning_rate", "batch_k",
-                                "batch_p", "flip_augment", "standardize"]
+    """
+    Embeddings that are generated with the triplet model are saved in folders that have time stamp as name.
+    There is an args.json file in each folder that has the values for the arguments.
+
+    The function checks to see if there is an args.json file within that folder. If yes, it looks for arguments
+    from a list of arguments and returns the argument value. If that argument does not exist in the json file, it is returned as -1.
+
+    :param ts: The embedding folder's name which is usually a time stamp.
+    :return: two lists. The first list is a list of arguments, the second list is those arguments' values.
+    """
+    list_of_arguments_to_get = get_json_argument_list()
 
     args_val_list = []
 
@@ -531,7 +583,7 @@ def get_arguments_from_json(ts):
                 if arg in args_resumed:
                     args_val_list.append(args_resumed[arg])
                 else:
-                    args_val_list.append(0)
+                    args_val_list.append(-1)
 
             f.close()
 
@@ -539,10 +591,25 @@ def get_arguments_from_json(ts):
 
 
 def concat_all_evaluation_results():
-
     """
+    The function uses a list of folders, goes through each folder and reads its evaluation csv files.
+    Normally, there should be 3 files in each folder: one for training set evaluation, one for validation set evaluation,
+    and one for training+validation set evaluation.
 
-    :return:
+    The function first concatenates each set's results from all the folders (concatenates vertically) into csv files.
+    So there will be 3 csv files, one for training, one for validation, and one for training+validation.
+    Number of rows == number of folder.
+
+    The function then concatenates those 3 csv files horizontally into a final general csv file.
+
+
+    :return: None. The function generates 4 csv files.
+
+    training_all_evaluation_result_top_tri.csv
+    validation_all_evaluation_result_top_tri.csv
+    training_and_validation_all_evaluation_result_top_tri.csv
+    all_evaluation_result_top_tri.csv
+
     """
     """
     list_of_folders= ["1584753511", "1583770480", "1585521837", "1584025762", "1586831151", "1586740776", "1587686591",
@@ -567,6 +634,8 @@ def concat_all_evaluation_results():
         files = os.listdir(path_to_eval_folder)
 
         for f in files:
+
+            # for each evaluation result csv file, see whether it is from training set, or validation set, or training+validation
             if f.endswith("image_level_evaluation_result_top_tri.csv"):
 
                 if "random" in f:
@@ -597,6 +666,9 @@ def concat_all_evaluation_results():
                         df = pd.read_csv(os.path.join(path_to_eval_folder, f))
                         val_eval_df_list.append(df)
 
+
+    # add 'training_' or 'validation_' to the column names of evaluation results coming from training and validation sets.
+    # This is to be able to distinguish them in the final general csv file.
 
     columns = list(train_val_eval_df_list[0])
     train_columns = ["training_"+item for item in columns[1:]]
@@ -636,8 +708,8 @@ def concat_all_evaluation_results():
     # If you have columns on arguments, keep them in training but drop them in validation and train_and_val to prevent duplicates
     list_of_cols_in_validation_df = list(concatenated_validation_df)
     list_of_cols_in_train_val_df = list(concatenated_train_and_validation_df)
-    args_cols = ["segmentation_training_samples","patch_count_per_image", "learning_rate", "batch_k",
-                                "batch_p", "flip_augment", "standardize"]
+    args_cols = get_json_argument_list()
+
     args_cols_val = ["validation_"+item for item in args_cols]
     
     if len(list_of_cols_in_train_val_df) == len(list_of_cols_in_validation_df) and len(list_of_cols_in_train_val_df) > 7:
@@ -653,36 +725,24 @@ def concat_all_evaluation_results():
 
 
 
-def plot_roc_curve_2(x, y, label):
+def plot_curve(x, y, title, labels, set_type):
+    """
+    :param x: x axis values
+    :param y: y axis values
+    :param title: graph title
+    :param labels: axis labels
+    :param set_type: the set
+    :return: None
+    """
 
-    print ("here in plotting ...")
+    print ("Here in plotting ...")
     import matplotlib.pyplot as plt
 
     plt.scatter(x, y)
-    plt.title(label+" - Training")
-    plt.xlabel("label")
-    plt.ylabel("distance")
+    plt.title(title+" - " + set_type)
+    plt.xlabel(labels[0])
+    plt.ylabel(labels[1])
     plt.show()
-
-def plot_roc_curve(label_matrix, dist_matrix):
-
-    print ("Here in plotting ...")
-    import scikitplot as skplt
-    import matplotlib.pyplot as plt
-
-    y_true =  label_matrix
-    y_pred=  dist_matrix
-
-    print (type(y_true))
-    print (type(y_pred))
-
-    print (y_true.shape)
-    print (y_pred.shape)
-    skplt.metrics.plot_roc_curve(y_true, y_pred)
-    plt.show()
-
-
-
 
 
 def main():
@@ -706,10 +766,6 @@ def main():
 
 
 if __name__ == '__main__':
-
-    #main()
-    #concat_all_evaluatio
-    # n_results()
 
     #main()
     concat_all_evaluation_results()
