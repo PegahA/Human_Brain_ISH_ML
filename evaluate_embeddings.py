@@ -618,13 +618,13 @@ def concat_all_evaluation_results():
         #train_and_val_columns_dict[columns[i]] = train_and_val_columns[i]
 
 
-    concatenated_training_df = pd.concat(train_eval_df_list)
+    concatenated_training_df = pd.concat(train_eval_df_list, sort=False)
     concatenated_training_df = concatenated_training_df.rename(columns=train_columns_dict)
 
-    concatenated_validation_df = pd.concat(val_eval_df_list)
+    concatenated_validation_df = pd.concat(val_eval_df_list, sort=False)
     concatenated_validation_df = concatenated_validation_df.rename(columns=val_columns_dict)
     
-    concatenated_train_and_validation_df = pd.concat(train_val_eval_df_list)
+    concatenated_train_and_validation_df = pd.concat(train_val_eval_df_list, sort=False)
     #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
 
 
