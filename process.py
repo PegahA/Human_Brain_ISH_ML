@@ -1519,7 +1519,7 @@ if __name__ == '__main__':
     #convert_to_tsv(new_path)
     #convert_to_tsv(no_na_path)
 
-    def get_duration_for_files()
+    get_duration_for_files()
 
 
 
