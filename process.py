@@ -9,6 +9,7 @@ from shutil import copyfile
 import operator
 import matplotlib.pyplot as plt
 import math
+import json
 random.seed(1)
 
 
@@ -1483,9 +1484,44 @@ def get_duration_for_files():
 
 
 
+def info_from_existing_embed_files():
+    list_of_folders = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
+                       "1593244389", "1593245325", "1593349242", "1593353302", "1593355864", "1593458519", "1593462661",
+                       "1593470584", "1593570490", "1593581711", "1593585268", "1593683948", "1593695731", "1593696278",
+                       "1593798768", "1593804603", "1593813177", "1593929477", "1593929501"]
 
 
 
+    list_of_arguments_to_get = ["segmentation_training_samples", "patch_count_per_image", "learning_rate", "batch_k",
+                                "batch_p", "flip_augment", "standardize"]
+
+    columns = ['ts'] + list_of_arguments_to_get
+    existing_embeds_df = pd.DataFrame(columns=columns)
+
+    args_value_list = []
+
+    row_idx = 0
+    for ts in list_of_folders:
+        path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
+        args_file = os.path.join(path_to_embeddings, "args.json")
+        if not os.path.exists(args_file):
+            print("There is no args.json file in ", path_to_embeddings)
+
+        else:
+            with open(args_file, 'r+') as f:
+                args_resumed = json.load(f)
+                for arg in list_of_arguments_to_get:
+                    if arg in args_resumed:
+                        args_value_list.append(args_resumed[arg])
+                    else:
+                        args_value_list.append(-1)
+
+                existing_embeds_df.loc[row_idx] = [ts] + args_value_list
+
+                row_idx +=1
+
+    df_name = "embeddings_info_so_far.csv"
+    existing_embeds_df.to_csv(os.path.join(EMBEDDING_DEST, df_name), index=False)
 
 
 if __name__ == '__main__':
@@ -1519,7 +1555,9 @@ if __name__ == '__main__':
     #convert_to_tsv(new_path)
     #convert_to_tsv(no_na_path)
 
-    get_duration_for_files()
+    #get_duration_for_files()
+
+    info_from_existing_embed_files()
 
 
 
