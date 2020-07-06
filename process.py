@@ -1516,7 +1516,7 @@ def info_from_existing_embed_files():
                     else:
                         args_value_list.append(-1)
 
-                existing_embeds_df.loc[row_idx] = [ts] + args_value_list
+                existing_embeds_df.append([ts] + args_value_list)
 
                 row_idx +=1
 
