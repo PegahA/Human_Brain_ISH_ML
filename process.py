@@ -1498,11 +1498,12 @@ def info_from_existing_embed_files():
     columns = ['ts'] + list_of_arguments_to_get
     existing_embeds_df = pd.DataFrame(columns=columns)
 
-    args_value_list = []
+   
 
     row_idx = 0
     for ts in list_of_folders:
         path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
+        args_value_list = []
         args_file = os.path.join(path_to_embeddings, "args.json")
         if not os.path.exists(args_file):
             print("There is no args.json file in ", path_to_embeddings)
@@ -1516,8 +1517,8 @@ def info_from_existing_embed_files():
                     else:
                         args_value_list.append(-1)
 
-                existing_embeds_df.append([ts] + args_value_list)
-
+                print (len(columns), len(args_value_list))
+                existing_embeds_df.loc[row_idx] = [ts] + args_value_list
                 row_idx +=1
 
     df_name = "embeddings_info_so_far.csv"
