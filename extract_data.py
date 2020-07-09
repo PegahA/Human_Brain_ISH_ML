@@ -300,8 +300,12 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
 
     specimen = section_data_set.find('specimen')
     donor = specimen.find('donor')
+    structure = specimen.find('structure')
+
     donor_id = donor.find('name').text
     donor_sex = donor.find('sex').text
+
+    region_name = structure.find('name').text
 
 
     gene = genes.find('gene')
@@ -326,7 +330,7 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
         for image_id in image_id_list:
             new_row =  pd.Series({'image_id': image_id, 'gene_symbol': gene_symbol, 'entrez_id': entrez_id,
                                   'experiment_id':experiment_id,'specimen_id': specimen_id, 'donor_id': donor_id,
-                                  'donor_sex': donor_sex})
+                                  'donor_sex': donor_sex, 'region':region_name})
 
             image_info_df = image_info_df.append(new_row, ignore_index=True)
 
@@ -383,11 +387,11 @@ def run():
             # total_invalid_experiments = dict(total_invalid_experiments.items() + invalid_experiments.items())
             total_invalid_experiments.update(invalid_experiments)
 
-        download_images(image_list_to_download)
-        redownload_small_images()
+        #download_images(image_list_to_download)
+        #redownload_small_images()
 
         # image_info_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "human_ISH_info.csv"), index=None)
-        image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"), index=None)
+        image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info_r.csv"), index=None)
         print("finished creating image_info csv file ...")
 
         """
