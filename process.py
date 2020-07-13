@@ -1486,7 +1486,8 @@ def info_from_existing_embed_files():
     list_of_folders = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
                        "1593244389", "1593245325", "1593349242", "1593353302", "1593355864", "1593458519", "1593462661",
                        "1593470584", "1593570490", "1593581711", "1593585268", "1593683948", "1593695731", "1593696278",
-                       "1593798768", "1593804603", "1593813177", "1593929477", "1593929501", "1594019525", "1594033616" ]
+                       "1593798768", "1593804603", "1593813177", "1593929477", "1593929501", "1594019525", "1594033616",
+                       "1594113452", "1594118066", "1594192645"]
 
 
 
@@ -1528,7 +1529,7 @@ if __name__ == '__main__':
     #generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=False)
-    get_embeddings_from_pre_trained_model_in_chunks(standardize=False)
+    #get_embeddings_from_pre_trained_model_in_chunks(standardize=False)
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
     #merge_embeddings_to_gene_level("1589259198")
@@ -1556,11 +1557,11 @@ if __name__ == '__main__':
 
     #get_duration_for_files()
 
-    #info_from_existing_embed_files()
+    info_from_existing_embed_files()
 
 
 
-
+    """
     path_1_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset.csv"
     path_2_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_2.csv"
     path_3_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_3.csv"
@@ -1580,6 +1581,7 @@ if __name__ == '__main__':
     merge_with_zeng_layer_marker_and_expression(processed_path_2_to_zeng, path_to_gene_level_embed)
     print("///////////////////////////////////////\n\n")
     merge_with_zeng_layer_marker_and_expression(processed_path_3_to_zeng, path_to_gene_level_embed)
+    """
 
 
 
