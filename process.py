@@ -1528,7 +1528,7 @@ if __name__ == '__main__':
     #generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=False)
-    #get_embeddings_from_pre_trained_model_in_chunks()
+    get_embeddings_from_pre_trained_model_in_chunks(standardize=False)
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
     #merge_embeddings_to_gene_level("1589259198")
@@ -1580,8 +1580,6 @@ if __name__ == '__main__':
     merge_with_zeng_layer_marker_and_expression(processed_path_2_to_zeng, path_to_gene_level_embed)
     print("///////////////////////////////////////\n\n")
     merge_with_zeng_layer_marker_and_expression(processed_path_3_to_zeng, path_to_gene_level_embed)
-
-
 
 
 
