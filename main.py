@@ -171,7 +171,7 @@ if __name__ == "__main__":
     #crop_and_rotate.create_patches(PATCH_TYPE)
     #process.make_sets() 
 
- 
+    """ 
     
     print ("i am here in main!")
 
@@ -282,6 +282,8 @@ if __name__ == "__main__":
             f.close()
     #---------
  
+
+    """
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file(TIMESTAMP)
 
