@@ -1530,7 +1530,7 @@ if __name__ == '__main__':
     #generate_random_embeddings("", 128)
     #merge_embeddings_to_image_level("resnet50")
     #get_embeddings_from_pre_trained_model(standardize=False)
-    #get_embeddings_from_pre_trained_model_in_chunks()
+    get_embeddings_from_pre_trained_model_in_chunks(standardize=False)
   
     #concatenate_embedding_chunks("resnet50_10_patches_standardized", number_of_chunks=10)
     #merge_embeddings_to_gene_level("1589259198")
@@ -1558,7 +1558,7 @@ if __name__ == '__main__':
 
     #get_duration_for_files()
 
-    info_from_existing_embed_files()
+    #info_from_existing_embed_files()
 
 
 
