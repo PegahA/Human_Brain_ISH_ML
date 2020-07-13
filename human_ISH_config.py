@@ -10,7 +10,7 @@ STUDY = "cortex"
 #DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
 DATA_DIR = "/human_ISH/human_ish_data"
 CODE_DIR = "/"
-VOL_CODE_DIR = "/human_ISH/human_ish_code"
+#VOL_CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
 TEST_SPLIT = 10
@@ -31,8 +31,6 @@ SEGMENTATION_TRAINING_SAMPLES = 40
 current_time  = int(time.time())
 TIMESTAMP = str(current_time)
 
-
-
 if PATCH_TYPE == 'r_per_image':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
@@ -52,7 +50,7 @@ SETS_DIR = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_
 TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
 EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
-TRIPLET_DIR = os.path.join(VOL_CODE_DIR, "triplet-reid")
+TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
 TRAIN_EMBEDDING_DIM = 128
@@ -70,7 +68,7 @@ LOSS = 'batch_hard'
 LEARNING_RATE = 1e-5
 TRAIN_ITERATIONS = 30000
 DECAY_START_ITERATION = 25000
-CHECKPOINT_FREQUENCY = 1000
+CHECKPOINT_FREQUENCY = 0
 TRAIN_STANDARDIZE = False
 TRAIN_FLIP_AUGMENT = False
 EMBED_FLIP_AUGMENT = False
