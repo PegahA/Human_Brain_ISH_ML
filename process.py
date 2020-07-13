@@ -1354,8 +1354,6 @@ def helper_function_to_get_embeddings_of_target_sets():
         get_image_level_embeddings_of_a_target_set(path_to_set, ts)
 
 
-
-
 def preprocess_zeng_layer_marker_and_expression(path_to_zeng):
 
     acceptable_layer_names = {"layer 1", "layer 1", "layer 3", "layer 4", "layer 5", "layer 6"}
@@ -1377,7 +1375,7 @@ def preprocess_zeng_layer_marker_and_expression(path_to_zeng):
     zeng_df['Cortical.marker..human.'] = layer_marker_list
 
     new_zeng_path = path_to_zeng.split(".")[0] + "_processed.csv"
-    #zeng_df.to_csv(new_zeng_path, index= None, na_rep='NA')
+    zeng_df.to_csv(new_zeng_path, index= None, na_rep='NA')
 
 
 
@@ -1441,7 +1439,7 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
     merged_with_markers_df_no_na = merged_with_markers_df[merged_with_markers_df['Cortical.marker..human.'].notna()]
 
     no_na_path = path_to_gene_level_embeddings.split(".")[0] + "_with_marker_no_na.csv"
-    merged_with_markers_df_no_na.to_csv(no_na_path, index=None)
+    #merged_with_markers_df_no_na.to_csv(no_na_path, index=None)
 
 
     return new_path, no_na_path
@@ -1558,7 +1556,33 @@ if __name__ == '__main__':
 
     #get_duration_for_files()
 
-    info_from_existing_embed_files()
+    #info_from_existing_embed_files()
+
+
+
+
+    path_1_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset.csv"
+    path_2_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_2.csv"
+    path_3_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_3.csv"
+
+    preprocess_zeng_layer_marker_and_expression(path_1_to_zeng)
+    preprocess_zeng_layer_marker_and_expression(path_2_to_zeng)
+    preprocess_zeng_layer_marker_and_expression(path_3_to_zeng)
+
+    path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591132845/" \
+                               "triplet_training_validation_embeddings_gene_level.csv"
+
+    processed_path_1_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_processed.csv"
+    processed_path_2_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_2_processed.csv"
+    processed_path_3_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_3_processed.csv"
+    merge_with_zeng_layer_marker_and_expression(processed_path_1_to_zeng, path_to_gene_level_embed)
+    print ("///////////////////////////////////////\n\n")
+    merge_with_zeng_layer_marker_and_expression(processed_path_2_to_zeng, path_to_gene_level_embed)
+    print("///////////////////////////////////////\n\n")
+    merge_with_zeng_layer_marker_and_expression(processed_path_3_to_zeng, path_to_gene_level_embed)
+
+
+
 
 
 
