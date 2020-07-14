@@ -1274,6 +1274,8 @@ def specific_donor_embeddings(donor_id, embed_folder_name):
 
 def convert_to_tsv(path_to_csv):
 
+    #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
+    cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
 
     # With meta
 
@@ -1289,7 +1291,7 @@ def convert_to_tsv(path_to_csv):
     path_to_tsv = path_to_csv.split(".")[0] + "_no_meta.tsv"
     csv_read = pd.read_csv(path_to_csv)
 
-    csv_read = csv_read.drop(columns=['gene_symbol', 'Cortical.marker..human.', 'Expression.level'])
+    csv_read = csv_read.drop(columns=cols)
 
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False, header=False))
@@ -1548,14 +1550,51 @@ def add_new_columns_to_image_level_embed_file(ts, columns):
     images_info = images_info[avail_cols]
     new_image_level_embed_df = image_level_embed_df.merge(images_info, how="left", on="image_id")
 
+    number_of_new_columns = len(avail_cols) - 1
     columns = list(new_image_level_embed_df)
-    columns = [columns[0]] + columns[-3:] + columns[1:-3]
+    columns = [columns[0]] + columns[(-1*number_of_new_columns):] + columns[1:(-1*number_of_new_columns)]
 
     new_image_level_embed_df = new_image_level_embed_df[columns]
     new_image_level_embed_name = ts + "_" + image_level_file_name.split(".")[0] + "_with_info.csv"
     new_image_level_embed_df_path = os.path.join(EMBEDDING_DEST, ts, new_image_level_embed_name)
 
     new_image_level_embed_df.to_csv(new_image_level_embed_df_path, index=None)
+
+
+def add_new_columns_to_gene_level_embed_file(ts, columns):
+    path_to_embed_file = os.path.join(EMBEDDING_DEST, ts)
+    contents = os.listdir(path_to_embed_file)
+
+    image_level_file_name = ""
+    for item in contents:
+        if item.endswith("training_validation_embeddings_gene_level.csv"):
+            image_level_file_name = item
+
+    image_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, image_level_file_name))
+
+    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+
+    avail_cols = ['gene_symbol']
+    for col in columns:
+        if col not in list(images_info):
+            print("column {} does not exist in image info file.".format(col))
+        else:
+            avail_cols.append(col)
+
+
+    images_info = images_info[avail_cols]
+    new_image_level_embed_df = image_level_embed_df.merge(images_info, how="left", on="image_id")
+
+    number_of_new_columns = len(avail_cols) - 1
+    columns = list(new_image_level_embed_df)
+    columns = [columns[0]] + columns[(-1*number_of_new_columns):] + columns[1:(-1*number_of_new_columns)]
+
+    new_image_level_embed_df = new_image_level_embed_df[columns]
+    new_image_level_embed_name = ts + "_" + image_level_file_name.split(".")[0] + "_with_info.csv"
+    new_image_level_embed_df_path = os.path.join(EMBEDDING_DEST, ts, new_image_level_embed_name)
+
+    new_image_level_embed_df.to_csv(new_image_level_embed_df_path, index=None)
+
 
 if __name__ == '__main__':
 
@@ -1591,11 +1630,21 @@ if __name__ == '__main__':
     #get_duration_for_files()
 
     #info_from_existing_embed_files()
-    add_new_columns_to_image_level_embed_file("1593570490", ["gene_symbol", "entrez_id", "region"])
-    add_new_columns_to_image_level_embed_file("1593133440", ["gene_symbol", "entrez_id", "region"])
-    add_new_columns_to_image_level_embed_file("1593695731", ["gene_symbol", "entrez_id", "region"])
+    #add_new_columns_to_image_level_embed_file("1593570490", ["gene_symbol", "entrez_id", "region"])
+    #add_new_columns_to_image_level_embed_file("1593133440", ["gene_symbol", "entrez_id", "region"])
+    #add_new_columns_to_image_level_embed_file("1593695731", ["gene_symbol", "entrez_id", "region"])
 
+    add_new_columns_to_gene_level_embed_file("1593570490", ["entrez_id"])
+    add_new_columns_to_gene_level_embed_file("1593133440", ["entrez_id"])
+    add_new_columns_to_gene_level_embed_file("1593695731", ["entrez_id"])
 
+    """
+    top_3_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3"
+    embed_file_name  ="_triplet_training_validation_embeddings_image_level_with_info.csv"
+    convert_to_tsv(os.path.join(top_3_path,"1593570490"+embed_file_name ))
+    convert_to_tsv(os.path.join(top_3_path,"1593133440"+embed_file_name ))
+    convert_to_tsv(os.path.join(top_3_path,"1593695731"+embed_file_name ))
+    """
 
     """
     path_1_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset.csv"
