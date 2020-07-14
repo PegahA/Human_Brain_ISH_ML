@@ -1583,7 +1583,7 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
 
 
     images_info = images_info[avail_cols]
-    new_image_level_embed_df = image_level_embed_df.merge(images_info, how="left", on="image_id")
+    new_image_level_embed_df = image_level_embed_df.merge(images_info, how="left", on='gene_symbol')
 
     number_of_new_columns = len(avail_cols) - 1
     columns = list(new_image_level_embed_df)
