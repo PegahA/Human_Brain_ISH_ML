@@ -456,7 +456,7 @@ def get_creation_time(ts):
     :param ts: folder name.
     :return:  creation time stamp.
     """
-    path_to_embed_file = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_"+ ts, "triplet_training_validation_embeddings.csv")
+    path_to_embed_file = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_"+ ts, "triplet_training_validation_embeddings.h5")
 
     if os.path.exists(path_to_embed_file):
         stat = os.stat(path_to_embed_file)
@@ -467,6 +467,7 @@ def get_creation_time(ts):
             # so we'll settle for when its content was last modified.
             return stat.st_mtime
     else:
+        print ("here, path is: ", path_to_embed_file)
         return None
 
 def evaluate(ts):
