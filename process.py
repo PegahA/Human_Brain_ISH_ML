@@ -1552,7 +1552,7 @@ def add_new_columns_to_image_level_embed_file(ts, columns):
     columns = [columns[0]] + columns[-3:] + columns[1:-3]
 
     new_image_level_embed_df = new_image_level_embed_df[columns]
-    new_image_level_embed_name = image_level_file_name.split(".")[0] + "_with_info.csv"
+    new_image_level_embed_name = ts + "_" + image_level_file_name.split(".")[0] + "_with_info.csv"
     new_image_level_embed_df_path = os.path.join(EMBEDDING_DEST, ts, new_image_level_embed_name)
 
     new_image_level_embed_df.to_csv(new_image_level_embed_df_path, index=None)
@@ -1592,6 +1592,8 @@ if __name__ == '__main__':
 
     #info_from_existing_embed_files()
     add_new_columns_to_image_level_embed_file("1593570490", ["gene_symbol", "entrez_id", "region"])
+    add_new_columns_to_image_level_embed_file("1593133440", ["gene_symbol", "entrez_id", "region"])
+    add_new_columns_to_image_level_embed_file("1593695731", ["gene_symbol", "entrez_id", "region"])
 
 
 
