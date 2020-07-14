@@ -1387,8 +1387,10 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
     zeng_df = pd.read_csv(path_to_zeng)
     gene_level_embed_df = pd.read_csv(path_to_gene_level_embeddings)
 
-    zeng_gene_symbol_list = list(zeng_df['gene_symbol'])
-    embed_gene_symbol_list = list(gene_level_embed_df['gene_symbol'])
+    merge_on = "entrez_id"
+
+    zeng_gene_symbol_list = list(zeng_df[merge_on])
+    embed_gene_symbol_list = list(gene_level_embed_df[merge_on])
 
     zeng_gene_symbol_list_unique =  set(zeng_gene_symbol_list)
     embed_gene_symbol_list_unique = set(embed_gene_symbol_list)
@@ -1406,15 +1408,15 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
         if item not in zeng_gene_symbol_list_unique:
             in_embed_not_in_zeng.append(item)
 
-    print ("There are {} genes in Zeng that are not in the embeddings file.".format(len(in_zeng_not_in_embed)))
+    print ("There are {} {} in Zeng that are not in the embeddings file.".format(len(in_zeng_not_in_embed), merge_on))
     print (in_zeng_not_in_embed)
 
     print ("----")
-    print ("There are {} genes in the embeddings file that are not in Zeng.".format(len(in_embed_not_in_zeng)))
+    print ("There are {} {} in the embeddings file that are not in Zeng.".format(len(in_embed_not_in_zeng), merge_on))
     print (in_embed_not_in_zeng)
 
 
-    merged_with_markers_df = gene_level_embed_df.merge(zeng_df, how='left', on='gene_symbol')
+    merged_with_markers_df = gene_level_embed_df.merge(zeng_df, how='left', on=merge_on)
     columns = list(merged_with_markers_df)
     columns = [columns[0]] + [columns[-2]] + [columns[-1] ] + columns[1:-2]
     merged_with_markers_df = merged_with_markers_df[columns]
@@ -1565,12 +1567,12 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
     path_to_embed_file = os.path.join(EMBEDDING_DEST, ts)
     contents = os.listdir(path_to_embed_file)
 
-    image_level_file_name = ""
+    gene_level_file_name = ""
     for item in contents:
         if item.endswith("training_validation_embeddings_gene_level.csv"):
-            image_level_file_name = item
+            gene_level_file_name = item
 
-    image_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, image_level_file_name))
+    gene_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, gene_level_file_name))
 
     images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
 
@@ -1583,14 +1585,15 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
 
 
     images_info = images_info[avail_cols]
-    new_image_level_embed_df = image_level_embed_df.merge(images_info, how="left", on='gene_symbol')
+    new_gene_level_embed_df = gene_level_embed_df.merge(images_info, how="left", on='gene_symbol')
+    new_gene_level_embed_df = new_gene_level_embed_df.drop_duplicates(subset=['gene_symbol'])
 
     number_of_new_columns = len(avail_cols) - 1
-    columns = list(new_image_level_embed_df)
+    columns = list(new_gene_level_embed_df)
     columns = [columns[0]] + columns[(-1*number_of_new_columns):] + columns[1:(-1*number_of_new_columns)]
 
-    new_image_level_embed_df = new_image_level_embed_df[columns]
-    new_image_level_embed_name = ts + "_" + image_level_file_name.split(".")[0] + "_with_info.csv"
+    new_image_level_embed_df = new_gene_level_embed_df[columns]
+    new_image_level_embed_name = ts + "_" + gene_level_file_name.split(".")[0] + "_with_info.csv"
     new_image_level_embed_df_path = os.path.join(EMBEDDING_DEST, ts, new_image_level_embed_name)
 
     new_image_level_embed_df.to_csv(new_image_level_embed_df_path, index=None)
@@ -1669,9 +1672,16 @@ if __name__ == '__main__':
     """
 
 
+    """
+    path_to_gene_level_embed ="/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3/" \
+                              "1593570490_triplet_training_validation_embeddings_gene_level_with_info.csv"
 
-
-
+    path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv"
+    preprocess_zeng_layer_marker_and_expression(path_4_to_zeng)
+    processed_path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4_processed.csv"
+    merge_with_zeng_layer_marker_and_expression(processed_path_4_to_zeng, path_to_gene_level_embed)
+    
+    """
 
 
 
