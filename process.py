@@ -1546,13 +1546,16 @@ def add_new_columns_to_image_level_embed_file(ts, columns):
             avail_cols.append(col)
 
     images_info = images_info[avail_cols]
+    new_image_level_embed_df = image_level_embed_df.merge(images_info, how="left", on="image_id")
 
-    new_image_level_embed_file = image_level_embed_df.merge(images_info, how="left", on="image_id")
+    columns = list(new_image_level_embed_df)
+    columns = columns[0] + columns[-3:] + columns[1:-3]
 
-    print (list(new_image_level_embed_file))
+    new_image_level_embed_df = new_image_level_embed_df[columns]
+    new_image_level_embed_name = image_level_file_name.split(".")[0] + "_with_info.csv"
+    new_image_level_embed_df_path = os.path.join(EMBEDDING_DEST, ts, new_image_level_embed_name)
 
-
-
+    new_image_level_embed_df.to_csv(new_image_level_embed_df_path, index=None)
 
 if __name__ == '__main__':
 
