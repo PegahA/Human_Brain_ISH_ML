@@ -1525,6 +1525,35 @@ def info_from_existing_embed_files():
     existing_embeds_df.to_csv(os.path.join(EMBEDDING_DEST, df_name), index=False)
 
 
+def add_new_columns_to_image_level_embed_file(ts, columns):
+    path_to_embed_file = os.path.join(EMBEDDING_DEST, ts)
+    contents = os.listdir(path_to_embed_file)
+
+    image_level_file_name = ""
+    for item in contents:
+        if item.endswith("training_validation_embeddings_image_level.csv"):
+            image_level_file_name = item
+
+    image_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, image_level_file_name))
+
+    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+
+    avail_cols = ['image_id']
+    for col in columns:
+        if col not in list(images_info):
+            print ("column {} does not exist in image info file.".format(col))
+        else:
+            avail_cols.append(col)
+
+    images_info = images_info[avail_cols]
+
+    new_image_level_embed_file = image_level_embed_df.merge(images_info, how="left", on="image_id")
+
+    print (list(new_image_level_embed_file))
+
+
+
+
 if __name__ == '__main__':
 
     #generate_random_embeddings("", 128)
@@ -1558,7 +1587,8 @@ if __name__ == '__main__':
 
     #get_duration_for_files()
 
-    info_from_existing_embed_files()
+    #info_from_existing_embed_files()
+    add_new_columns_to_image_level_embed_file("1593570490", ["gene_symbol", "entrez_id", "region"])
 
 
 
