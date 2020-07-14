@@ -5,11 +5,11 @@ import os
 
 if __name__ == "__main__":
 
-    batch_p_list = [5,10] #[5, 10, 20, 40, 50, 60]
+    batch_p_list = [60] #[5, 10, 20, 40, 50, 60]
 
-    learning_rate_list = [5e-5, 10e-4, 10e-5, 10e-6]
+    learning_rate_list = [10e-6]
 
-    flip_list = [True, False]
+    flip_list = [True]
 
     main_py_path = os.path.join(CODE_DIR, "main.py")
     for lr in learning_rate_list:
@@ -23,7 +23,7 @@ if __name__ == "__main__":
                                             " --train_batch_p=" + str(batch_p) + \
                                             " --train_batch_k=" + str(batch_k) +\
                                             " --learning_rate=" +  str(lr) +\
-                                            (" --train_flip_augment" if flip else "")
+                                            (" --train_flip_augment=1" if flip else " --train_flip_augment=''")
 
 
                 os.system(main_command_line_string)
