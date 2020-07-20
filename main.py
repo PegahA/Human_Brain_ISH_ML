@@ -7,7 +7,7 @@ import process
 from argparse import ArgumentParser
 import os
 import json
-
+import time
 
 TRAIN = True
 
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     #crop_and_rotate.create_patches(PATCH_TYPE)
     #process.make_sets() 
 
-    """ 
+   
     
     print ("i am here in main!")
 
@@ -274,7 +274,10 @@ if __name__ == "__main__":
         with open(args_file, 'r+') as f:
             args_resumed = json.load(f)
             f.close()
-
+        
+        current_time = int(time.time())
+        current_time = str(current_time)
+        args_resumed["finish_time"] = current_time
         args_resumed["patch_count_per_image"] = PATCH_COUNT_PER_IMAGE
         args_resumed["segmentation_training_samples"] = SEGMENTATION_TRAINING_SAMPLES
         with open(args_file, 'w') as f:
@@ -283,7 +286,7 @@ if __name__ == "__main__":
     #---------
  
 
-    """
+    
     process.convert_h5_to_csv()
     filename = process.save_embedding_info_into_file(TIMESTAMP)
 
