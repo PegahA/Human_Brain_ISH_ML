@@ -1679,15 +1679,15 @@ if __name__ == '__main__':
 
 
 
-    path_to_gene_level_embed ="/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3/" \
-                              "1593570490_triplet_training_validation_embeddings_gene_level_with_info.csv"
+    #path_to_gene_level_embed ="/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3/" \
+                              #"1593570490_triplet_training_validation_embeddings_gene_level_with_info.csv"
 
-    path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv"
+    #path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv"
     #preprocess_zeng_layer_marker_and_expression(path_4_to_zeng)
-    processed_path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4_processed.csv"
-    merge_with_zeng_layer_marker_and_expression(processed_path_4_to_zeng, path_to_gene_level_embed)
+    #processed_path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4_processed.csv"
+    #merge_with_zeng_layer_marker_and_expression(processed_path_4_to_zeng, path_to_gene_level_embed)
 
 
-
+    info_from_existing_embed_files()
 
 
