@@ -1487,12 +1487,19 @@ def get_duration_for_files():
 
 
 def info_from_existing_embed_files():
-    list_of_folders = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
-                       "1593244389", "1593245325", "1593349242", "1593353302", "1593355864", "1593458519", "1593462661",
-                       "1593470584", "1593570490", "1593581711", "1593585268", "1593683948", "1593695731", "1593696278",
-                       "1593798768", "1593804603", "1593813177", "1593929477", "1593929501", "1594019525", "1594033616",
-                       "1594113452", "1594118066", "1594132422", "1594165757", "1594192645", "1594199191", "1594232848",
-                       "1594694428", "1594694844", "1594695178"]
+    #list_of_folders = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
+                       #"1593244389", "1593245325", "1593349242", "1593353302", "1593355864", "1593458519", "1593462661",
+                       #"1593470584", "1593570490", "1593581711", "1593585268", "1593683948", "1593695731", "1593696278",
+                       #"1593798768", "1593804603", "1593813177", "1593929477", "1593929501", "1594019525", "1594033616",
+                       #"1594113452", "1594118066", "1594132422", "1594165757", "1594192645", "1594199191", "1594232848",
+                       #"1594694428", "1594694844", "1594695178"]
+
+
+    list_of_folders = ["1594920479", "1594920854", "1594921222", "1594957148", "1594957337", "1594957873", "1594957337",
+                       "1594957873", "1594990440", "1594991833", "1594992442", "1595027778", "1595029308", "1595029898",
+                       "1595035644", "1595061900", "1595063681", "1595064319", "1595071590", "1595099038", "1595101976",
+                       "1595102546", "1595107729", "1595132851", "1595136249", "1595102546", "1595107729", "1595132851",
+                       "1595136249", "1595136799", "1595143205", "1595171169", "1595175053", "1595175523"]
 
 
 
@@ -1525,7 +1532,7 @@ def info_from_existing_embed_files():
                 existing_embeds_df.loc[row_idx] = [ts] + args_value_list
                 row_idx +=1
 
-    df_name = "embeddings_info_so_far.csv"
+    df_name = "embeddings_info_so_far_2.csv"
     existing_embeds_df.to_csv(os.path.join(EMBEDDING_DEST, df_name), index=False)
 
 
@@ -1637,9 +1644,9 @@ if __name__ == '__main__':
     #add_new_columns_to_image_level_embed_file("1593133440", ["gene_symbol", "entrez_id", "region"])
     #add_new_columns_to_image_level_embed_file("1593695731", ["gene_symbol", "entrez_id", "region"])
 
-    add_new_columns_to_gene_level_embed_file("1593570490", ["entrez_id"])
-    add_new_columns_to_gene_level_embed_file("1593133440", ["entrez_id"])
-    add_new_columns_to_gene_level_embed_file("1593695731", ["entrez_id"])
+    #add_new_columns_to_gene_level_embed_file("1593570490", ["entrez_id"])
+    #add_new_columns_to_gene_level_embed_file("1593133440", ["entrez_id"])
+    #add_new_columns_to_gene_level_embed_file("1593695731", ["entrez_id"])
 
     """
     top_3_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3"
@@ -1672,16 +1679,15 @@ if __name__ == '__main__':
     """
 
 
-    """
+
     path_to_gene_level_embed ="/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3/" \
                               "1593570490_triplet_training_validation_embeddings_gene_level_with_info.csv"
 
     path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv"
-    preprocess_zeng_layer_marker_and_expression(path_4_to_zeng)
+    #preprocess_zeng_layer_marker_and_expression(path_4_to_zeng)
     processed_path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4_processed.csv"
     merge_with_zeng_layer_marker_and_expression(processed_path_4_to_zeng, path_to_gene_level_embed)
-    
-    """
+
 
 
 
