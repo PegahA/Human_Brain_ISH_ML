@@ -563,7 +563,7 @@ def get_json_argument_list():
     Returns a list of arguments from json files that we are interested in and we want to keep as columns in the evaluation tables.
     :return: list of arguments
     """
-    list_of_arguments_to_get = ["segmentation_training_samples", "patch_count_per_image", "learning_rate", "batch_k",
+    list_of_arguments_to_get = ["finish_time", "segmentation_training_samples", "patch_count_per_image", "learning_rate", "batch_k",
                                 "batch_p", "flip_augment", "standardize"]
 
     return list_of_arguments_to_get
