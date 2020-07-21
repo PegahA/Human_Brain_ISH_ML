@@ -626,12 +626,19 @@ def concat_all_evaluation_results():
                       "1592090557", "1592105924", "1592178919"]
     """
 
+    """
     list_of_folders = ["1593023060", "1593023112", "1593023149", "1593132703", "1593133440", "1593134313", "1593242622",
                        "1593244389", "1593245325", "1593349242", "1593353302", "1593355864", "1593458519", "1593462661",
                        "1593470584", "1593570490", "1593581711", "1593585268", "1593683948", "1593695731", "1593696278",
                        "1593798768", "1593804603", "1593813177", "1593929477", "1593929501", "1594019525", "1594033616",
                        "1594113452", "1594118066", "1594132422", "1594165757", "1594192645", "1594199191", "1594232848",
                        "1594694428", "1594694844", "1594695178", "random"]
+    """
+
+    list_of_folders = ["1594920479", "1594920854", "1594921222", "1594957148", "1594957337", "1594957873", "1594990440",
+                       "1594991833", "1594992442", "1595027778", "1595029308", "1595029898", "1595035644", "1595061900",
+                       "1595063681", "1595064319", "1595071590", "1595099038", "1595101976", "1595102546", "1595107729",
+                       "1595132851", "1595136249", "1595136799", "1595143205", "1595171169", "1595175053", "1595175523"]
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -709,9 +716,9 @@ def concat_all_evaluation_results():
     #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
 
 
-    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","training_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","validation_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"second_grid","training_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"second_grid","validation_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"second_grid","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
 
     # ---------
     # If you have columns on arguments, keep them in training but drop them in validation and train_and_val to prevent duplicates
@@ -730,7 +737,7 @@ def concat_all_evaluation_results():
 
     all_three_df_list = [concatenated_training_df, concatenated_validation_df, concatenated_train_and_validation_df]
     concatenated_all_df = pd.concat(all_three_df_list, axis=1)
-    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"grids","all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"second_grid","all_evaluation_result_top_tri.csv"), index=None)
 
 
 
@@ -787,8 +794,8 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
-    #concat_all_evaluation_results()
+    #main()
+    concat_all_evaluation_results()
 
 
     
