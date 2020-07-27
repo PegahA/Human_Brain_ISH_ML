@@ -683,7 +683,7 @@ def helper_to_copy_to_local():
         os.remove(f)
 
     predicted_masks = os.listdir(predicted_masks_path)
-    selected_predicted_masks = random.sample(predicted_masks, 50)
+    selected_predicted_masks = random.sample(predicted_masks, 100)
     for item in selected_predicted_masks:
         copyfile(os.path.join(predicted_masks_path, item), os.path.join(predicted_masks_dummy_path, item))
 
@@ -701,7 +701,7 @@ def helper_to_copy_to_local():
         os.remove(f)
 
     final_masks = os.listdir(final_masks_path)
-    selected_final_masks = random.sample(final_masks, 50)
+    selected_final_masks = random.sample(final_masks, 100)
     for item in selected_final_masks:
         copyfile(os.path.join(final_masks_path, item), os.path.join(final_masks_dummy_path, item))
         copyfile(os.path.join(final_patches_path, item), os.path.join(final_patches_dummy_path, item))
