@@ -653,6 +653,29 @@ def create_valid_patches_info_csv_file():
     valid_patches_df.to_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"), index=None)
 
     print ("finished creating valid patches info csv file ...")
+
+
+def helper_to_copy_to_local():
+
+    images_path = ORIGINAL_IMAGES_PATH
+    images_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/images"
+
+    predicted_masks_path = os.path.join(DATA_DIR, STUDY, "segmentation_data", "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "predicted_masks" )
+    predicted_masks_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/predicted_masks"
+
+    final_patches_path = os.path.join(DATA_DIR, STUDY, "segmentation_data", "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
+                                      "results", "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
+    final_patches_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/final_patches"
+
+    final_masks_path = os.path.join(DATA_DIR, STUDY, "segmentation_data", "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
+                                      "results", "final_masks_"+str(PATCH_COUNT_PER_IMAGE))
+    final_masks_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/final_masks"
+
+
+    predicted_masks = os.listdir(predicted_masks_path)
+    selected_predicted_masks = random.sample(predicted_masks, 50)
+    print (selected_predicted_masks)
+
 def main():
     pass
     #use_trained_model("training_example_feb_6.pkl")
@@ -668,7 +691,9 @@ if __name__ == "__main__":
 
 
     #rotate_horizontal_to_vertical()
-    use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
+    #use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
+
+    helper_to_copy_to_local()
 
     #check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
