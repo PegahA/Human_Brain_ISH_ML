@@ -265,25 +265,26 @@ def check_percentage_foreground(arr, threshold, patch_size):
 
     return False
 
-def rotate_horizontal_to_vertical(images_path, image_name):
+def rotate_horizontal_to_vertical():
     """
     This function checks the height and width of an img to see if it is oriented horizontally.
     If yes, it will rotate the image 90 degrees counter clockwise.
-    :param img: a PIL library Image object
-    :param image_name: String. Name of the image. To be used to save the image after rotation.
-    :return: a PIL library Image object
     """
-    image_path = os.path.join(images_path, image_name)
-    # Open the input image as numpy array, convert to RGB
-    img = Image.open(image_path).convert("RGB")
-    w, h = img.size
-    if w> h:  # the image is horizontal
-        print ("image {} is horizontal.".format(image_name))
-        print(h, w)
-        img = img.rotate(90, expand=True)
-        img.save(os.path.join(images_path, image_name))
 
-    return img
+    dir_images_list = os.listdir(ORIGINAL_IMAGES_PATH)
+
+    for item in dir_images_list:
+        if item.endswith(".jpg"): # the images are saved with jpg format
+
+            image_path = os.path.join(ORIGINAL_IMAGES_PATH, item)
+            # Open the input image as numpy array, convert to RGB
+            img = Image.open(image_path).convert("RGB")
+            w, h = img.size
+            if w> h:  # the image is horizontal
+                print ("image {} is horizontal.".format(item))
+                print(h, w)
+                img = img.rotate(90, expand=True)
+                img.save(os.path.join(ORIGINAL_IMAGES_PATH, item))
 
 
 def use_trained_model(model_name, predict_new_masks=True):
@@ -343,9 +344,10 @@ def use_trained_model(model_name, predict_new_masks=True):
                 img_h = img.shape[0]
                 img_w = img.shape[1]
                 
-                print ("image h is {} and image w is {}".format(img_h, img_w))
+                
+                #print ("image h is {} and image w is {}".format(img_h, img_w))
 
-                """
+                
                 h_w_dif = img_h - img_w
 
                 # ------- pad the image to make it into a square
@@ -382,7 +384,7 @@ def use_trained_model(model_name, predict_new_masks=True):
                 print("Finished segementing and starting to get the patches for: ", final_name)
 
                 create_patches(rescaled_img, final_name, original_images_path, final_patches_path, mask_patches_path)
-                """
+               
 
 
         else:  # if we only want to create new patches. We already have the segmented masks.
@@ -664,6 +666,8 @@ if __name__ == "__main__":
     #create_valid_patches_info_csv_file()
     #main()
 
+
+    #rotate_horizontal_to_vertical()
     use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
 
     #check_masks_and_patches_info()
