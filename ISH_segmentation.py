@@ -16,6 +16,8 @@ from PIL import Image
 from pathlib import Path
 import pandas as pd
 
+from shutil import copyfile
+
 from human_ISH_config import *
 
 import torchvision
@@ -674,7 +676,11 @@ def helper_to_copy_to_local():
 
     predicted_masks = os.listdir(predicted_masks_path)
     selected_predicted_masks = random.sample(predicted_masks, 50)
-    print (selected_predicted_masks)
+    for item in selected_predicted_masks:
+        item = item.split("_")[0] + ".jpg"
+        copyfile(os.path.join(images_path, item), os.path.join(images_dummy_path, item))
+        
+
 
 def main():
     pass
