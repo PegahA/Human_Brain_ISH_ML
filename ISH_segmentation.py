@@ -674,8 +674,8 @@ def helper_to_copy_to_local():
                                       "results", "final_masks_"+str(PATCH_COUNT_PER_IMAGE))
     final_masks_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/final_masks"
 
-    image_files = glob.glob(images_dummy_path)
-    predicted_masks_files = glob.glob(predicted_masks_dummy_path)
+    image_files = glob.glob(images_dummy_path+"/*")
+    predicted_masks_files = glob.glob(predicted_masks_dummy_path+"/*")
     for f in image_files:
         os.remove(f)
     for f in predicted_masks_files:
@@ -686,7 +686,7 @@ def helper_to_copy_to_local():
     selected_predicted_masks = random.sample(predicted_masks, 50)
     for item in selected_predicted_masks:
         copyfile(os.path.join(predicted_masks_path, item), os.path.join(predicted_masks_dummy_path, item))
-        
+
     for item in selected_predicted_masks:
         item = item.split("_")[0] + ".jpg"
         copyfile(os.path.join(images_path, item), os.path.join(images_dummy_path, item))
