@@ -1331,6 +1331,79 @@ def get_image_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["t
     print ("Finished getting embeddings of target sets.")
 
 
+def helper_compare_genes_from_all_sets_to_zeng_cleaned():
+    train_df = pd.read_csv("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/sets_50_patches_40_seg/training.csv")
+    val_df = pd.read_csv("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/sets_50_patches_40_seg/validation.csv")
+    test_df = pd.read_csv("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/sets_50_patches_40_seg/test.csv")
+    zeng_df = pd.read_csv("/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv")
+
+    train_sym = list(train_df['gene_symbol'])
+    train_ent = list(train_df['entrez_id'])
+
+    val_sym = list(val_df['gene_symbol'])
+    val_ent = list(val_df['entrez_id'])
+
+    test_sym = list(test_df['gene_symbol'])
+    test_ent = list(test_df['entrez_id'])
+
+    zeng_sym = list(zeng_df['gene_symbol'])
+    zeng_ent = list(zeng_df['entrez_id'])
+
+
+    all_sym = train_sym + val_sym + test_sym
+    all_ent = train_ent + val_ent + test_ent
+
+    all_sym_unq = list(set(all_sym))
+    all_ent_unq = list(set(all_ent))
+
+
+    zeng_sym_unq = list(set(zeng_sym))
+    zeng_ent_unq = list(set(zeng_ent))
+
+    print ("There are {} unique genes and {} unique entrez ids in sets".format(len(all_sym_unq), len(all_ent_unq)))
+    print ("There are {} unique genes and {} unique entrez ids in zeng".format(len(zeng_sym_unq), len(zeng_ent_unq)))
+
+    in_sets_not_in_zeng_sym = []
+    in_sets_not_in_zeng_ent = []
+
+    in_zeng_not_in_sets_sym = []
+    in_zeng_not_in_sets_ent = []
+
+
+    for item in all_sym_unq:
+        if item not in zeng_sym_unq:
+            in_sets_not_in_zeng_sym.append(item)
+
+    for item in all_ent_unq:
+        if item not in zeng_ent_unq:
+            in_sets_not_in_zeng_ent.append(item)
+
+
+    for item in zeng_sym_unq:
+        if item not in all_sym_unq:
+            in_zeng_not_in_sets_sym.append(item)
+
+    for item in zeng_ent_unq:
+        if item not in all_ent_unq:
+            in_zeng_not_in_sets_ent.append(item)
+
+
+    print ("_______________")
+    print ("There are {} genes in zeng and {} entrez ids in zeng that are not in sets".format(len(in_zeng_not_in_sets_sym), len(in_zeng_not_in_sets_ent)))
+    print (in_zeng_not_in_sets_sym)
+    print ("---")
+    print (in_zeng_not_in_sets_ent)
+
+    print ("_______________")
+
+    print ("There are {} genes in sets and {} entrez ids in sets that are not in zeng".format(len(in_sets_not_in_zeng_sym), len(in_sets_not_in_zeng_ent)))
+    print (in_sets_not_in_zeng_sym)
+    print ("---")
+    print (in_sets_not_in_zeng_ent)
+
+
+
+
 
 def helper_function_to_get_embeddings_of_target_sets():
 
@@ -1381,46 +1454,54 @@ def preprocess_zeng_layer_marker_and_expression(path_to_zeng):
 
 
 
-def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level_embeddings):
+def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embeddings):
 
 
     zeng_df = pd.read_csv(path_to_zeng)
-    gene_level_embed_df = pd.read_csv(path_to_gene_level_embeddings)
+    embed_df = pd.read_csv(path_to_embeddings)
 
     merge_on = "entrez_id"
 
-    zeng_gene_symbol_list = list(zeng_df[merge_on])
-    embed_gene_symbol_list = list(gene_level_embed_df[merge_on])
+    zeng_list = list(zeng_df[merge_on])
+    embed_list = list(embed_df[merge_on])
 
-    zeng_gene_symbol_list_unique =  set(zeng_gene_symbol_list)
-    embed_gene_symbol_list_unique = set(embed_gene_symbol_list)
-
-
-    in_zeng_not_in_embed = []
-    in_embed_not_in_zeng = []
+    zeng_list_unique =  set(zeng_list)
+    embed_list_unique = set(embed_list)
 
 
-    for item in zeng_gene_symbol_list_unique:
-        if item not in embed_gene_symbol_list_unique:
-            in_zeng_not_in_embed.append(item)
+    in_zeng_not_in_embed_entrez = []
+    in_embed_not_in_zeng_entrez = []
 
-    for item in embed_gene_symbol_list_unique:
-        if item not in zeng_gene_symbol_list_unique:
-            in_embed_not_in_zeng.append(item)
+    in_zeng_not_in_embed_sym = []
+    in_embed_not_in_zeng_sym = []
 
-    print ("There are {} {} in Zeng that are not in the embeddings file.".format(len(in_zeng_not_in_embed), merge_on))
-    print (in_zeng_not_in_embed)
+
+    for item in zeng_list_unique:
+        if item not in embed_list_unique:
+            in_zeng_not_in_embed_entrez.append(item)
+            in_zeng_not_in_embed_sym.append(list(zeng_df[zeng_df[merge_on]==item]['gene_symbol'])[0])
+
+    for item in embed_list_unique:
+        if item not in zeng_list_unique:
+            in_embed_not_in_zeng_entrez.append(item)
+            in_embed_not_in_zeng_sym.append(list(embed_df[embed_df[merge_on]==item]['gene_symbol'])[0])
+
+
+    print ("There are {} {} in Zeng that are not in the embeddings file.".format(len(in_zeng_not_in_embed_entrez), merge_on))
+    print (in_zeng_not_in_embed_entrez)
+    print (in_zeng_not_in_embed_sym)
 
     print ("----")
-    print ("There are {} {} in the embeddings file that are not in Zeng.".format(len(in_embed_not_in_zeng), merge_on))
-    print (in_embed_not_in_zeng)
+    print ("There are {} {} in the embeddings file that are not in Zeng.".format(len(in_embed_not_in_zeng_entrez), merge_on))
+    print (in_embed_not_in_zeng_entrez)
+    print (in_embed_not_in_zeng_sym)
 
 
-    merged_with_markers_df = gene_level_embed_df.merge(zeng_df, how='left', on=merge_on)
+    merged_with_markers_df = embed_df.merge(zeng_df, how='left', on=merge_on)
     columns = list(merged_with_markers_df)
     columns = [columns[0]] + [columns[-2]] + [columns[-1] ] + columns[1:-2]
     merged_with_markers_df = merged_with_markers_df[columns]
-    new_path = path_to_gene_level_embeddings.split(".")[0] + "_with_marker.csv"
+    new_path = path_to_embeddings.split(".")[0] + "_with_marker.csv"
     merged_with_markers_df.to_csv(new_path, index=None, na_rep='NA')
 
     acceptable_layer_names = {"layer 1", "layer 1", "layer 3", "layer 4", "layer 5", "layer 6"}
@@ -1442,7 +1523,7 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_gene_level
 
     merged_with_markers_df_no_na = merged_with_markers_df[merged_with_markers_df['Cortical.marker..human.'].notna()]
 
-    no_na_path = path_to_gene_level_embeddings.split(".")[0] + "_with_marker_no_na.csv"
+    no_na_path = path_to_embeddings.split(".")[0] + "_with_marker_no_na.csv"
     #merged_with_markers_df_no_na.to_csv(no_na_path, index=None)
 
 
@@ -1498,7 +1579,12 @@ def info_from_existing_embed_files():
     list_of_folders = ["1594920479", "1594920854", "1594921222", "1594957148", "1594957337", "1594957873", "1594990440",
                        "1594991833", "1594992442", "1595027778", "1595029308", "1595029898", "1595035644", "1595061900",
                        "1595063681", "1595064319", "1595071590", "1595099038", "1595101976", "1595102546", "1595107729",
-                       "1595132851", "1595136249", "1595136799", "1595143205", "1595171169", "1595175053", "1595175523"]
+                       "1595132851", "1595136249", "1595136799", "1595143205", "1595171169", "1595175053", "1595175523",
+                       "1595287279", "1595287977", "1595288363", "1595326272", "1595326978", "1595327354", "1595360634",
+                       "1595361328", "1595361718", "1595398605", "1595399328", "1595399723", "1595431794", "1595432150",
+                       "1595434064", "1595469825", "1595470197", "1595472034", "1595503244", "1595503323", "1595536453",
+                       "1595536980", "1595570417", "1595570961", "1595602850", "1595603756", "1595635727", "1595636690",
+                       "1595668008", "1595669221"]
 
 
 
@@ -1678,16 +1764,21 @@ if __name__ == '__main__':
     """
 
 
+    """
+    path_to_gene_level_embed ="/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3_all/" \
+                              "1593570490_triplet_training_validation_embeddings_image_level_with_info.csv"
 
-    #path_to_gene_level_embed ="/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3/" \
-                              #"1593570490_triplet_training_validation_embeddings_gene_level_with_info.csv"
-
-    #path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv"
-    #preprocess_zeng_layer_marker_and_expression(path_4_to_zeng)
-    #processed_path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4_processed.csv"
-    #merge_with_zeng_layer_marker_and_expression(processed_path_4_to_zeng, path_to_gene_level_embed)
+    path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4.csv"
+    preprocess_zeng_layer_marker_and_expression(path_4_to_zeng)
+    processed_path_4_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_4_processed.csv"
+    merge_with_zeng_layer_marker_and_expression(processed_path_4_to_zeng, path_to_gene_level_embed)
+    
+    """
 
 
     info_from_existing_embed_files()
 
+    #helper_compare_genes_from_all_sets_to_zeng_cleaned()
 
+    #path_5_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_5.csv"
+    #preprocess_zeng_layer_marker_and_expression(path_5_to_zeng)
