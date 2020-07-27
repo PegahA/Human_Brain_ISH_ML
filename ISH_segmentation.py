@@ -322,7 +322,8 @@ def use_trained_model(model_name, predict_new_masks=True):
                 img = cv.imread(os.path.join(original_images_path, item), cv.COLOR_BGR2GRAY)
                 img_h = img.shape[0]
                 img_w = img.shape[1]
-
+                
+                print ("image h is {} and image w is {}".format(img_h, img_w))
                 h_w_dif = img_h - img_w
 
                 # ------- pad the image to make it into a square
@@ -640,7 +641,7 @@ if __name__ == "__main__":
     #create_valid_patches_info_csv_file()
     #main()
 
-    use_trained_model("training_example_feb_6.pkl",predict_new_masks=False)
+    use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
 
     #check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
