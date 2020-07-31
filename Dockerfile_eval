@@ -1,0 +1,17 @@
+FROM tensorflow/tensorflow:1.13.1-gpu-py3
+
+COPY main.py ./main.py
+COPY human_ISH_config.py ./human_ISH_config.py
+COPY crop_and_rotate.py ./crop_and_rotate.py
+COPY evaluate_embeddings.py ./evaluate_embeddings.py
+COPY extract_data.py ./extract_data.py
+COPY ISH_segmentation.py ./ISH_segmentation.py
+COPY process.py ./process.py
+
+RUN ["apt-get", "install", "-y", "libsm6", "libxext6", "libxrender-dev"]
+
+COPY requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
+RUN rm ./requirements.txt
+
+ENTRYPOINT ["python3" , "evaluate_embeddings.py"]
