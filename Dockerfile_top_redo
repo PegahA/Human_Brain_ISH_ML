@@ -1,6 +1,6 @@
 FROM tensorflow/tensorflow:1.13.1-gpu-py3
 
-COPU top_level_redo.py ./top_level_redo.py
+COPY top_level_redo.py ./top_level_redo.py
 COPY top_level.py ./top_level.py
 COPY main.py ./main.py
 COPY human_ISH_config.py ./human_ISH_config.py
