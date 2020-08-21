@@ -1871,7 +1871,7 @@ if __name__ == '__main__':
     input_dir = os.path.join(DATA_DIR, study)
     input_file = pd.read_csv(os.path.join(input_dir, "human_ISH_info.csv"))
     output_dir = input_dir
-    output_name = "triplet_patches.csv"
+    output_name = "triplet_patches_" + study + ".csv"
 
     make_custom_triplet_csv(study, input_file, output_dir, output_name, patch_count_per_image=50)
 
