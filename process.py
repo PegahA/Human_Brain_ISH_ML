@@ -544,6 +544,44 @@ def make_triplet_csv_with_segmentation(df, out_file):
 
 
 
+def make_custom_triplet_csv(study, df, output_dir, output_name, patch_count_per_image = 50):
+    csv_file_name = "less_than_" + str(patch_count_per_image) + ".csv"
+    not_enough_patches_df = pd.read_csv(
+        os.path.join(DATA_DIR, study, "segmentation_data", "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES),
+                     "outlier_images", csv_file_name))
+
+    not_enough_patches_dict = dict(zip(not_enough_patches_df["image_id"], not_enough_patches_df["count"]))
+
+    temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
+    new_image_info = []
+
+    for id, gene in zip(temp_df['image'], temp_df['gene_symbol']):
+
+        id_temp = int(id.split(".")[0])
+        if id_temp in not_enough_patches_dict:
+
+            count = not_enough_patches_dict[id_temp]
+            for patch_index in range(0, count):
+                patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
+                new_image_info += patch_image_list
+
+
+        else:
+
+            for patch_index in range(0, PATCH_COUNT_PER_IMAGE):
+                patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
+                new_image_info += patch_image_list
+
+    new_df = pd.DataFrame(columns=['gene_symbol', 'image'])
+    new_df['image'] = [item[0] for item in new_image_info]
+    new_df['gene_symbol'] = [item[1] for item in new_image_info]
+
+    new_df = new_df.sort_values(by=['image'])
+
+    out_file = os.path.join(output_dir, output_name)
+
+    new_df.to_csv(out_file, index=False, header=False)
+
 
 
 def make_triplet_csvs(dfs):
@@ -1454,6 +1492,43 @@ def preprocess_zeng_layer_marker_and_expression(path_to_zeng):
 
 
 
+
+def merge_with_zeng_compare_gene_symbols(path_to_zeng, path_to_embeddings):
+    zeng_df = pd.read_csv(path_to_zeng)
+    embed_df = pd.read_csv(path_to_embeddings)
+    embed_df = embed_df.rename(columns={"gene_symbol": "old_gene_symbol"})
+
+
+    merge_on = "entrez_id"
+
+    merged_with_markers_df = embed_df.merge(zeng_df, how='left', on=merge_on)
+    columns = list(merged_with_markers_df)
+
+    columns = columns[0:2] + [columns[132]] + columns[2:132] + columns[133:]
+    merged_with_markers_df = merged_with_markers_df[columns]
+
+    print (columns)
+    old_gene_symbols = list(merged_with_markers_df['old_gene_symbol'])
+    new_gene_symbols = list(merged_with_markers_df['gene_symbol'])
+    entrez_ids = list(merged_with_markers_df['entrez_id'])
+
+    print (len(old_gene_symbols))
+    print (len(new_gene_symbols))
+
+    mismatch_count = 0
+    mismatch_d = {}
+    for i in range(len(old_gene_symbols)):
+        if old_gene_symbols[i] != new_gene_symbols[i]:
+            if old_gene_symbols[i] not in mismatch_d:
+                mismatch_d[old_gene_symbols[i]] = [new_gene_symbols[i], entrez_ids[i]]
+
+                mismatch_count +=1
+
+    for item in mismatch_d:
+        print ("{}  :  {}".format(item, mismatch_d[item]))
+    print ("number of mis-matches: ", mismatch_count)
+
+
 def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embeddings):
 
 
@@ -1776,9 +1851,27 @@ if __name__ == '__main__':
     """
 
 
-    info_from_existing_embed_files()
+    #info_from_existing_embed_files()
 
     #helper_compare_genes_from_all_sets_to_zeng_cleaned()
 
     #path_5_to_zeng = "/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Cleaned_Zeng_dataset_5.csv"
     #preprocess_zeng_layer_marker_and_expression(path_5_to_zeng)
+
+
+    """
+    path_to_zeng ="/Users/pegah_abed/Documents/Zeng/transcriptome_app/data/processed/Zeng et al/Cleaned_Zeng_dataset.csv"
+    path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/top_3_all/" \
+                               "1593570490_triplet_training_validation_embeddings_image_level_with_info.csv"
+
+    merge_with_zeng_compare_gene_symbols(path_to_zeng, path_to_gene_level_embed)
+    """
+
+    study = "schizophrenia"
+    input_dir = os.path.join(DATA_DIR, study)
+    input_file = os.path.join(input_dir, "human_ISH_info.csv")
+    output_dir = input_dir
+    output_name = "triplet_patches.csv"
+
+    make_custom_triplet_csv(study, input_file, output_dir, output_name, patch_count_per_image=50)
+
