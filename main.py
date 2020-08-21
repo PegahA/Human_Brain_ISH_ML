@@ -265,8 +265,52 @@ if __name__ == "__main__":
 
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
-  
-    # --------
+
+
+
+
+    # -------- adding disease dataset to pipeline --------
+
+
+    autism_embed_dataset = ""
+    autsim_image_root = os.path.join(DATA_DIR, "autism", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
+                                                  "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
+
+    autism_command_line_string = "python " + embed_py_path + \
+                                " --experiment_root=" + "'" + args.experiment_root + "'" + \
+                                " --dataset=" + "'" + autism_embed_dataset + "'" + \
+                                " --image_root=" + "'" + autsim_image_root + "'" + \
+                                " --loading_threads=" + str(args.loading_threads) + \
+                                " --batch_size=" + str(args.embed_batch_size) + \
+                                (" --flip_augment" if args.embed_flip_augment else "") + \
+                                (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
+                                (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
+
+    os.system(autism_command_line_string)
+
+
+        # -----------
+
+    schiz_embed_dataset = ""
+    schiz_image_root = os.path.join(DATA_DIR, "schizophrenia", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
+                                                  "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
+    schiz_command_line_string = "python " + embed_py_path + \
+                                " --experiment_root=" + "'" + args.experiment_root + "'" + \
+                                " --dataset=" + "'" + schiz_embed_dataset + "'" + \
+                                " --image_root=" + "'" + schiz_image_root + "'" + \
+                                " --loading_threads=" + str(args.loading_threads) + \
+                                " --batch_size=" + str(args.embed_batch_size) + \
+                                (" --flip_augment" if args.embed_flip_augment else "") + \
+                                (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
+                                (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
+
+
+
+    os.system(schiz_command_line_string)
+
+    # ----------------------------------------------------------
+
+
     # to add extra parameters in the args.json file
 
     args_file = os.path.join( EXPERIMENT_ROOT, "args.json")
