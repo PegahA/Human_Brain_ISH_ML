@@ -584,6 +584,10 @@ def check_masks_and_patches_info():
     not_enough_patches_df["count"] = final_patches_less_than_thresh_count
 
     csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
+
+    if not os.path.exists(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images")):
+        os.mkdir(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images"))
+
     #not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH, "outlier_images", csv_file_name), index=None)
     not_enough_patches_df.to_csv(os.path.join(SEGMENTATION_DATA_PATH ,"outlier_images", csv_file_name), index=None)
 
@@ -661,10 +665,10 @@ def create_valid_patches_info_csv_file():
 def helper_to_copy_to_local():
 
     images_path = ORIGINAL_IMAGES_PATH
-    images_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/images"
+    images_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/schiz/images"
 
     predicted_masks_path = os.path.join(DATA_DIR, STUDY, "segmentation_data", "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "predicted_masks" )
-    predicted_masks_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/autism/predicted_masks"
+    predicted_masks_dummy_path = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/dummy/dummy_2/schiz/predicted_masks"
 
     final_patches_path = os.path.join(DATA_DIR, STUDY, "segmentation_data", "trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
                                       "results", "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
@@ -683,7 +687,7 @@ def helper_to_copy_to_local():
         os.remove(f)
 
     predicted_masks = os.listdir(predicted_masks_path)
-    selected_predicted_masks = random.sample(predicted_masks, 100)
+    selected_predicted_masks = random.sample(predicted_masks, 200)
     for item in selected_predicted_masks:
         copyfile(os.path.join(predicted_masks_path, item), os.path.join(predicted_masks_dummy_path, item))
 
@@ -692,7 +696,7 @@ def helper_to_copy_to_local():
         copyfile(os.path.join(images_path, item), os.path.join(images_dummy_path, item))
 
     # ----------------
-
+    """
     final_patches_files = glob.glob(final_patches_dummy_path + "/*")
     final_masks_files = glob.glob(final_masks_dummy_path + "/*")
     for f in final_patches_files:
@@ -704,9 +708,10 @@ def helper_to_copy_to_local():
     selected_final_masks = random.sample(final_masks, 100)
     for item in selected_final_masks:
         copyfile(os.path.join(final_masks_path, item), os.path.join(final_masks_dummy_path, item))
+
         copyfile(os.path.join(final_patches_path, item), os.path.join(final_patches_dummy_path, item))
 
-
+    """
 
 
 
@@ -725,11 +730,11 @@ if __name__ == "__main__":
 
 
     #rotate_horizontal_to_vertical()
-    #use_trained_model("training_example_apr_17.pkl",predict_new_masks=True)
+    #use_trained_model("training_example_apr_17.pkl",predict_new_masks=False)
 
-    helper_to_copy_to_local()
+    #helper_to_copy_to_local()
 
-    #check_masks_and_patches_info()
+    check_masks_and_patches_info()
     #check_genes_in_images_with_not_enough_patches("less_than_10.csv")
 
 
