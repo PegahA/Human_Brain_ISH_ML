@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
     # -------- adding disease dataset to pipeline --------
 
-
+    """
     autism_embed_dataset = ""
     autsim_image_root = os.path.join(DATA_DIR, "autism", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
                                                   "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
@@ -287,11 +287,12 @@ if __name__ == "__main__":
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
     os.system(autism_command_line_string)
+    """
 
 
         # -----------
 
-    schiz_embed_dataset = ""
+    schiz_embed_dataset = os.path.join(DATA_DIR, "schizophrenia", "triplet_patches.csv")
     schiz_image_root = os.path.join(DATA_DIR, "schizophrenia", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
                                                   "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     schiz_command_line_string = "python " + embed_py_path + \
