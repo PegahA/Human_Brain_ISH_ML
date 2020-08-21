@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from human_ISH_config import *
-import h5py
+#import h5py
 import time
 from shutil import copyfile
 import operator
@@ -1869,7 +1869,7 @@ if __name__ == '__main__':
 
     study = "schizophrenia"
     input_dir = os.path.join(DATA_DIR, study)
-    input_file = os.path.join(input_dir, "human_ISH_info.csv")
+    input_file = pd.read_csv(os.path.join(input_dir, "human_ISH_info.csv"))
     output_dir = input_dir
     output_name = "triplet_patches.csv"
 
