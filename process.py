@@ -612,6 +612,18 @@ def convert_h5_to_csv():
             print ("set csv file name is: ", set_csv_file_name)
             print ("item is: ", item)
 
+
+            # ----
+            if "autism" in item:
+                sets_path = os.path.join(DATA_DIR, "autism", "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(
+                    SEGMENTATION_TRAINING_SAMPLES) + "_seg")
+
+            elif "schizophrenia" in item:
+                sets_path = os.path.join(DATA_DIR, "schizophrenia", "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(
+                    SEGMENTATION_TRAINING_SAMPLES) + "_seg")
+
+            # ----
+
             set_csv_file = os.path.join(sets_path, set_csv_file_name)
             df = pd.read_csv(set_csv_file, names=['gene', 'image_id'])
             f = h5py.File(os.path.join(EXPERIMENT_ROOT, item), 'r')['emb']
