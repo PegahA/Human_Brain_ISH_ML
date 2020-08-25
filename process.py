@@ -600,11 +600,15 @@ def make_triplet_csvs(dfs):
 
 
 
-def convert_h5_to_csv():
+def convert_h5_to_csv(experiment_root =None):
 
     sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
-    exp_root_contents = os.listdir(EXPERIMENT_ROOT)
+    if experiment_root == None:
+        exp_root_contents = os.listdir(EXPERIMENT_ROOT)
+    else:
+        exp_root_contents = os.listdir(experiment_root)
+
     for item in exp_root_contents:
         if item.endswith(".h5"):
             embedding_csv_name = item.split(".")[0] + ".csv"
