@@ -167,7 +167,7 @@ parser.add_argument(
 
 def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
     args = parser.parse_args()
-    
+
     experiment_root = os.path.join(DATA_DIR, "cortex", "experiment_files", "experiment_" + trained_model_ts)
 
     if (not os.path.exists(experiment_root)):
@@ -192,7 +192,7 @@ def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
 
     os.system(disease_command_line_string)
 
-    process.convert_h5_to_csv()
+    process.convert_h5_to_csv(experiment_root)
     filename = process.save_embedding_info_into_file(trained_model_ts)
 
     process.merge_embeddings_to_gene_level(filename)
