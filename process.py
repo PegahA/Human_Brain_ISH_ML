@@ -671,7 +671,22 @@ def merge_embeddings_to_gene_level(filename):
             #else:
 
             embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
-            patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
+
+
+            if "autism" in item:
+                image_root = os.path.join(DATA_DIR, "autism", "segmentation_data",
+                                          "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES), "results",
+                                          "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+            elif "schizophrenia" in item:
+                image_root = os.path.join(DATA_DIR, "schizophrenia", "segmentation_data",
+                                         "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES), "results",
+                                         "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+            else:
+                image_root = IMAGE_ROOT
+
+            patches_info = pd.read_csv(os.path.join(image_root, "valid_patches_info.csv"))
 
             embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
             # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
@@ -716,7 +731,21 @@ def merge_embeddings_to_image_level(filename):
             #else:
             print ("staaaaaaart: ", item)
             embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
-            patches_info = pd.read_csv(os.path.join(IMAGE_ROOT, "valid_patches_info.csv"))
+
+            if "autism" in item:
+                image_root = os.path.join(DATA_DIR, "autism", "segmentation_data",
+                                          "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES), "results",
+                                          "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+            elif "schizophrenia" in item:
+                image_root = os.path.join(DATA_DIR, "schizophrenia", "segmentation_data",
+                                         "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES), "results",
+                                         "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+            else:
+                image_root = IMAGE_ROOT
+
+            patches_info = pd.read_csv(os.path.join(image_root, "valid_patches_info.csv"))
 
             print (embeddings_file.head())
             print ("---")
