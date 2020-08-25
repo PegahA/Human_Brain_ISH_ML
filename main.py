@@ -173,7 +173,9 @@ def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
     if (not os.path.exists(experiment_root)):
         print ("experiment root does not exist")
 
-    disease_embed_dataset = os.path.join(DATA_DIR, disease, "triplet_patches_"+ disease + ".csv")
+    disease_embed_dataset = os.path.join(DATA_DIR, disease, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(
+                                           SEGMENTATION_TRAINING_SAMPLES) + "_seg", "triplet_patches_"+ disease + ".csv")
+    
     disease_image_root =  os.path.join(DATA_DIR, disease, "segmentation_data",
                                     "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES),
                                     "results", "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
