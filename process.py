@@ -605,9 +605,9 @@ def convert_h5_to_csv(experiment_root =None):
     sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
     if experiment_root == None:
-        exp_root_contents = os.listdir(EXPERIMENT_ROOT)
-    else:
-        exp_root_contents = os.listdir(experiment_root)
+        experiment_root = EXPERIMENT_ROOT
+
+    exp_root_contents = os.listdir(experiment_root)
 
     for item in exp_root_contents:
         if item.endswith(".h5"):
@@ -630,9 +630,9 @@ def convert_h5_to_csv(experiment_root =None):
 
             set_csv_file = os.path.join(sets_path, set_csv_file_name)
             df = pd.read_csv(set_csv_file, names=['gene', 'image_id'])
-            f = h5py.File(os.path.join(EXPERIMENT_ROOT, item), 'r')['emb']
+            f = h5py.File(os.path.join(experiment_root, item), 'r')['emb']
             df['image_id']= df.apply(lambda x: x['image_id'].split('.')[0], axis =  1)
-            pd.DataFrame(np.array(f), index=df.image_id).to_csv(os.path.join(EXPERIMENT_ROOT, embedding_csv_name))
+            pd.DataFrame(np.array(f), index=df.image_id).to_csv(os.path.join(experiment_root, embedding_csv_name))
 
 
 
