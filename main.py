@@ -165,8 +165,62 @@ parser.add_argument(
 
 # --------------
 
+def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
+    args = parser.parse_args()
+    
+    experiment_root = os.path.join(DATA_DIR, "cortex", "experiment_files", "experiment_" + trained_model_ts)
+
+    if (not os.path.exists(experiment_root)):
+        print ("experiment root does not exist")
+
+    disease_embed_dataset = os.path.join(DATA_DIR, disease, "triplet_patches_"+ disease + ".csv")
+    disease_image_root =  os.path.join(DATA_DIR, disease, "segmentation_data",
+                                    "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES),
+                                    "results", "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+    embed_py_path = os.path.join(TRIPLET_DIR, "embed.py")
+
+    disease_command_line_string = "python " + embed_py_path + \
+                                " --experiment_root=" + "'" + experiment_root + "'" + \
+                                " --dataset=" + "'" + disease_embed_dataset + "'" + \
+                                " --image_root=" + "'" + disease_image_root + "'" + \
+                                " --loading_threads=" + str(args.loading_threads) + \
+                                " --batch_size=" + str(args.embed_batch_size) + \
+                                (" --flip_augment" if args.embed_flip_augment else "") + \
+                                (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
+                                (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
+
+    os.system(disease_command_line_string)
+
+    process.convert_h5_to_csv()
+    filename = process.save_embedding_info_into_file(trained_model_ts)
+
+    process.merge_embeddings_to_gene_level(filename)
+    process.merge_embeddings_to_image_level(filename)
+
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR, STUDY, "experiment_files")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
+
+    print("permisssions fixed for experiment files")
+
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
+
+    print("permissions fixed for segmentation embeddings")
+
 
 if __name__ == "__main__":
+
+
+    get_disease_embeddings_from_existing_models("schizophrenia", "1598225452")
+
+    """
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
     #process.make_sets() 
@@ -271,7 +325,7 @@ if __name__ == "__main__":
 
     # -------- adding disease dataset to pipeline --------
 
-    """
+
     autism_embed_dataset = ""
     autsim_image_root = os.path.join(DATA_DIR, "autism", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
                                                   "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
@@ -287,7 +341,7 @@ if __name__ == "__main__":
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
     os.system(autism_command_line_string)
-    """
+ 
 
 
         # -----------
@@ -361,6 +415,8 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
+    
+    """
     
     
    
