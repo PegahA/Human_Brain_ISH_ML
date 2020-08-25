@@ -341,12 +341,12 @@ if __name__ == "__main__":
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
     os.system(autism_command_line_string)
- 
 
 
         # -----------
 
-    schiz_embed_dataset = os.path.join(DATA_DIR, "schizophrenia", "triplet_patches_schizophrenia.csv")
+    schiz_embed_dataset = os.path.join(DATA_DIR, "schizophrenia","sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(SEGMENTATION_TRAINING_SAMPLES)+"_seg" ,"triplet_patches_schizophrenia.csv")
+
     schiz_image_root = os.path.join(DATA_DIR, "schizophrenia", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
                                                   "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     schiz_command_line_string = "python " + embed_py_path + \
@@ -362,7 +362,7 @@ if __name__ == "__main__":
 
 
     os.system(schiz_command_line_string)
-
+   
     # ----------------------------------------------------------
 
 
