@@ -660,20 +660,25 @@ def concat_all_evaluation_results():
      #                  "1595668008", "1595669221", "1595669221", "1595883396", "1595904365", "1595904737", "1595919239",
      #                  "1595941978", "1595942353", "1595954945", "1595989172", "1596024687", "1596058492", "random"]
 
-    list_of_folders = ["1596182551", "1596182973", "1596183379", "1596183933", "1596184224", "1596187834", "1596221527",
-     "1596221771", "1596223288", "1596225537", "1596256485", "1596256723", "1596258245", "1596260525",
-     "1596300288", "1596300554", "1596302071", "1596304056", "1596335566", "1596335814", "1596337331",
-     "1596339342", "1596374295", "1596375453", "1596375695", "1596379176", "1596409725", "1596410763",
-     "1596410988", "1596414379", "1596444832", "1596450560", "1596450802", "1596454143", "1596479945",
-     "1596485467", "1596485699", "1596489082", "1596516521", "1596525946", "1596526192", "1596529501",
-     "1596553484", "1596561093", "1596561322", "1596564704", "1596595541", "1596604431", "1596604622",
-     "1596607509", "1596630544", "1596639464", "1596639649", "1596642538", "1596672248", "1596683659",
-     "1596683840", "1596686401", "1596709811", "1596718871", "1596719042", "1596721616", "1596746123",
-     "1596759993", "1596760102", "1596762700", "1596784123", "1596795103", "1596795150", "1596797763",
-     "1596819094", "1596835082", "1596835093", "1596837656", "1596854477", "1596869949", "1596869960",
-     "1596872548", "1596890418", "1596911384", "1596911583", "1596914043", "1596929673", "1596946541",
-     "1596946785", "1596949246", "1596987783", "1596988070", "1596989989", "1597020996", "1597021394",
-     "1597023204", "1597059046", "1597059501", "1597061142", "random"]
+    #list_of_folders = ["1596182551", "1596182973", "1596183379", "1596183933", "1596184224", "1596187834", "1596221527",
+    # "1596221771", "1596223288", "1596225537", "1596256485", "1596256723", "1596258245", "1596260525",
+    # "1596300288", "1596300554", "1596302071", "1596304056", "1596335566", "1596335814", "1596337331",
+    # "1596339342", "1596374295", "1596375453", "1596375695", "1596379176", "1596409725", "1596410763",
+    # "1596410988", "1596414379", "1596444832", "1596450560", "1596450802", "1596454143", "1596479945",
+    # "1596485467", "1596485699", "1596489082", "1596516521", "1596525946", "1596526192", "1596529501",
+    # "1596553484", "1596561093", "1596561322", "1596564704", "1596595541", "1596604431", "1596604622",
+    # "1596607509", "1596630544", "1596639464", "1596639649", "1596642538", "1596672248", "1596683659",
+    # "1596683840", "1596686401", "1596709811", "1596718871", "1596719042", "1596721616", "1596746123",
+    # "1596759993", "1596760102", "1596762700", "1596784123", "1596795103", "1596795150", "1596797763",
+    # "1596819094", "1596835082", "1596835093", "1596837656", "1596854477", "1596869949", "1596869960",
+    # "1596872548", "1596890418", "1596911384", "1596911583", "1596914043", "1596929673", "1596946541",
+    # "1596946785", "1596949246", "1596987783", "1596988070", "1596989989", "1597020996", "1597021394",
+    # "1597023204", "1597059046", "1597059501", "1597061142", "random"]
+
+
+
+    list_of_folders = ["1598148899", "1598149283", "1598149994", "1598163229", "1598169861", "1598176752", "1598176969",
+               "1598189473", "1598190556", "1598202465", "1598208605", "1598225452", "random"]
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -751,9 +756,9 @@ def concat_all_evaluation_results():
     #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
 
 
-    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"third_grid","training_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"third_grid","validation_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"third_grid","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","training_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","validation_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
 
     # ---------
     # If you have columns on arguments, keep them in training but drop them in validation and train_and_val to prevent duplicates
@@ -772,7 +777,7 @@ def concat_all_evaluation_results():
 
     all_three_df_list = [concatenated_training_df, concatenated_validation_df, concatenated_train_and_validation_df]
     concatenated_all_df = pd.concat(all_three_df_list, axis=1)
-    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"third_grid","all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","all_evaluation_result_top_tri.csv"), index=None)
 
 
 
@@ -869,8 +874,8 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
-    #concat_all_evaluation_results()
+    #main()
+    concat_all_evaluation_results()
 
 
     
