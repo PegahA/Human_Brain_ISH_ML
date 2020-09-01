@@ -647,16 +647,18 @@ def save_embedding_info_into_file(filename):
         os.mkdir(os.path.join(EMBEDDING_DEST, filename))
     embed_info_dir = os.path.join(EMBEDDING_DEST, filename)
 
-    exp_root_contents = os.listdir(EXPERIMENT_ROOT)
+
+    exp_root = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" +  filename)
+    exp_root_contents = os.listdir(exp_root)
     for item in exp_root_contents:
         if item.endswith(".csv"):
-            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+            copyfile(os.path.join(exp_root, item), os.path.join(embed_info_dir, item))
         elif item.endswith(".json"):
-            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+            copyfile(os.path.join(exp_root, item), os.path.join(embed_info_dir, item))
         elif item.endswith(".log"):
-            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+            copyfile(os.path.join(exp_root, item), os.path.join(embed_info_dir, item))
         elif item.startswith("events."):
-            copyfile(os.path.join(EXPERIMENT_ROOT, item), os.path.join(embed_info_dir, item))
+            copyfile(os.path.join(exp_root, item), os.path.join(embed_info_dir, item))
 
     return filename
 
