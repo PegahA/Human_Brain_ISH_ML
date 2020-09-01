@@ -643,7 +643,8 @@ def save_embedding_info_into_file(filename):
     if (not os.path.exists(EMBEDDING_DEST)):
         os.mkdir(EMBEDDING_DEST)
 
-    os.mkdir(os.path.join(EMBEDDING_DEST, filename))
+    if (not os.path.exists(os.path.join(EMBEDDING_DEST, filename))):
+        os.mkdir(os.path.join(EMBEDDING_DEST, filename))
     embed_info_dir = os.path.join(EMBEDDING_DEST, filename)
 
     exp_root_contents = os.listdir(EXPERIMENT_ROOT)
