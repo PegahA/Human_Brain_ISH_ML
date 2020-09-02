@@ -783,8 +783,8 @@ def concat_all_evaluation_results():
     args_cols_val = ["validation_"+item for item in args_cols]
     
     if len(list_of_cols_in_train_val_df) == len(list_of_cols_in_validation_df) and len(list_of_cols_in_train_val_df) > 7:
-        concatenated_validation_df = concatenated_validation_df.drop(args_cols_val, axis=1)
-        concatenated_train_and_validation_df = concatenated_train_and_validation_df.drop(args_cols, axis=1)
+        concatenated_validation_df = concatenated_validation_df.drop(args_cols_val, axis=1, errors='ignore')
+        concatenated_train_and_validation_df = concatenated_train_and_validation_df.drop(args_cols, axis=1, errors='ignore')
 
 
     # ---------
