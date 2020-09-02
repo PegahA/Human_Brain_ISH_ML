@@ -609,6 +609,17 @@ def get_arguments_from_json(ts):
     return list_of_arguments_to_get, args_val_list
 
 
+def get_all_ts_folders():
+    path_to_ts_embed_folders = os.path.join(EMBEDDING_DEST)
+    folders = os.listdir(path_to_ts_embed_folders)
+    ts_folders = []
+
+    for f in folders:
+        if "159" in f:
+            ts_folders.append(f)
+
+    return ts_folders
+
 def concat_all_evaluation_results():
     """
     The function uses a list of folders, goes through each folder and reads its evaluation csv files.
@@ -677,8 +688,11 @@ def concat_all_evaluation_results():
 
 
 
-    list_of_folders = ["1598148899", "1598149283", "1598149994", "1598163229", "1598169861", "1598176752", "1598176969",
-               "1598189473", "1598190556", "1598202465", "1598208605", "1598225452", "random"]
+    #list_of_folders = ["1598148899", "1598149283", "1598149994", "1598163229", "1598169861", "1598176752", "1598176969",
+     #          "1598189473", "1598190556", "1598202465", "1598208605", "1598225452", "random"]
+
+
+    list_of_folders = get_all_ts_folders()
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -756,9 +770,9 @@ def concat_all_evaluation_results():
     #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
 
 
-    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","training_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","validation_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"training_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"validation_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
 
     # ---------
     # If you have columns on arguments, keep them in training but drop them in validation and train_and_val to prevent duplicates
@@ -777,7 +791,7 @@ def concat_all_evaluation_results():
 
     all_three_df_list = [concatenated_training_df, concatenated_validation_df, concatenated_train_and_validation_df]
     concatenated_all_df = pd.concat(all_three_df_list, axis=1)
-    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"iter_grid","all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"all_evaluation_result_top_tri.csv"), index=None)
 
 
 
