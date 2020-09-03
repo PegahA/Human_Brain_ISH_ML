@@ -501,7 +501,7 @@ def disease_embed_evaluate(study):
         for item in image_level_files_list:
             # for every image level embedding file, call another function to calculate first hit match percentage and AUC
             image_level_embed_file_name = item
-            results = first_hit_match_percentage_and_AUC_results(path_to_embeddings, image_level_embed_file_name)
+            results = first_hit_match_percentage_and_AUC_results(path_to_embeddings, image_level_embed_file_name, study)
 
             # list of columns to have in the evaluation table.
             columns = ["ts", "dataset","number of embeddings", "general_first_hit_percentage", "general_AUC",
