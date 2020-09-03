@@ -41,7 +41,7 @@ def create_diagonal_mask(low_to_high_map, target_value=1):
 
     return relationship_df
 
-def get_general_distance_and_relationship_matrix(path_to_embeddings,image_level_embed_file_name):
+def get_general_distance_and_relationship_matrix(path_to_embeddings,image_level_embed_file_name, study=None):
     """
     This function uses the image_level_embeddings to create a distance matrix. It also creates a relationship matrix
     for images that we have an embedding for.
@@ -51,8 +51,12 @@ def get_general_distance_and_relationship_matrix(path_to_embeddings,image_level_
     :param path_to_embeddings:  path to the image_level_embeddings
     :return: 2 pandas Data frames: distance matrix and the relationship matrix.
     """
-    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
-    #images_info = pd.read_csv(os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
+
+    if study == None:
+        images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY,"human_ISH_info.csv"))
+    else:
+        images_info = pd.read_csv(os.path.join(DATA_DIR, study, "human_ISH_info.csv"))
+
 
     dist_matrix_df = build_distance_matrix(os.path.join(path_to_embeddings,  image_level_embed_file_name))
 
@@ -251,7 +255,7 @@ def AUC(dist_matrix_df, label_matrix_df, title, image_level_embed_file_name):
         return None
 
 
-def first_hit_percentage(dist_matrix_df):
+def first_hit_percentage(dist_matrix_df, study=None):
     """
     This function finds the image ID of the closest image to every image and then check to see what percentage of
     these pairs are positive, meaning they have the same gene.
@@ -268,8 +272,10 @@ def first_hit_percentage(dist_matrix_df):
 
     print ("Calculating first hit match percentage ...")
 
-    images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
-    #images_info = pd.read_csv( os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2", "human_ISH_info.csv"))
+    if study == None:
+        images_info = pd.read_csv(os.path.join(DATA_DIR,STUDY, "human_ISH_info.csv"))
+    else:
+        images_info = pd.read_csv(os.path.join(DATA_DIR, study, "human_ISH_info.csv"))
 
     min_indexes_df = find_closest_image(dist_matrix_df) # min_indexes_df has two columns: an image ID and the ID of the closest image to that image
 
@@ -287,9 +293,9 @@ def first_hit_percentage(dist_matrix_df):
     return proportion
 
 
-def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_embed_file_name):
+def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_embed_file_name, study = None):
 
-    general_distance_matrix , general_relationship_matrix = get_general_distance_and_relationship_matrix(path_to_embeddings, image_level_embed_file_name)
+    general_distance_matrix , general_relationship_matrix = get_general_distance_and_relationship_matrix(path_to_embeddings, image_level_embed_file_name, study)
 
 
 
@@ -297,7 +303,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     # General means only look at gene. Is it the same gene or different gene. Do not check donor_id.
 
     print ("---------------------------------- General ---------------------------------- ")
-    general_first_hit_percentage = first_hit_percentage(general_distance_matrix)
+    general_first_hit_percentage = first_hit_percentage(general_distance_matrix, study)
     general_AUC = AUC(general_distance_matrix, general_relationship_matrix, "General", image_level_embed_file_name)
 
     general_res = [general_first_hit_percentage, general_AUC]
@@ -305,7 +311,11 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     # ---- Among Other Donors ------------------------------------------------------------------------
 
     print ("---------------------------------- Other Donors ----------------------------- ")
-    images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
+    if study == None:
+        images_info = pd.read_csv(os.path.join( DATA_DIR,STUDY,"human_ISH_info.csv"))
+    else:
+        images_info = pd.read_csv(os.path.join(DATA_DIR, study, "human_ISH_info.csv"))
+
 
     dist_matrix_rows = list(general_distance_matrix.index)
 
@@ -469,6 +479,55 @@ def get_creation_time(ts):
     else:
         print ("here, path is: ", path_to_embed_file)
         return None
+
+
+
+def disease_embed_evaluate(study):
+
+    ts_list =  ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673',
+                '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
+                '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
+
+
+    for ts in ts_list:
+        path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
+        image_level_files_list = []
+
+        contents = os.listdir(path_to_embeddings)
+        for item in contents:
+            if item.endswith("embeddings_image_level.csv") and study in item:
+                image_level_files_list.append(item)
+
+        for item in image_level_files_list:
+            # for every image level embedding file, call another function to calculate first hit match percentage and AUC
+            image_level_embed_file_name = item
+            results = first_hit_match_percentage_and_AUC_results(path_to_embeddings, image_level_embed_file_name)
+
+            # list of columns to have in the evaluation table.
+            columns = ["ts", "dataset","number of embeddings", "general_first_hit_percentage", "general_AUC",
+                       "among_other_donors_first_hit_percentage","among_other_donors_AUC",
+                       "within_donor_first_hit_percentage", "within_donor_AUC"]
+
+            df = pd.read_csv(os.path.join(path_to_embeddings, image_level_embed_file_name))
+            number_of_embeddings = len(df)
+
+            eval_results_df = pd.DataFrame(columns=columns)
+
+            general_res = results[0]
+            among_other_donors_res = results[1]
+            within_donor_res = results[2]
+
+
+            eval_results_df.loc[0] = [ts, study, number_of_embeddings, general_res[0], general_res[1],
+                                          among_other_donors_res[0],
+                                          among_other_donors_res[1],
+                                          within_donor_res[0], within_donor_res[1]]
+
+            eval_result_file_name = item.split(".")[0] + "_evaluation_result_top_tri.csv"
+            eval_path = os.path.join(EMBEDDING_DEST, ts)
+            eval_results_df.to_csv(os.path.join(eval_path, eval_result_file_name), index=None)
+
+
 
 def evaluate(ts, not_found_list):
     """
@@ -889,7 +948,10 @@ def main():
 if __name__ == '__main__':
 
     #main()
-    concat_all_evaluation_results()
+    #concat_all_evaluation_results()
+    disease_embed_evaluate("schizophrenia")
+
+
 
 
     
