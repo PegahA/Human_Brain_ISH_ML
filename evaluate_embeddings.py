@@ -679,6 +679,34 @@ def get_all_ts_folders():
 
     return ts_folders
 
+
+def concat_disease_evaluation_results(study):
+    list_of_folders= ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673',
+                      '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
+                      '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
+
+    eval_df_list = []
+
+    for item in list_of_folders:
+        path_to_eval_folder = os.path.join(EMBEDDING_DEST, item)
+        files = os.listdir(path_to_eval_folder)
+
+        for f in files:
+
+            # for each evaluation result csv file, see whether it is from training set, or validation set, or training+validation
+            if f.endswith("image_level_evaluation_result_top_tri.csv") and study in f:
+                df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                eval_df_list.append(df)
+
+
+    columns = list(eval_df_list[0])
+
+    concatenated_df = pd.concat(eval_df_list, sort=False)
+    concatenated_df = concatenated_df.rename(columns=columns)
+
+    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, study+ "_all_evaluation_result_top_tri.csv"),index=None)
+
+
 def concat_all_evaluation_results():
     """
     The function uses a list of folders, goes through each folder and reads its evaluation csv files.
@@ -949,7 +977,8 @@ if __name__ == '__main__':
 
     #main()
     #concat_all_evaluation_results()
-    disease_embed_evaluate("schizophrenia")
+    #disease_embed_evaluate("schizophrenia")
+    concat_disease_evaluation_results("schizophrenia")
 
 
 
