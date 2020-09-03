@@ -702,8 +702,7 @@ def concat_disease_evaluation_results(study):
     columns = list(eval_df_list[0])
 
     concatenated_df = pd.concat(eval_df_list, sort=False)
-    concatenated_df = concatenated_df.rename(columns=columns)
-
+    
     concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, study+ "_all_evaluation_result_top_tri.csv"),index=None)
 
 
