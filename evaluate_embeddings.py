@@ -332,13 +332,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     distance_matrix_after_masking = apply_mask(arranged_mask_df, general_distance_matrix)
     relationship_matrix_after_masking = apply_mask(arranged_mask_df, general_relationship_matrix)
 
-    print("//////////////// donors ///////////////")
-    print(distance_matrix_after_masking)
-    print (relationship_matrix_after_masking)
-    print("///////////////////////////////////////")
-
-  
-    among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
+    among_other_donors_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking, study)
     among_other_donors_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Other Donors", image_level_embed_file_name)
 
     among_other_donors_res = [among_other_donors_first_hit_percentage, among_other_donors_AUC]
@@ -361,7 +355,7 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     distance_matrix_after_masking = apply_mask(arranged_inverted_mask_df, general_distance_matrix)
     relationship_matrix_after_masking = apply_mask(arranged_inverted_mask_df, general_relationship_matrix)
 
-    withing_donor_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking)
+    withing_donor_first_hit_percentage = first_hit_percentage(distance_matrix_after_masking, study)
     within_donor_brains_AUC = AUC(distance_matrix_after_masking, relationship_matrix_after_masking, "Within Donor", image_level_embed_file_name)
 
     within_donor_res = [withing_donor_first_hit_percentage, within_donor_brains_AUC]
