@@ -320,6 +320,9 @@ def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_e
     dist_matrix_rows = list(general_distance_matrix.index)
 
     donors = images_info[images_info['image_id'].isin(dist_matrix_rows)]['donor_id']
+    print ("//////////////// donors ///////////////")
+    print (donors)
+    print ("///////////////////////////////////////")
 
     low_to_high_map = pd.DataFrame(list(zip(dist_matrix_rows, donors)))  # create a 2-column df of image IDs and genes
     mask_df = create_diagonal_mask(low_to_high_map, target_value=1) # the pairs that have the same donor will have label 1
