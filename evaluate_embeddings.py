@@ -488,7 +488,7 @@ def disease_embed_evaluate(study):
               #  '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
              #   '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
 
-    ts_list =  ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544']
+    ts_list =  ['1596374295'] #, '1595171169', '1596183933', '1595636690', '1596630544']
     for ts in ts_list:
         path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
         image_level_files_list = []
@@ -502,6 +502,10 @@ def disease_embed_evaluate(study):
             # for every image level embedding file, call another function to calculate first hit match percentage and AUC
             image_level_embed_file_name = item
             results = first_hit_match_percentage_and_AUC_results(path_to_embeddings, image_level_embed_file_name, study)
+
+            print ("//////////////// RESULTS ///////////////")
+            print (results)
+            print ("////////////////////////////////////////")
 
             # list of columns to have in the evaluation table.
             columns = ["ts", "dataset","number of embeddings", "general_first_hit_percentage", "general_AUC",
@@ -976,8 +980,8 @@ if __name__ == '__main__':
 
     #main()
     #concat_all_evaluation_results()
-    #disease_embed_evaluate("schizophrenia")
-    concat_disease_evaluation_results("schizophrenia")
+    disease_embed_evaluate("schizophrenia")
+    #concat_disease_evaluation_results("schizophrenia")
 
 
 
