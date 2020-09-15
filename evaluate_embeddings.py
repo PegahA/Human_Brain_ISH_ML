@@ -503,6 +503,8 @@ def disease_embed_evaluate(study):
 
         image_level_files_list = []
 
+        print ("ts is: ", ts)
+        
         contents = os.listdir(path_to_embeddings)
         for item in contents:
             if item.endswith("embeddings_image_level.csv") and study in item:
