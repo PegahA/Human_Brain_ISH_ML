@@ -1396,9 +1396,10 @@ def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
 
 
     merged_df = pd.merge(this_donor_image_id_gene, embed_df, on='image_id')
-    merged_df = merged_df.drop(columns=['image_id'])
+
     
     merged_df_no_meta = merged_df.drop(columns=['gene_symbol'])
+    merged_df_no_meta = merged_df_no_meta.drop(columns=['image_id'])
 
     if study == None:
         donor_file_name = donor_id
@@ -1418,7 +1419,7 @@ def convert_to_tsv(path_to_csv):
     csv_read = pd.read_csv(path_to_csv)
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False))
-        
+
 
 
 def convert_to_tsv_meta_and_without_meta(path_to_csv):
