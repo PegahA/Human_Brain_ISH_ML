@@ -1368,10 +1368,14 @@ def run():
         merge_embeddings_to_image_level(ts)
 
 
-def specific_donor_embeddings(donor_id, embed_folder_name):
+def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
 
 
-    images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    if study == None:
+        images_info_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+    else:
+        images_info_df = pd.read_csv(os.path.join(DATA_DIR, study, "human_ISH_info.csv"))
+
     this_donor = images_info_df[images_info_df['donor_id']==donor_id]
     this_donor_image_id_gene = this_donor[['image_id', 'gene_symbol']]
 
@@ -1379,8 +1383,13 @@ def specific_donor_embeddings(donor_id, embed_folder_name):
     
     embed_file_name  = ""
     for item in os.listdir(embed_dir):
-        if item.endswith("embeddings_image_level.csv"):
-            embed_file_name = item
+        if study == None:
+            if item.endswith("embeddings_image_level.csv"):
+                embed_file_name = item
+        else:
+            if item.endswith("embeddings_image_level.csv") and study in item:
+                embed_file_name = item
+
     
     embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, embed_file_name))
 
@@ -1391,11 +1400,16 @@ def specific_donor_embeddings(donor_id, embed_folder_name):
     
     merged_df_no_meta = merged_df.drop(columns=['gene_symbol'])
 
-    merged_df.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_id+".csv"), index=None)
-    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_id+".csv"))
+    if study == None:
+        donor_file_name = donor_id
+    else:
+        donor_file_name = study+ "_" + donor_id
 
-    merged_df_no_meta.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_id+"_no_meta.csv"), header=False, index=None)
-    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_id+"_no_meta.csv"))
+    merged_df.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_file_name+".csv"), index=None)
+    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_file_name+".csv"))
+
+    merged_df_no_meta.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_file_name+"_no_meta.csv"), header=False, index=None)
+    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_file_name+"_no_meta.csv"))
 
 
 
@@ -1971,6 +1985,11 @@ if __name__ == '__main__':
     """
 
 
+    """
     generate_random_embeddings_for_disease_dataset(embeddings_length=128)
     get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet",
                                                     dim=128, standardize=False)
+                                                    
+    """
+
+    specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
