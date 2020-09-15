@@ -1416,7 +1416,8 @@ def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
 def convert_to_tsv(path_to_csv):
 
     #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
-    cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
+    #cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
+    cols =  ['image_id', 'gene_symbol']
 
     # With meta
 
