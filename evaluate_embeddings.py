@@ -717,16 +717,25 @@ def concat_disease_evaluation_results(study):
     for item in list_of_folders:
         if item == "random" or "resnet" in item:
             path_to_eval_folder = os.path.join(DATA_DIR, study, "segmentation_embeddings", item)
+            base_case = True
         else:
             path_to_eval_folder = os.path.join(EMBEDDING_DEST, item)
+            base_case = False
+
         files = os.listdir(path_to_eval_folder)
 
         for f in files:
 
             # for each evaluation result csv file, see whether it is from training set, or validation set, or training+validation
-            if f.endswith("image_level_evaluation_result_top_tri.csv") and study in f:
-                df = pd.read_csv(os.path.join(path_to_eval_folder, f))
-                eval_df_list.append(df)
+
+            if base_case == True:
+                if f.endswith("image_level_evaluation_result_top_tri.csv"):
+                    df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                    eval_df_list.append(df)
+            else:
+                if f.endswith("image_level_evaluation_result_top_tri.csv") and study in f:
+                    df = pd.read_csv(os.path.join(path_to_eval_folder, f))
+                    eval_df_list.append(df)
 
 
     columns = list(eval_df_list[0])
