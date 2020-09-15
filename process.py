@@ -1414,10 +1414,17 @@ def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
 
 
 def convert_to_tsv(path_to_csv):
+    path_to_tsv = path_to_csv.split(".")[0] + ".tsv"
+    csv_read = pd.read_csv(path_to_csv)
+    with open(path_to_tsv, 'w') as write_tsv:
+        write_tsv.write(csv_read.to_csv(sep='\t', index=False))
+        
+
+
+def convert_to_tsv_meta_and_without_meta(path_to_csv):
 
     #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
-    #cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
-    cols =  ['image_id', 'gene_symbol']
+    cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
 
     # With meta
 
@@ -1433,7 +1440,7 @@ def convert_to_tsv(path_to_csv):
     path_to_tsv = path_to_csv.split(".")[0] + "_no_meta.tsv"
     csv_read = pd.read_csv(path_to_csv)
 
-    #csv_read = csv_read.drop(columns=cols)
+    csv_read = csv_read.drop(columns=cols)
 
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False, header=False))
@@ -1885,7 +1892,7 @@ if __name__ == '__main__':
 
     #get_stats("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/human_ISH_info.csv")
     #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/test_image_level_copy_2.csv"
-    #convert_to_tsv(path_to_csv)
+    #convert_to_tsv_meta_and_without_meta(path_to_csv)
 
 
     #specific_donor_embeddings('H08-0025', '1587462051')
@@ -1898,8 +1905,8 @@ if __name__ == '__main__':
     #new_path_to_zeng = "/Users/pegah_abed/Downloads/Cleaned_Zeng_dataset_processed.csv"
     #path_to_gene_level_embed = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/1591132845/triplet_training_validation_embeddings_gene_level.csv"
     #new_path, no_na_path = merge_with_zeng_layer_marker_and_expression(new_path_to_zeng, path_to_gene_level_embed)
-    #convert_to_tsv(new_path)
-    #convert_to_tsv(no_na_path)
+    #convert_to_tsv_meta_and_without_meta(new_path)
+    #convert_to_tsv_meta_and_without_meta(no_na_path)
 
     #get_duration_for_files()
 
