@@ -491,15 +491,18 @@ def disease_embed_evaluate(study):
     #ts_list =  ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544']
 
     ts_list = ["random", "resnet50_50_patches"]
-
+    
     for ts in ts_list:
 
         if ts == "random" or "resnet" in ts:
             path_to_embeddings = os.path.join(DATA_DIR, study, "segmentation_embeddings", ts)
             eval_path = os.path.join(DATA_DIR, study, "segmentation_embeddings", ts)
+            base_case = True
+
         else:
             path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
             eval_path = os.path.join(EMBEDDING_DEST, ts)
+            base_case = False
 
         image_level_files_list = []
 
@@ -509,10 +512,16 @@ def disease_embed_evaluate(study):
         contents = os.listdir(path_to_embeddings)
 
         print (contents)
-        
+
         for item in contents:
-            if item.endswith("embeddings_image_level.csv") and study in item:
-                image_level_files_list.append(item)
+
+            if base_case:
+                if item.endswith("embeddings_image_level.csv"):
+                    image_level_files_list.append(item)
+            else:
+
+                if item.endswith("embeddings_image_level.csv") and study in item:
+                    image_level_files_list.append(item)
 
         print (image_level_files_list)
 
