@@ -2000,7 +2000,10 @@ if __name__ == '__main__':
                                                     dim=128, standardize=False)
                                                     
     """
-    concatenate_embedding_chunks("resnet50_50_patches", number_of_chunks =10)
+    #concatenate_embedding_chunks("resnet50_50_patches", number_of_chunks =10)
+    merge_embeddings_to_gene_level("resnet50_50_patches")
+    merge_embeddings_to_image_level("resnet50_50_patches")
+
                                                     
 
 
