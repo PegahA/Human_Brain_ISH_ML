@@ -488,9 +488,19 @@ def disease_embed_evaluate(study):
               #  '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
              #   '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
 
-    ts_list =  ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544']
+    #ts_list =  ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544']
+
+    ts_list = ["random", "resnet50_50_patches"]
+
     for ts in ts_list:
-        path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
+
+        if ts == "random" or "resnet" in ts:
+            path_to_embeddings = os.path.join(DATA_DIR, study, "segmentation_embeddings", ts)
+            eval_path = os.path.join(DATA_DIR, study, "segmentation_embeddings", ts)
+        else:
+            path_to_embeddings = os.path.join(EMBEDDING_DEST, ts)
+            eval_path = os.path.join(EMBEDDING_DEST, ts)
+
         image_level_files_list = []
 
         contents = os.listdir(path_to_embeddings)
@@ -524,8 +534,8 @@ def disease_embed_evaluate(study):
                                           within_donor_res[0], within_donor_res[1]]
 
             eval_result_file_name = item.split(".")[0] + "_evaluation_result_top_tri.csv"
-            eval_path = os.path.join(EMBEDDING_DEST, ts)
             eval_results_df.to_csv(os.path.join(eval_path, eval_result_file_name), index=None)
+
 
 
 
