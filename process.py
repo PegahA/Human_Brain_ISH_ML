@@ -2000,5 +2000,8 @@ if __name__ == '__main__':
                                                     dim=128, standardize=False)
                                                     
     """
+    concatenate_embedding_chunks("resnet50_50_patches", number_of_chunks =10)
+                                                    
 
-    specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
+
+    #specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
