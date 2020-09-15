@@ -987,14 +987,11 @@ def make_sets():
     """
 
 
-def generate_random_embeddings(info_csv_file, embeddings_length):
+def generate_random_embeddings( embeddings_length):
     """
     this function generates random embeddings for the images. The result will be a csv files that has the embedding vector of every image.
 
     :param embeddings_length: the length of the embedding vector which also determines the number of columns in the final csv file.
-    :param range_min: the minimum possible value in the embeddings.
-    :param range_max: the maximum possible value in the embeddings.
-
     :return: None
     """
 
@@ -1031,6 +1028,47 @@ def generate_random_embeddings(info_csv_file, embeddings_length):
         random_embed_file.to_csv(os.path.join(path_to_random, "random_" + set_name.split(".")[0] +"_embeddings_image_level.csv"),index=None)
 
         print ("finished generating random embeddings...")
+
+
+def generate_random_embeddings_for_disease_dataset(study, embeddings_length):
+    """
+    this function generates random embeddings for the images of a certain dataser. The result will be a csv files that has the embedding vector of every image.
+
+    :param study: the specific study (=disease) dataset. Could be schizophrenia or autism.
+    :param embeddings_length: the length of the embedding vector which also determines the number of columns in the final csv file.
+
+    :return: None
+    """
+
+    path_to_info_csv = os.path.join(DATA_DIR, study, "human_ISH_info.csv")
+    info_csv = pd.read_csv(path_to_info_csv,)
+
+    columns = list(info_csv)
+    id_column = info_csv[columns[0]]
+
+    n_images = len(info_csv)
+
+    cols = np.arange(0, embeddings_length)
+    cols = list(map(str, cols))
+    cols = ['id'] + cols
+
+    random_embed_file = pd.DataFrame(columns=cols)
+    random_embed_file['id'] = id_column
+
+    for i in range(embeddings_length):
+        sample = np.random.uniform(size=(n_images,))
+        random_embed_file[str(i)] = sample
+
+
+    path_to_random = os.path.join(DATA_DIR, study, "random")
+    if (not os.path.exists(path_to_random)):
+        os.mkdir(path_to_random)
+
+    random_embed_file.to_csv(os.path.join(path_to_random, "random_embeddings_image_level.csv"),index=None)
+
+    print ("finished generating random embeddings...")
+
+
 
 
 def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128, standardize=False,
@@ -1915,6 +1953,8 @@ if __name__ == '__main__':
     merge_with_zeng_compare_gene_symbols(path_to_zeng, path_to_gene_level_embed)
     """
 
+    """
+
     study = "schizophrenia"
     input_dir = os.path.join(DATA_DIR, study)
     input_file = pd.read_csv(os.path.join(input_dir, "human_ISH_info.csv"))
@@ -1925,4 +1965,8 @@ if __name__ == '__main__':
     output_name = "triplet_patches_" + study + ".csv"
 
     make_custom_triplet_csv(study, input_file, output_dir, output_name, patch_count_per_image=50)
+    """
+
+    study = "schizophrenia"
+    generate_random_embeddings_for_disease_dataset(study, 128)
 
