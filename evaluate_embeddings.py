@@ -491,7 +491,7 @@ def disease_embed_evaluate(study):
     #ts_list =  ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544']
 
     ts_list = ["random", "resnet50_50_patches"]
-    
+
     for ts in ts_list:
 
         if ts == "random" or "resnet" in ts:
@@ -710,12 +710,15 @@ def get_all_ts_folders():
 def concat_disease_evaluation_results(study):
     list_of_folders= ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673',
                       '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
-                      '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
+                      '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729', "random", "resnet50_50_patches"]
 
     eval_df_list = []
 
     for item in list_of_folders:
-        path_to_eval_folder = os.path.join(EMBEDDING_DEST, item)
+        if item == "random" or "resnet" in item:
+            path_to_eval_folder = os.path.join(DATA_DIR, study, "segmentation_embeddings", item)
+        else:
+            path_to_eval_folder = os.path.join(EMBEDDING_DEST, item)
         files = os.listdir(path_to_eval_folder)
 
         for f in files:
@@ -1003,8 +1006,8 @@ if __name__ == '__main__':
 
     #main()
     #concat_all_evaluation_results()
-    disease_embed_evaluate("schizophrenia")
-    #concat_disease_evaluation_results("schizophrenia")
+    #disease_embed_evaluate("schizophrenia")
+    concat_disease_evaluation_results("schizophrenia")
 
 
 
