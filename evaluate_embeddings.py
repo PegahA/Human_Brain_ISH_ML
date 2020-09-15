@@ -504,12 +504,14 @@ def disease_embed_evaluate(study):
         image_level_files_list = []
 
         print ("ts is: ", ts)
-        
+
         contents = os.listdir(path_to_embeddings)
         for item in contents:
             if item.endswith("embeddings_image_level.csv") and study in item:
                 image_level_files_list.append(item)
 
+        print (image_level_files_list)
+        
         for item in image_level_files_list:
             # for every image level embedding file, call another function to calculate first hit match percentage and AUC
             image_level_embed_file_name = item
