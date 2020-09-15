@@ -1030,7 +1030,7 @@ def generate_random_embeddings( embeddings_length):
         print ("finished generating random embeddings...")
 
 
-def generate_random_embeddings_for_disease_dataset(study, embeddings_length):
+def generate_random_embeddings_for_disease_dataset(embeddings_length, study=None):
     """
     this function generates random embeddings for the images of a certain dataser. The result will be a csv files that has the embedding vector of every image.
 
@@ -1039,6 +1039,9 @@ def generate_random_embeddings_for_disease_dataset(study, embeddings_length):
 
     :return: None
     """
+
+    if study == None:
+        study = STUDY
 
     path_to_info_csv = os.path.join(DATA_DIR, study, "human_ISH_info.csv")
     info_csv = pd.read_csv(path_to_info_csv,)
@@ -1060,7 +1063,7 @@ def generate_random_embeddings_for_disease_dataset(study, embeddings_length):
         random_embed_file[str(i)] = sample
 
 
-    path_to_random = os.path.join(DATA_DIR, study, "random")
+    path_to_random = os.path.join(DATA_DIR, study, "segmentation_embeddings", "random")
     if (not os.path.exists(path_to_random)):
         os.mkdir(path_to_random)
 
@@ -1222,7 +1225,7 @@ def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="ima
     
 
 
-def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet", dim=128, standardize=True,):
+def  get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet", dim=128, standardize=True):
 
     """
     This function is used when the number of images is too high for the system to handle them all at once and it could cause
@@ -1967,6 +1970,7 @@ if __name__ == '__main__':
     make_custom_triplet_csv(study, input_file, output_dir, output_name, patch_count_per_image=50)
     """
 
-    study = "schizophrenia"
-    generate_random_embeddings_for_disease_dataset(study, 128)
 
+    generate_random_embeddings_for_disease_dataset(embeddings_length=128)
+    get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet",
+                                                    dim=128, standardize=False)
