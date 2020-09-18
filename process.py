@@ -1377,7 +1377,7 @@ def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
         images_info_df = pd.read_csv(os.path.join(DATA_DIR, study, "human_ISH_info.csv"))
 
     this_donor = images_info_df[images_info_df['donor_id']==donor_id]
-    this_donor_image_id_gene = this_donor[['image_id', 'gene_symbol']]
+    this_donor_image_id_gene = this_donor[['image_id', 'donor_id', 'gene_symbol']]
 
     embed_dir = os.path.join(EMBEDDING_DEST, embed_folder_name)
     
@@ -1400,6 +1400,7 @@ def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
     
     merged_df_no_meta = merged_df.drop(columns=['gene_symbol'])
     merged_df_no_meta = merged_df_no_meta.drop(columns=['image_id'])
+    merged_df_no_meta = merged_df_no_meta.drop(columns=['donor_id'])
 
     if study == None:
         donor_file_name = donor_id
@@ -2001,10 +2002,11 @@ if __name__ == '__main__':
                                                     
     """
     #concatenate_embedding_chunks("resnet50_50_patches", number_of_chunks =10)
-    merge_embeddings_to_gene_level("resnet50_50_patches")
-    merge_embeddings_to_image_level("resnet50_50_patches")
+    #merge_embeddings_to_gene_level("resnet50_50_patches")
+    #merge_embeddings_to_image_level("resnet50_50_patches")
 
                                                     
 
 
-    #specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
+    specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
+    specific_donor_embeddings("H08-0140", "1596374295", study="schizophrenia")
