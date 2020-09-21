@@ -661,7 +661,7 @@ def evaluate(ts, not_found_list):
 
             print ("/////////////////////////////////")
             print (args_names)
-            if "finish_time" in args_names:
+            if args_names != None and "finish_time" in args_names:
                 idx = args_names.index("finish_time")
                 creation_time = int(args_val[idx])
                 duration = creation_time - int(ts)
