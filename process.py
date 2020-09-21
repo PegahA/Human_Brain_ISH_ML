@@ -1076,7 +1076,7 @@ def generate_random_embeddings_for_disease_dataset(embeddings_length, study=None
 def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
 
     mode_folder_name = model_name + "_" + str(PATCH_COUNT_PER_IMAGE) + "_patches"
-    path_to_pre_trained_embeddings = os.path.join(EMBEDDING_DEST, mode_folder_name, model_name+"_embeddings.csv")
+    path_to_pre_trained_embeddings = os.path.join(EMBEDDING_DEST, mode_folder_name, model_name+"_embeddings_image_level.csv")
     pre_trained_embeddings =pd.read_csv(path_to_pre_trained_embeddings)
 
     print (len(pre_trained_embeddings))
