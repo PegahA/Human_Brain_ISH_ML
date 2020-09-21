@@ -1089,7 +1089,7 @@ def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
 
         this_set_pre_trained_embeds = pre_trained_embeddings[pre_trained_embeddings['image_id'].isin(set_id_column)]
         set_pre_trained_embed_file_name = model_name + "_" + set_name.split(".")[0] + "_embeddings_image_level.csv"
-        this_set_pre_trained_embeds.to_csv(EMBEDDING_DEST, mode_folder_name, set_pre_trained_embed_file_name, index=None)
+        this_set_pre_trained_embeds.to_csv(os.path.join(EMBEDDING_DEST, mode_folder_name, set_pre_trained_embed_file_name), index=None)
 
         print ("finished generating {} embeddings for this set.".format(model_name))
 
