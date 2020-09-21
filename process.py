@@ -1002,7 +1002,7 @@ def generate_random_embeddings( embeddings_length):
 
         path_to_info_csv = os.path.join(DATA_DIR,STUDY, "sets_50_patches_40_seg/" + set_name)
         #path_to_info_csv = os.path.join(IMAGE_ROOT,info_csv_file)
-        info_csv = pd.read_csv(path_to_info_csv,)
+        info_csv = pd.read_csv(path_to_info_csv)
 
         columns = list(info_csv)
         id_column = info_csv[columns[0]]
@@ -1072,6 +1072,26 @@ def generate_random_embeddings_for_disease_dataset(embeddings_length, study=None
     print ("finished generating random embeddings...")
 
 
+
+def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
+
+    mode_folder_name = model_name + "_" + PATCH_COUNT_PER_IMAGE + "_patches"
+    path_to_pre_trained_embeddings = os.path.join(EMBEDDING_DEST, mode_folder_name, model_name+"_embeddings.csv")
+    pre_trained_embeddings =pd.read_csv(path_to_pre_trained_embeddings)
+
+    set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
+    for set_name in set_name_list:
+        print("set: ", set_name)
+
+        path_to_info_csv = os.path.join(DATA_DIR, STUDY, "sets_50_patches_40_seg/" + set_name)
+        info_csv = pd.read_csv(path_to_info_csv )
+        set_id_column = list(info_csv['image_id'])
+
+        this_set_pre_trained_embeds = pre_trained_embeddings[pre_trained_embeddings['image_id'].isin(set_id_column)]
+        set_pre_trained_embed_file_name = model_name + "_" + set_name.split(".")[0] + "_embeddings_image_level.csv"
+        this_set_pre_trained_embeds.to_csv(EMBEDDING_DEST, mode_folder_name, set_pre_trained_embed_file_name, index=None)
+
+        print ("finished generating {} embeddings for this set.".format(model_name))
 
 
 def get_embeddings_from_pre_trained_model(model_name="resnet50", trained_on="imagenet", dim=128, standardize=False,
@@ -2008,5 +2028,8 @@ if __name__ == '__main__':
                                                     
 
 
-    specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
-    specific_donor_embeddings("H08-0140", "1596374295", study="schizophrenia")
+    #specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
+    #specific_donor_embeddings("H08-0140", "1596374295", study="schizophrenia")
+
+    get_embeddings_from_pre_trained_model_for_each_set()
+
