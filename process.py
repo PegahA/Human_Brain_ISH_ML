@@ -2035,4 +2035,5 @@ if __name__ == '__main__':
     #specific_donor_embeddings("H08-0140", "1596374295", study="schizophrenia")
 
     get_embeddings_from_pre_trained_model_for_each_set()
-
+    merge_embeddings_to_gene_level("resnet50_50_patches")
+    merge_embeddings_to_image_level("resnet50_50_patches")
