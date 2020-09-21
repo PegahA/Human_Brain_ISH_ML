@@ -1079,6 +1079,8 @@ def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
     path_to_pre_trained_embeddings = os.path.join(EMBEDDING_DEST, mode_folder_name, model_name+"_embeddings.csv")
     pre_trained_embeddings =pd.read_csv(path_to_pre_trained_embeddings)
 
+    print (len(pre_trained_embeddings))
+
     set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
     for set_name in set_name_list:
         print("set: ", set_name)
@@ -1086,6 +1088,7 @@ def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
         path_to_info_csv = os.path.join(DATA_DIR, STUDY, "sets_50_patches_40_seg/" + set_name)
         info_csv = pd.read_csv(path_to_info_csv )
         set_id_column = list(info_csv['image_id'])
+        print (len(set_id_column))
 
         this_set_pre_trained_embeds = pre_trained_embeddings[pre_trained_embeddings['image_id'].isin(set_id_column)]
         set_pre_trained_embed_file_name = model_name + "_" + set_name.split(".")[0] + "_embeddings_image_level.csv"
