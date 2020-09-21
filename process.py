@@ -2034,7 +2034,9 @@ if __name__ == '__main__':
     #specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
     #specific_donor_embeddings("H08-0140", "1596374295", study="schizophrenia")
 
-
+    get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet",
+                                                    dim=128, standardize=False)
+    concatenate_embedding_chunks("resnet50_50_patches", number_of_chunks=10)
     merge_embeddings_to_gene_level("resnet50_50_patches")
     merge_embeddings_to_image_level("resnet50_50_patches")
 
