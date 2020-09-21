@@ -320,7 +320,7 @@ def first_hit_percentage(dist_matrix_df, study=None):
 
 
 def first_hit_match_percentage_and_AUC_results(path_to_embeddings ,image_level_embed_file_name, study = None):
-    """ 
+    """
     :param path_to_embeddings:
     :param image_level_embed_file_name:
     :param study: the study that the embeddings belong to (i.e autism, schizophrenia)
@@ -1050,8 +1050,10 @@ def main():
 
 
 
-    ts_list = ["1598148899", "1598149283", "1598149994", "1598163229", "1598169861", "1598176752", "1598176969",
-               "1598189473", "1598190556", "1598202465", "1598208605", "1598225452"]
+    #ts_list = ["1598148899", "1598149283", "1598149994", "1598163229", "1598169861", "1598176752", "1598176969",
+               #"1598189473", "1598190556", "1598202465", "1598208605", "1598225452"]
+
+    ts_list = ["resnet50_50_patches"]
 
     not_found_list = []
     for ts in ts_list:
@@ -1068,10 +1070,10 @@ def main():
 
 if __name__ == '__main__':
 
-    #main()
+    main()
     #concat_all_evaluation_results()
     #disease_embed_evaluate("schizophrenia")
-    concat_disease_evaluation_results("schizophrenia")
+    #concat_disease_evaluation_results("schizophrenia")
 
 
 
