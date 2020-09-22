@@ -442,6 +442,9 @@ def build_distance_matrix(path_to_embeddings):
 
     print ("finished building the distance matrix ...")
 
+    print ("///////////////////")
+    print (len(distances_df))
+
     return distances_df
 
 
