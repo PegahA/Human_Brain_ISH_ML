@@ -1918,7 +1918,7 @@ def get_within_donor_info(study, ts):
 
     for donor in donors:
         print ("Donor: ", donor)
-        donor_df = specific_donor_embeddings(donor, ts, convert_to_tsv = False, study =study)
+        donor_df = specific_donor_embeddings(donor, ts, convert_to_tsv = False, study =study)[0]
         this_donor_group_by_gene = donor_df.groupby('gene_symbol')
         for key, item in this_donor_group_by_gene:
             if len(item) == 1:
