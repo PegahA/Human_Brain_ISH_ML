@@ -2136,7 +2136,7 @@ if __name__ == '__main__':
     #get_within_donor_gene_info()
     #get_among_other_donors_gene_info()
 
-    #add_new_columns_to_image_level_embed_file("1596374295", ["gene_symbol", "donor_id"], study="schizophrenia")
+    add_new_columns_to_image_level_embed_file("1596374295", ["donor_id", "gene_symbol"], study="schizophrenia")
 
     ts  = "1596374295"
     path_to_csv = os.path.join(EMBEDDING_DEST, ts, "1596374295_triplet_patches_schizophrenia_embeddings_image_level_with_info.csv")
