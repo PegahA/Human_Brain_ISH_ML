@@ -1455,12 +1455,12 @@ def convert_to_tsv_meta_and_without_meta(path_to_csv):
 
     #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
     #cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
+    cols = ['image_id', 'gene_symbol', 'donor_id']
 
     # With meta
 
     path_to_tsv = path_to_csv.split(".")[0] + ".tsv"
     csv_read = pd.read_csv(path_to_csv)
-    cols = list(csv_read)
 
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False))
