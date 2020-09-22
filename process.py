@@ -1391,7 +1391,7 @@ def run():
         merge_embeddings_to_image_level(ts)
 
 
-def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
+def specific_donor_embeddings(donor_id, embed_folder_name, convert_to_tsv = True, study =None):
 
 
     if study == None:
@@ -1430,11 +1430,16 @@ def specific_donor_embeddings(donor_id, embed_folder_name, study =None):
     else:
         donor_file_name = study+ "_" + donor_id
 
-    merged_df.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_file_name+".csv"), index=None)
-    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_file_name+".csv"))
 
-    merged_df_no_meta.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_file_name+"_no_meta.csv"), header=False, index=None)
-    convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_file_name+"_no_meta.csv"))
+    if convert_to_tsv:
+        merged_df.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_file_name+".csv"), index=None)
+        convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name,donor_file_name+".csv"))
+
+        merged_df_no_meta.to_csv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_file_name+"_no_meta.csv"), header=False, index=None)
+        convert_to_tsv(os.path.join(EMBEDDING_DEST, embed_folder_name, donor_file_name+"_no_meta.csv"))
+
+
+    return merged_df, merged_df_no_meta
 
 
 
@@ -1902,6 +1907,32 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
     new_image_level_embed_df.to_csv(new_image_level_embed_df_path, index=None)
 
 
+
+
+def get_within_donor_info(study, ts):
+
+    path_to_info_file = os.path.join(DATA_DIR, study, "human_ISH_info.csv")
+    info_df = pd.read_csv(path_to_info_file)
+    donors = list(set(list(info_df['donor_id'])))
+    print ("There are {} unique donors in {} dataset.".format(len(donors), study))
+
+    for donor in donors:
+        print ("Donor: ", donor)
+        donor_df = specific_donor_embeddings(donor, ts, convert_to_tsv = False, study =study)
+        this_donor_group_by_gene = donor_df.groupby('gene_symbol')
+        for key, item in this_donor_group_by_gene:
+            if len(item) == 1:
+                print ("Gene: {}    Number of images: {}".format(key, len(item)))
+
+        print ("-----------------")
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
 
     #generate_random_embeddings("", 128)
@@ -2034,6 +2065,8 @@ if __name__ == '__main__':
     #specific_donor_embeddings( "H08-0097", "1596374295", study="schizophrenia")
     #specific_donor_embeddings("H08-0140", "1596374295", study="schizophrenia")
 
+    """
+
     get_embeddings_from_pre_trained_model_in_chunks(number_of_chunks=10, model_name="resnet50", trained_on="imagenet",
                                                     dim=128, standardize=False)
     concatenate_embedding_chunks("resnet50_50_patches", number_of_chunks=10)
@@ -2041,3 +2074,7 @@ if __name__ == '__main__':
     merge_embeddings_to_image_level("resnet50_50_patches")
 
     get_embeddings_from_pre_trained_model_for_each_set()
+
+    """
+
+    get_within_donor_info("schizophrenia","1596374295" )
