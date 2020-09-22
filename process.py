@@ -1846,15 +1846,17 @@ def add_new_columns_to_image_level_embed_file(ts, columns, study=None):
         if study == None:
             if item.endswith("training_validation_embeddings_image_level.csv"):
                 image_level_file_name = item
+                images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
 
         else:
             if study in item and item.endswith("embeddings_image_level.csv"):
                 image_level_file_name = item
+                images_info = pd.read_csv(os.path.join(DATA_DIR, study, "human_ISH_info.csv"))
 
 
     image_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, image_level_file_name))
 
-    images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
+
 
     avail_cols = ['image_id']
     for col in columns:
