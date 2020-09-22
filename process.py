@@ -1454,12 +1454,13 @@ def convert_to_tsv(path_to_csv):
 def convert_to_tsv_meta_and_without_meta(path_to_csv):
 
     #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
-    cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
+    #cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
 
     # With meta
 
     path_to_tsv = path_to_csv.split(".")[0] + ".tsv"
     csv_read = pd.read_csv(path_to_csv)
+    cols = list(csv_read)
 
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False))
@@ -1474,8 +1475,6 @@ def convert_to_tsv_meta_and_without_meta(path_to_csv):
 
     with open(path_to_tsv, 'w') as write_tsv:
         write_tsv.write(csv_read.to_csv(sep='\t', index=False, header=False))
-
-
 
 
 def get_image_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["training", "validation"]):
@@ -2137,4 +2136,8 @@ if __name__ == '__main__':
     #get_within_donor_gene_info()
     #get_among_other_donors_gene_info()
 
-    add_new_columns_to_image_level_embed_file("1596374295", ["gene_symbol", "donor_id"], study="schizophrenia")
+    #add_new_columns_to_image_level_embed_file("1596374295", ["gene_symbol", "donor_id"], study="schizophrenia")
+
+    ts  = "1596374295"
+    path_to_csv = os.path.join(EMBEDDING_DEST, ts, "1596374295_triplet_patches_schizophrenia_embeddings_image_level_with_info.csv")
+    convert_to_tsv_meta_and_without_meta(path_to_csv)
