@@ -1909,7 +1909,7 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
 
 
 
-def get_within_donor_info(study, ts):
+def get_within_donor_info(study):
 
     path_to_info_file = os.path.join(DATA_DIR, study, "human_ISH_info.csv")
     info_df = pd.read_csv(path_to_info_file)
@@ -1918,7 +1918,7 @@ def get_within_donor_info(study, ts):
 
     for donor in donors:
         print ("Donor: ", donor)
-        donor_df = specific_donor_embeddings(donor, ts, convert_to_tsv = False, study =study)[0]
+        donor_df = info_df[info_df['donor_id']==donor]
         this_donor_group_by_gene = donor_df.groupby('gene_symbol')
         for key, item in this_donor_group_by_gene:
             if len(item) == 1:
@@ -2077,4 +2077,4 @@ if __name__ == '__main__':
 
     """
 
-    get_within_donor_info("schizophrenia","1596374295" )
+    get_within_donor_info("schizophrenia" )
