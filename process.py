@@ -1837,14 +1837,20 @@ def info_from_existing_embed_files():
     existing_embeds_df.to_csv(os.path.join(EMBEDDING_DEST, df_name), index=False)
 
 
-def add_new_columns_to_image_level_embed_file(ts, columns):
+def add_new_columns_to_image_level_embed_file(ts, columns, study=None):
     path_to_embed_file = os.path.join(EMBEDDING_DEST, ts)
     contents = os.listdir(path_to_embed_file)
 
     image_level_file_name = ""
     for item in contents:
-        if item.endswith("training_validation_embeddings_image_level.csv"):
-            image_level_file_name = item
+        if study == None:
+            if item.endswith("training_validation_embeddings_image_level.csv"):
+                image_level_file_name = item
+
+        else:
+            if study in item and item.endswith("embeddings_image_level.csv"):
+                image_level_file_name = item
+
 
     image_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, image_level_file_name))
 
@@ -1909,22 +1915,71 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
 
 
 
-def get_within_donor_info(study):
+def get_within_donor_gene_info():
 
-    path_to_info_file = os.path.join(DATA_DIR, study, "human_ISH_info.csv")
+    path_to_info_file = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/SZ/human_ISH_info.csv"
     info_df = pd.read_csv(path_to_info_file)
     donors = list(set(list(info_df['donor_id'])))
-    print ("There are {} unique donors in {} dataset.".format(len(donors), study))
+    print ("There are {} unique donors.".format(len(donors)))
 
+    total_image_count = 0
     for donor in donors:
+        this_donor_one_image_count = 0
+
         print ("Donor: ", donor)
         donor_df = info_df[info_df['donor_id']==donor]
         this_donor_group_by_gene = donor_df.groupby('gene_symbol')
         for key, item in this_donor_group_by_gene:
             if len(item) == 1:
                 print ("Gene: {}    Number of images: {}".format(key, len(item)))
+                this_donor_one_image_count +=1
+
+        print ("Total number of images: {}    Images with one gene: {}    %: {}".format(len(donor_df),
+                                                                                            this_donor_one_image_count,
+                                                                                            this_donor_one_image_count*100/len(donor_df)))
 
         print ("-----------------")
+
+        total_image_count += this_donor_one_image_count
+
+
+    print ("total image count: ", total_image_count)
+
+def get_among_other_donors_gene_info():
+    path_to_info_file = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_2/SZ/human_ISH_info.csv"
+    info_df = pd.read_csv(path_to_info_file)
+    donors = list(set(list(info_df['donor_id'])))
+    genes = list(set(list(info_df['gene_symbol'])))
+
+
+    donor_genes_dict = {}
+    for donor in donors:
+        donor_df = info_df[info_df['donor_id'] == donor]
+        this_donor_genes = list(set(list(donor_df['gene_symbol'])))
+
+        donor_genes_dict[donor] = this_donor_genes
+
+
+    genes_in_one_donor_only_list = []
+    for gene in genes:
+        number_of_donors = 0
+        for donor in donor_genes_dict:
+            if gene in donor_genes_dict[donor]:
+                number_of_donors +=1
+
+
+        if number_of_donors == 1:
+            genes_in_one_donor_only_list.append(gene)
+
+
+
+    print (len(genes_in_one_donor_only_list))
+
+
+
+
+
+
 
 
 
@@ -2077,4 +2132,7 @@ if __name__ == '__main__':
 
     """
 
-    get_within_donor_info("schizophrenia" )
+    #get_within_donor_gene_info()
+    #get_among_other_donors_gene_info()
+
+    add_new_columns_to_image_level_embed_file("1596374295", ["gene_symbol", "donor_id"], study="schizophrenia")
