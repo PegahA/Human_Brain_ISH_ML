@@ -309,8 +309,8 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
     donor_race = donor.find('race-only').text
     smoker = donor.find('smoker').text
     chemotherapy = donor.find('chemotherapy').text
-    radiation_therapy = donor.find('radiation_therapy').text
-    tumor_status = donor.find('tumor_status').text
+    radiation_therapy = donor.find('radiation-therapy').text
+    tumor_status = donor.find('tumor-status').text
 
     conditions = donor.find('conditions')
     condition = conditions.find('condition')
