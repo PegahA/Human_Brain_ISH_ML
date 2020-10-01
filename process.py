@@ -1455,7 +1455,7 @@ def convert_to_tsv_meta_and_without_meta(path_to_csv):
 
     #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
     #cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
-    cols = ['image_id', 'gene_symbol', 'donor_id']
+    cols = ['image_id', 'gene_symbol', 'donor_id', 'region']
 
     # With meta
 
@@ -1844,7 +1844,7 @@ def add_new_columns_to_image_level_embed_file(ts, columns, study=None):
     for item in contents:
         if study == None:
             #if item.endswith("training_validation_embeddings_image_level.csv"):
-            if item == "validation_embeddings_image_level.csv":
+            if item == "training_embeddings_image_level.csv":
 
                 image_level_file_name = item
                 images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
@@ -2151,3 +2151,6 @@ if __name__ == '__main__':
     #generate_random_embeddings(embeddings_length=128)
 
     add_new_columns_to_image_level_embed_file("1596374295", ["donor_id", "gene_symbol", "region"])
+
+    #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/talk_human/top_1596374295/1596374295_validation_embeddings_image_level_with_info.csv"
+    #convert_to_tsv_meta_and_without_meta(path_to_csv)
