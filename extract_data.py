@@ -338,8 +338,8 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
         gene_symbol = gene.find('acronym').text
         gene_alias_tags = gene.find('alias-tags').text
         entrez_id = gene.find('entrez-id').text
-        gene_original_name = gene.find('original-name')
-        gene_original_symbol = gene.find('original-symbol')
+        gene_original_name = gene.find('original-name').text
+        gene_original_symbol = gene.find('original-symbol').text
 
         all_section_images = section_images.findall('section-image')
 
@@ -418,7 +418,7 @@ def run():
         #redownload_small_images()
 
         # image_info_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "human_ISH_info.csv"), index=None)
-        image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info_r.csv"), index=None)
+        image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"), index=None)
         print("finished creating image_info csv file ...")
 
         """
