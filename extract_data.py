@@ -304,8 +304,26 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
 
     donor_id = donor.find('name').text
     donor_sex = donor.find('sex').text
+    donor_age = donor.find('age-id').text
+    pmi = donor.find('pmi').text
+    donor_race = donor.find('race-only').text
+    smoker = donor.find('smoker').text
+    chemotherapy = donor.find('chemotherapy').text
+    radiation_therapy = donor.find('radiation_therapy').text
+    tumor_status = donor.find('tumor_status').text
+
+    conditions = donor.find('conditions')
+    condition = conditions.find('condition')
+    description = condition.find('description').text
+
+
+
+
 
     region_name = structure.find('name').text
+    region_acronym = structure.find('acronym').text
+
+    tissue_ph = specimen.find('tissue-ph').text
 
 
     gene = genes.find('gene')
@@ -318,7 +336,10 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
 
 
         gene_symbol = gene.find('acronym').text
+        gene_alias_tags = gene.find('alias-tags').text
         entrez_id = gene.find('entrez-id').text
+        gene_original_name = gene.find('original-name')
+        gene_original_symbol = gene.find('original-symbol')
 
         all_section_images = section_images.findall('section-image')
 
@@ -329,8 +350,14 @@ def add_experiment_images_to_image_info_csv(image_info_df, experiment_xml_file):
 
         for image_id in image_id_list:
             new_row =  pd.Series({'image_id': image_id, 'gene_symbol': gene_symbol, 'entrez_id': entrez_id,
-                                  'experiment_id':experiment_id,'specimen_id': specimen_id, 'donor_id': donor_id,
-                                  'donor_sex': donor_sex, 'region':region_name})
+                                  'alias_tags': gene_alias_tags, 'original_name': gene_original_name,
+                                  'original_symbol': gene_original_symbol, 'experiment_id':experiment_id,'specimen_id': specimen_id,
+                                  'description': description, 'donor_id': donor_id, 'donor_sex': donor_sex,
+                                  'donor_age':donor_age, 'donor_race':donor_race,
+                                  'smoker' : smoker, 'chemotherapy': chemotherapy, 'radiation_therapy': radiation_therapy,
+                                  'tumor_status' : tumor_status,
+                                  'region':region_name, 'region_acronym': region_acronym,
+                                  'tissue_ph': tissue_ph, 'pmi': pmi })
 
             image_info_df = image_info_df.append(new_row, ignore_index=True)
 
@@ -385,7 +412,7 @@ def run():
             print("finished processing image IDs for " + specimen_id)
 
             # total_invalid_experiments = dict(total_invalid_experiments.items() + invalid_experiments.items())
-            total_invalid_experiments.update(invalid_experiments)
+            #total_invalid_experiments.update(invalid_experiments)
 
         #download_images(image_list_to_download)
         #redownload_small_images()
