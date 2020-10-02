@@ -636,7 +636,8 @@ def evaluate(ts, not_found_list):
 
         contents = os.listdir(path_to_embeddings)
         for item in contents:
-            if item.endswith("embeddings_image_level.csv"):
+            #if item.endswith("embeddings_image_level.csv"):
+            if item.endswith(("five.csv")):
                image_level_files_list.append(item)
 
         for item in image_level_files_list:
@@ -1056,7 +1057,7 @@ def main():
     #ts_list = ["1598148899", "1598149283", "1598149994", "1598163229", "1598169861", "1598176752", "1598176969",
                #"1598189473", "1598190556", "1598202465", "1598208605", "1598225452"]
 
-    ts_list = ["random_2"]
+    ts_list = ["1596374295"]
 
     not_found_list = []
     for ts in ts_list:
