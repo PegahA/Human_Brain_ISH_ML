@@ -2150,7 +2150,7 @@ if __name__ == '__main__':
 
     #generate_random_embeddings(embeddings_length=128)
 
-    add_new_columns_to_image_level_embed_file("1596374295", ["donor_id", "gene_symbol", "region"])
+    add_new_columns_to_image_level_embed_file("1596374295", ["donor_id", "gene_symbol", "region", "entrez_id"])
 
-    #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/talk_human/top_1596374295/1596374295_validation_embeddings_image_level_with_info.csv"
+    #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/talk_human/top_1596374295/1596374295_training_embeddings_image_level_with_info.csv"
     #convert_to_tsv_meta_and_without_meta(path_to_csv)
