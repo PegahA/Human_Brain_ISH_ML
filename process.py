@@ -1529,7 +1529,7 @@ def get_gene_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["tr
         target_df = pd.read_csv(path_to_target_set)
         target_gene_symbol = list(set(list(target_df['gene_symbol'])))
 
-        target_embeddings = gene_level_embeddings[gene_level_embeddings['image_id'].isin(target_gene_symbol)]
+        target_embeddings = gene_level_embeddings[gene_level_embeddings['gene_symbol'].isin(target_gene_symbol)]
 
         target_embeddings_file_name = target +"_embeddings_gene_level.csv"
         target_embeddings.to_csv(os.path.join(embeddings_path, target_embeddings_file_name), index=None)
