@@ -1915,7 +1915,7 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
 
     gene_level_file_name = ""
     for item in contents:
-        if item.endswith("training_validation_embeddings_gene_level.csv"):
+        if item.endswith("training_embeddings_gene_level.csv"):
             gene_level_file_name = item
 
     gene_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, gene_level_file_name))
@@ -2208,5 +2208,5 @@ if __name__ == '__main__':
     #convert_to_tsv_meta_and_without_meta(with_zeng_info_val_path)
 
     sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
-    get_gene_level_embeddings_of_a_target_set(sets_path, "1596374295", target_sets=["training", "validation"])
-    #add_new_columns_to_gene_level_embed_file("1596374295", ["entrez_id"])
+    #get_gene_level_embeddings_of_a_target_set(sets_path, "1596374295", target_sets=["training", "validation"])
+    add_new_columns_to_gene_level_embed_file("1596374295", ["entrez_id"])
