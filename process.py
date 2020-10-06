@@ -1844,7 +1844,7 @@ def add_new_columns_to_image_level_embed_file(ts, columns, study=None):
     for item in contents:
         if study == None:
             #if item.endswith("training_validation_embeddings_image_level.csv"):
-            if item == "training_embeddings_image_level.csv":
+            if item == "validation_embeddings_image_level.csv":
 
                 image_level_file_name = item
                 images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
