@@ -1915,7 +1915,7 @@ def add_new_columns_to_gene_level_embed_file(ts, columns):
 
     gene_level_file_name = ""
     for item in contents:
-        if item.endswith("training_embeddings_gene_level.csv"):
+        if item.endswith("validation_embeddings_gene_level.csv"):
             gene_level_file_name = item
 
     gene_level_embed_df = pd.read_csv(os.path.join(EMBEDDING_DEST, ts, gene_level_file_name))
