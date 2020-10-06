@@ -1455,7 +1455,9 @@ def convert_to_tsv_meta_and_without_meta(path_to_csv):
 
     #cols = ['gene_symbol', 'Cortical.marker..human.', 'Expression.level']
     #cols = ['image_id', 'gene_symbol', 'entrez_id', 'region']
-    cols = ['image_id', 'gene_symbol', 'donor_id', 'region']
+    #cols = ['image_id', 'gene_symbol', 'donor_id', 'region' ]
+    cols = ['image_id', 'gene_symbol_x', 'donor_id', 'region', "entrez_id", "V1_pattern", "V2_pattern", "Temporal_pattern",
+            "marker_annotation","expression_level", "gene_symbol_y"]
 
     # With meta
 
@@ -1503,10 +1505,37 @@ def get_image_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["t
         target_embeddings_file_name = target +"_embeddings_image_level.csv"
         target_embeddings.to_csv(os.path.join(embeddings_path, target_embeddings_file_name), index=None)
 
+    print ("Finished getting embeddings of target sets.")
 
 
+def get_gene_level_embeddings_of_a_target_set(path_to_sets, ts, target_sets=["training", "validation"]):
+
+    embeddings_path = os.path.join(EMBEDDING_DEST, ts)
+    contents = os.listdir(embeddings_path)
+
+    gene_level_embeddings_file_name = ""
+
+    for item in contents:
+        if item.endswith("training_validation_embeddings_gene_level.csv"):
+            gene_level_embeddings_file_name = item
+            break
+
+    gene_level_embeddings = pd.read_csv(os.path.join(embeddings_path, gene_level_embeddings_file_name))
+
+    for target in target_sets:
+
+        print ("Getting embeddings of the " + target + " set...")
+        path_to_target_set = os.path.join(path_to_sets, target +".csv")
+        target_df = pd.read_csv(path_to_target_set)
+        target_gene_symbol = list(set(list(target_df['gene_symbol'])))
+
+        target_embeddings = gene_level_embeddings[gene_level_embeddings['image_id'].isin(target_gene_symbol)]
+
+        target_embeddings_file_name = target +"_embeddings_gene_level.csv"
+        target_embeddings.to_csv(os.path.join(embeddings_path, target_embeddings_file_name), index=None)
 
     print ("Finished getting embeddings of target sets.")
+
 
 
 def helper_compare_genes_from_all_sets_to_zeng_cleaned():
@@ -1722,7 +1751,7 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embeddings
     acceptable_layer_names = {"layer 1", "layer 1", "layer 3", "layer 4", "layer 5", "layer 6"}
     na_count = 0
 
-    layer_marker_col = list(merged_with_markers_df['Cortical.marker..human.'])
+    layer_marker_col = list(merged_with_markers_df['marker_annotation'])
     for item in layer_marker_col:
         if item not in acceptable_layer_names:
             na_count += 1
@@ -1736,7 +1765,7 @@ def merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embeddings
 
     # ------ remove NA values
 
-    merged_with_markers_df_no_na = merged_with_markers_df[merged_with_markers_df['Cortical.marker..human.'].notna()]
+    merged_with_markers_df_no_na = merged_with_markers_df[merged_with_markers_df['marker_annotation'].notna()]
 
     no_na_path = path_to_embeddings.split(".")[0] + "_with_marker_no_na.csv"
     #merged_with_markers_df_no_na.to_csv(no_na_path, index=None)
@@ -2151,7 +2180,7 @@ if __name__ == '__main__':
     #generate_random_embeddings(embeddings_length=128)
     #generate_random_embeddings(embeddings_length=128)
 
-    add_new_columns_to_image_level_embed_file("1596374295", ["donor_id", "gene_symbol", "region", "entrez_id"])
+    #add_new_columns_to_image_level_embed_file("1596374295", ["donor_id", "gene_symbol", "region", "entrez_id"])
 
 
     #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/talk_human/top_1596374295/1596374295_training_embeddings_image_level_with_info.csv"
@@ -2160,3 +2189,24 @@ if __name__ == '__main__':
     #path_to_csv = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/talk_human/top_1596374295/1596374295_validation_embeddings_image_level_with_info.csv"
     #convert_to_tsv_meta_and_without_meta(path_to_csv)
 
+    embed_general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/talk_human/top_1596374295"
+
+    path_to_zeng = os.path.join(embed_general_path, "Cleaned_Zeng_dataset.csv")
+
+    path_to_training_embed = os.path.join(embed_general_path,
+                                          "1596374295_training_embeddings_image_level_with_info.csv")
+
+    path_to_val_embed = os.path.join(embed_general_path, "1596374295_validation_embeddings_image_level_with_info.csv")
+
+
+    #merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_training_embed)
+    #merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_val_embed)
+
+    #with_zeng_info_train_path = os.path.join(embed_general_path, "1596374295_training_embeddings_image_level_with_info_with_marker_4.csv")
+    #with_zeng_info_val_path = os.path.join(embed_general_path, "1596374295_validation_embeddings_image_level_with_info_with_marker_2.csv")
+    #convert_to_tsv_meta_and_without_meta(with_zeng_info_train_path)
+    #convert_to_tsv_meta_and_without_meta(with_zeng_info_val_path)
+
+    sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+    get_gene_level_embeddings_of_a_target_set(sets_path, "1596374295", target_sets=["training", "validation"])
+    #add_new_columns_to_gene_level_embed_file("1596374295", ["entrez_id"])
