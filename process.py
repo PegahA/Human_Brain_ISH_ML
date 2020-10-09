@@ -164,6 +164,8 @@ def define_sets_with_no_shared_genes(images_info_df):
     """
     We want to create training, validation, and test set.
     The condition is that the sets should not have any genes in common.
+    If INCLUDE_SZ_DATA flag is set to false, we want to make sure there are no schizophrenia genes in the training set.
+
     :param images_info_df:  pandas dataframe that has the information of all image
     :return: 3 pandas dataframes: training, validation, test
     """
@@ -184,6 +186,21 @@ def define_sets_with_no_shared_genes(images_info_df):
 
     training_genes = [x for x in remaining_genes if x not in validation_genes]
 
+    # ------- filter SZ genes if necessary -------
+    if INCLUDE_SZ_DATA == False:
+        path_to_SZ_info = os.path.join(DATA_DIR, "schizophrenia", "human_ISH_info.csv")
+        sz_info_df = pd.read_csv(path_to_SZ_info)
+        sz_unique_genes = list(set(list(sz_info_df['gene_symbol'])))
+        print(
+            "There are {} genes in the training set. {} schizophrenia-associated genes will be removed"
+            .format(len(training_genes), len(sz_unique_genes)))
+
+        training_genes = [x for x in training_genes if x not in sz_unique_genes]
+        print ("Number of remaining genes: {}".format(len(training_genes)))
+
+    # --------------------------------------------
+
+
     training_df = images_info_df[images_info_df['gene_symbol'].isin(training_genes)]
     validation_df = images_info_df[images_info_df['gene_symbol'].isin(validation_genes)]
     test_df = images_info_df[images_info_df['gene_symbol'].isin(test_genes)]
@@ -200,10 +217,16 @@ def define_sets_with_no_shared_genes(images_info_df):
     if (not os.path.exists(sets_path)):
         os.mkdir(sets_path)
 
-    training_df.to_csv(os.path.join(sets_path, "training.csv"), index=None)
+    if INCLUDE_SZ_DATA == True:
+        training_df.to_csv(os.path.join(sets_path, "training.csv"), index=None)
+        train_val_df.to_csv(os.path.join(sets_path, "training_validation.csv"), index=None)
+    else:
+        training_df.to_csv(os.path.join(sets_path, "no_sz_training.csv"), index=None)
+        train_val_df.to_csv(os.path.join(sets_path, "no_sz_training_validation.csv"), index=None)
+
     validation_df.to_csv(os.path.join(sets_path, "validation.csv"), index=None)
     test_df.to_csv(os.path.join(sets_path, "test.csv"), index=None)
-    train_val_df.to_csv(os.path.join(sets_path, "training_validation.csv"), index=None)
+
 
     return training_df, validation_df, test_df, train_val_df
 
@@ -590,13 +613,25 @@ def make_triplet_csvs(dfs):
     out_base = sets_path + "/triplet"
 
     if PATCH_TYPE=="segmentation":
-        return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
-            out_base, ext))
-                     for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
+        if INCLUDE_SZ_DATA == True:
+            return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                out_base, ext))
+                         for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
+        else:
+            return tuple(
+                (make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                    out_base, ext))
+                for df, ext in zip(dfs, ("no_sz_training", "validation", "test", "no_sz_training_validation")))
 
     else:
-        return tuple((make_triplet_csv_no_segmentation(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
-                     for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
+        if INCLUDE_SZ_DATA == True:
+            return tuple((make_triplet_csv_no_segmentation(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
+                         for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
+        else:
+            return tuple((make_triplet_csv_no_segmentation(df,
+                                                           "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                out_base, ext))
+                         for df, ext in zip(dfs, ("no_sz_training", "validation", "test", "no_sz_training_validation")))
 
 
 
