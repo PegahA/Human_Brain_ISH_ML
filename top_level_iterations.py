@@ -5,10 +5,10 @@ if __name__ == "__main__":
 
     top_list = [[20, 8e-5, True],
                 [17, 7e-5, True],
-                [12, 8e-5, True],
-                [18, 7e-5, True]]
+                [18, 7e-5, True],
+                [12, 8e-5, True]]
 
-    training_iterations_list = [10000, 15000, 20000]
+    training_iterations_list = [30000] #[10000, 15000, 20000]
 
     main_py_path = os.path.join(CODE_DIR, "main.py")
 
