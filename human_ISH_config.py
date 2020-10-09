@@ -47,7 +47,7 @@ elif PATCH_TYPE == 'segmentation':
 
 
 
-INCLUDE_SZ_DATA = True
+INCLUDE_SZ_DATA = False
 
 SETS_DIR = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
