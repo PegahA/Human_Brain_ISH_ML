@@ -55,8 +55,8 @@ if INCLUDE_SZ_DATA == True:
     TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
     EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
 else:
-    TRAIN_SET = os.path.join(SETS_DIR, "no_sz_triplet_training.csv")
-    EMBED_SET = os.path.join(SETS_DIR, "no_sz_triplet_training_validation.csv")
+    TRAIN_SET = os.path.join(SETS_DIR, "triplet_no_sz_training.csv")
+    EMBED_SET = os.path.join(SETS_DIR, "triplet_no_sz_training_validation.csv")
 
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
