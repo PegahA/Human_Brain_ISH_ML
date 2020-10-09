@@ -224,17 +224,17 @@ if __name__ == "__main__":
 
 
     # ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673', '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103', '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
-    time_stamps =  ['1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
-    for ts in time_stamps:
-        get_disease_embeddings_from_existing_models("schizophrenia", ts)
+    #time_stamps =  ['1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
+    #for ts in time_stamps:
+        #get_disease_embeddings_from_existing_models("schizophrenia", ts)
 
-    """
+
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    #process.make_sets() 
+    process.make_sets()
 
    
-    
+    """
     print ("i am here in main!")
 
     
