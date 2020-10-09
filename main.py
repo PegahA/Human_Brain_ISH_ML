@@ -231,10 +231,10 @@ if __name__ == "__main__":
 
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    process.make_sets()
+    #process.make_sets()
 
    
-    """
+
     print ("i am here in main!")
 
     
@@ -330,11 +330,10 @@ if __name__ == "__main__":
     os.system(embed_command_line_string)
 
 
-
-
     # -------- adding disease dataset to pipeline --------
 
 
+    """
     autism_embed_dataset = ""
     autsim_image_root = os.path.join(DATA_DIR, "autism", "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES),
                                                   "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
@@ -350,6 +349,8 @@ if __name__ == "__main__":
                                 (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
     os.system(autism_command_line_string)
+    
+    """
 
 
         # -----------
@@ -424,8 +425,7 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
-    
-    """
+
     
     
    
