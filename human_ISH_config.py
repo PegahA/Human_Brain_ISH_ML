@@ -44,11 +44,20 @@ elif  PATCH_TYPE == 'r_overall' :
 elif PATCH_TYPE == 'segmentation':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
-    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
+
+
+
+INCLUDE_SZ_DATA = True
 
 SETS_DIR = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
-TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
-EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
+
+if INCLUDE_SZ_DATA == True:
+    TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
+    EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
+else:
+    TRAIN_SET = os.path.join(SETS_DIR, "no_sz_triplet_training.csv")
+    EMBED_SET = os.path.join(SETS_DIR, "no_sz_triplet_training_validation.csv")
+
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
