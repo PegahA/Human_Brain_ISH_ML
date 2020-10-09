@@ -19,6 +19,9 @@ parser.add_argument(
     '--experiment_root', default=EXPERIMENT_ROOT, type= str,
     help='Location used to store checkpoints and dumped data.')
 
+parser.add_argument(
+    '--include_sz_data', default=INCLUDE_SZ_DATA,
+    help='Flag to determine whether schizophrenia genes should be included in training.')
 
 parser.add_argument(
     '--train_set', default=TRAIN_SET,
@@ -238,6 +241,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print ("\n------- Arguments:")
     print ("experiment root: ", args.experiment_root)
+    print ("include SZ data: ", args.include_sz_data)
     print ("train set: ", args.train_set)
     print ("image root: ", args.image_root)
     print ("train resume: ", args.train_resume)
