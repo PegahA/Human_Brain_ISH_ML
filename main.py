@@ -233,8 +233,7 @@ if __name__ == "__main__":
     #crop_and_rotate.create_patches(PATCH_TYPE)
     #process.make_sets()
 
-   
-    """
+
     print ("i am here in main!")
 
     
@@ -329,7 +328,7 @@ if __name__ == "__main__":
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
 
-    """
+
 
     # -------- adding disease dataset to pipeline --------
 
@@ -353,7 +352,7 @@ if __name__ == "__main__":
     
     """
 
-    """
+
         # -----------
 
     schiz_embed_dataset = os.path.join(DATA_DIR, "schizophrenia","sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(SEGMENTATION_TRAINING_SAMPLES)+"_seg" ,"triplet_patches_schizophrenia.csv")
@@ -399,19 +398,15 @@ if __name__ == "__main__":
     
     process.convert_h5_to_csv()
     
-    """
-
-    ts_list = ['1602219076', '1602225390', '1602226166']
-    for ts in ts_list:
-
-        #filename = process.save_embedding_info_into_file(TIMESTAMP)
-        filename = process.save_embedding_info_into_file(ts)
 
 
-        process.merge_embeddings_to_gene_level(filename)
-        process.merge_embeddings_to_image_level(filename)
-        process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
-        #evaluate_embeddings.evaluate(filename)
+    filename = process.save_embedding_info_into_file(TIMESTAMP)
+
+
+    process.merge_embeddings_to_gene_level(filename)
+    process.merge_embeddings_to_image_level(filename)
+    process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
+    #evaluate_embeddings.evaluate(filename)
 
    
 
