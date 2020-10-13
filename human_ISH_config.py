@@ -44,6 +44,7 @@ elif  PATCH_TYPE == 'r_overall' :
 elif PATCH_TYPE == 'segmentation':
     IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
     EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
+    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
 
 
