@@ -880,7 +880,7 @@ def concat_all_evaluation_results():
 
     #list_of_folders = get_all_ts_folders()
 
-    list_of_folders = ['1596374295', '1596183933', '159636690', '1602219076', '1602225390', '1602226166']
+    list_of_folders = ['1596374295', '1596183933', '159536690', '1602219076', '1602225390', '1602226166']
 
     train_eval_df_list = []
     val_eval_df_list = []
