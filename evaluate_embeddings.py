@@ -878,7 +878,9 @@ def concat_all_evaluation_results():
      #          "1598189473", "1598190556", "1598202465", "1598208605", "1598225452", "random"]
 
 
-    list_of_folders = get_all_ts_folders()
+    #list_of_folders = get_all_ts_folders()
+
+    list_of_folders = ['1596374295', '1596183933', '159636690', '1602219076', '1602225390', '1602226166']
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -956,9 +958,9 @@ def concat_all_evaluation_results():
     #concatenated_train_and_validation_df =  concatenated_train_and_validation_df.rename(columns=train_and_val_columns_dict)
 
 
-    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"training_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"validation_all_evaluation_result_top_tri.csv"),index=None)
-    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_training_df.to_csv(os.path.join(EMBEDDING_DEST,"compare_with_no_sz", "training_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_validation_df.to_csv(os.path.join(EMBEDDING_DEST, "compare_with_no_sz", "validation_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_train_and_validation_df.to_csv(os.path.join(EMBEDDING_DEST,"compare_with_no_sz","training_and_validation_all_evaluation_result_top_tri.csv"), index=None)
 
     # ---------
     # If you have columns on arguments, keep them in training but drop them in validation and train_and_val to prevent duplicates
@@ -977,7 +979,7 @@ def concat_all_evaluation_results():
 
     all_three_df_list = [concatenated_training_df, concatenated_validation_df, concatenated_train_and_validation_df]
     concatenated_all_df = pd.concat(all_three_df_list, axis=1)
-    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"all_evaluation_result_top_tri.csv"), index=None)
+    concatenated_all_df.to_csv(os.path.join(EMBEDDING_DEST,"compare_with_no_sz", "all_evaluation_result_top_tri.csv"), index=None)
 
 
 
@@ -1077,8 +1079,8 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
-    #concat_all_evaluation_results()
+    #main()
+    concat_all_evaluation_results()
     #disease_embed_evaluate("schizophrenia")
     #concat_disease_evaluation_results("schizophrenia")
 
