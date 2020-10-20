@@ -13,6 +13,8 @@ CODE_DIR = "/"
 #VOL_CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
+TRAIN_ON_ALL = False
+
 TEST_SPLIT = 10
 VALIDATION_SPLIT = 10
 TRAINING_SPLIT = 100 - (TEST_SPLIT + VALIDATION_SPLIT)
@@ -52,12 +54,16 @@ INCLUDE_SZ_DATA = False
 
 SETS_DIR = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
-if INCLUDE_SZ_DATA == True:
-    TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
-    EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
+if TRAIN_ON_ALL == False:
+    if INCLUDE_SZ_DATA == True:
+        TRAIN_SET =  os.path.join(SETS_DIR, "triplet_training.csv")
+        EMBED_SET = os.path.join(SETS_DIR, "triplet_training_validation.csv")
+    else:
+        TRAIN_SET = os.path.join(SETS_DIR, "triplet_no_sz_training.csv")
+        EMBED_SET = os.path.join(SETS_DIR, "triplet_no_sz_training_validation.csv")
 else:
-    TRAIN_SET = os.path.join(SETS_DIR, "triplet_no_sz_training.csv")
-    EMBED_SET = os.path.join(SETS_DIR, "triplet_no_sz_training_validation.csv")
+    TRAIN_SET = os.path.join(SETS_DIR, "triplet_all_training.csv")
+    EMBED_SET = None
 
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
