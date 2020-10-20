@@ -165,6 +165,8 @@ def define_sets_with_no_shared_genes(images_info_df):
     We want to create training, validation, and test set.
     The condition is that the sets should not have any genes in common.
     If INCLUDE_SZ_DATA flag is set to false, we want to make sure there are no schizophrenia genes in the training set.
+    if TRAIN_ON_ALL flag is set to True, then all the genes will be considered as training. We won't have a validation or test.
+
 
     :param images_info_df:  pandas dataframe that has the information of all image
     :return: 3 pandas dataframes: training, validation, test
@@ -174,61 +176,82 @@ def define_sets_with_no_shared_genes(images_info_df):
     total_unique_gene_count = len(unique_genes)
     print(total_unique_gene_count)
 
+    if TRAIN_ON_ALL == False:
 
-    test_genes_count = int((TEST_SPLIT / 100.0) * total_unique_gene_count)
-    validation_gene_count = int((VALIDATION_SPLIT / 100.0) * total_unique_gene_count)
+        test_genes_count = int((TEST_SPLIT / 100.0) * total_unique_gene_count)
+        validation_gene_count = int((VALIDATION_SPLIT / 100.0) * total_unique_gene_count)
 
-    test_genes = random.sample(unique_genes, test_genes_count)
+        test_genes = random.sample(unique_genes, test_genes_count)
 
-    remaining_genes = [x for x in unique_genes if x not in test_genes]
-    validation_genes = random.sample(remaining_genes, validation_gene_count)
-
-
-    training_genes = [x for x in remaining_genes if x not in validation_genes]
-
-    # ------- filter SZ genes if necessary -------
-    if INCLUDE_SZ_DATA == False:
-        path_to_SZ_info = os.path.join(DATA_DIR, "schizophrenia", "human_ISH_info.csv")
-        sz_info_df = pd.read_csv(path_to_SZ_info)
-        sz_unique_genes = list(set(list(sz_info_df['gene_symbol'])))
-        print(
-            "There are {} genes in the training set. {} schizophrenia-associated genes will be removed"
-            .format(len(training_genes), len(sz_unique_genes)))
-
-        training_genes = [x for x in training_genes if x not in sz_unique_genes]
-        print ("Number of remaining genes: {}".format(len(training_genes)))
-
-    # --------------------------------------------
+        remaining_genes = [x for x in unique_genes if x not in test_genes]
+        validation_genes = random.sample(remaining_genes, validation_gene_count)
 
 
-    training_df = images_info_df[images_info_df['gene_symbol'].isin(training_genes)]
-    validation_df = images_info_df[images_info_df['gene_symbol'].isin(validation_genes)]
-    test_df = images_info_df[images_info_df['gene_symbol'].isin(test_genes)]
+        training_genes = [x for x in remaining_genes if x not in validation_genes]
 
-    training_df = training_df.sort_values(by=['image_id'])
-    validation_df = validation_df.sort_values(by=['image_id'])
-    test_df = test_df.sort_values(by=['image_id'])
+        # ------- filter SZ genes if necessary -------
+        if INCLUDE_SZ_DATA == False:
+            path_to_SZ_info = os.path.join(DATA_DIR, "schizophrenia", "human_ISH_info.csv")
+            sz_info_df = pd.read_csv(path_to_SZ_info)
+            sz_unique_genes = list(set(list(sz_info_df['gene_symbol'])))
+            print(
+                "There are {} genes in the training set. {} schizophrenia-associated genes will be removed"
+                .format(len(training_genes), len(sz_unique_genes)))
 
-    train_val_df = pd.concat([training_df, validation_df], ignore_index=True)
-    train_val_df = train_val_df.sort_values(by=['image_id'])
+            training_genes = [x for x in training_genes if x not in sz_unique_genes]
+            print ("Number of remaining genes: {}".format(len(training_genes)))
+
+        # --------------------------------------------
 
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE)+"_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
-    if (not os.path.exists(sets_path)):
-        os.mkdir(sets_path)
+        training_df = images_info_df[images_info_df['gene_symbol'].isin(training_genes)]
+        validation_df = images_info_df[images_info_df['gene_symbol'].isin(validation_genes)]
+        test_df = images_info_df[images_info_df['gene_symbol'].isin(test_genes)]
 
-    if INCLUDE_SZ_DATA == True:
-        training_df.to_csv(os.path.join(sets_path, "training.csv"), index=None)
-        train_val_df.to_csv(os.path.join(sets_path, "training_validation.csv"), index=None)
+        training_df = training_df.sort_values(by=['image_id'])
+        validation_df = validation_df.sort_values(by=['image_id'])
+        test_df = test_df.sort_values(by=['image_id'])
+
+        train_val_df = pd.concat([training_df, validation_df], ignore_index=True)
+        train_val_df = train_val_df.sort_values(by=['image_id'])
+
+
+        sets_path = os.path.join(DATA_DIR, STUDY, "sets_"+str(PATCH_COUNT_PER_IMAGE)+"_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
+        if (not os.path.exists(sets_path)):
+            os.mkdir(sets_path)
+
+        if INCLUDE_SZ_DATA == True:
+            training_df.to_csv(os.path.join(sets_path, "training.csv"), index=None)
+            train_val_df.to_csv(os.path.join(sets_path, "training_validation.csv"), index=None)
+        else:
+            training_df.to_csv(os.path.join(sets_path, "no_sz_training.csv"), index=None)
+            train_val_df.to_csv(os.path.join(sets_path, "no_sz_training_validation.csv"), index=None)
+
+        validation_df.to_csv(os.path.join(sets_path, "validation.csv"), index=None)
+        test_df.to_csv(os.path.join(sets_path, "test.csv"), index=None)
+
+
+
     else:
-        training_df.to_csv(os.path.join(sets_path, "no_sz_training.csv"), index=None)
-        train_val_df.to_csv(os.path.join(sets_path, "no_sz_training_validation.csv"), index=None)
+        training_genes = [x for x in unique_genes]
+        training_df = images_info_df[images_info_df['gene_symbol'].isin(training_genes)]
+        training_df = training_df.sort_values(by=['image_id'])
 
-    validation_df.to_csv(os.path.join(sets_path, "validation.csv"), index=None)
-    test_df.to_csv(os.path.join(sets_path, "test.csv"), index=None)
+        validation_df = None
+        test_df = None
+        train_val_df = None
+
+        sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(
+            SEGMENTATION_TRAINING_SAMPLES) + "_seg")
+        if (not os.path.exists(sets_path)):
+            os.mkdir(sets_path)
+
+
+        training_df.to_csv(os.path.join(sets_path, "all_training.csv"), index=None)
 
 
     return training_df, validation_df, test_df, train_val_df
+
 
 
 def define_sets_with_no_shared_donors(images_info_df):
@@ -450,18 +473,30 @@ def get_stats_on_sets(stats_dict, training_df, validation_df, test_df):
 
 
     # ----- validation info -----
-    validation_images_count = len(set(validation_df['image_id']))
-    validation_genes_count = len(set(validation_df['gene_symbol']))
-    validation_donor_count = len(set(validation_df['donor_id']))
+    if validation_df != None:
+        validation_images_count = len(set(validation_df['image_id']))
+        validation_genes_count = len(set(validation_df['gene_symbol']))
+        validation_donor_count = len(set(validation_df['donor_id']))
+    else:
+        validation_images_count = 0
+        validation_genes_count = 0
+        validation_donor_count = 0
+
     print("\n---- Validation ----")
     print("image count: ", validation_images_count)
     print("gene count: ", validation_genes_count)
     print("donor count: ", validation_donor_count)
 
     # ----- test info ------
-    test_images_count = len(set(test_df['image_id']))
-    test_genes_count = len(set(test_df['gene_symbol']))
-    test_donor_count = len(set(test_df['donor_id']))
+    if test_df != None:
+        test_images_count = len(set(test_df['image_id']))
+        test_genes_count = len(set(test_df['gene_symbol']))
+        test_donor_count = len(set(test_df['donor_id']))
+    else:
+        test_images_count = 0
+        test_genes_count = 0
+        test_donor_count = 0
+
     print("\n---- Test ----")
     print("image count: ", test_images_count)
     print("gene count: ", test_genes_count)
@@ -510,60 +545,66 @@ def make_triplet_csv_no_segmentation(df, out_file):
     """
     Use this function to create input suited for the triplet-reid training scripts
     """
+    if df == None:
+        return None
+    else:
 
-    temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
-    new_image_info= []
+        temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
+        new_image_info= []
 
 
-    total_number_of_circles = NUMBER_OF_CIRCLES_IN_HEIGHT * NUMBER_OF_CIRCLES_IN_WIDTH
-    for patch_index in range(1, total_number_of_circles+1):
-        patch_image_list = [(id.split(".")[0]+"_"+str(patch_index)+".jpg",gene) for id, gene in zip(temp_df['image'],temp_df['gene_symbol'])]
-        new_image_info += patch_image_list
-    new_df = pd.DataFrame(columns=['gene_symbol','image'])
-    new_df['image'] = [item[0] for item in new_image_info]
-    new_df['gene_symbol'] = [item[1] for item in new_image_info]
+        total_number_of_circles = NUMBER_OF_CIRCLES_IN_HEIGHT * NUMBER_OF_CIRCLES_IN_WIDTH
+        for patch_index in range(1, total_number_of_circles+1):
+            patch_image_list = [(id.split(".")[0]+"_"+str(patch_index)+".jpg",gene) for id, gene in zip(temp_df['image'],temp_df['gene_symbol'])]
+            new_image_info += patch_image_list
+        new_df = pd.DataFrame(columns=['gene_symbol','image'])
+        new_df['image'] = [item[0] for item in new_image_info]
+        new_df['gene_symbol'] = [item[1] for item in new_image_info]
 
-    new_df = new_df.sort_values(by=['image'])
+        new_df = new_df.sort_values(by=['image'])
 
-    return (new_df.to_csv(out_file, index=False, header=False))
+        return (new_df.to_csv(out_file, index=False, header=False))
 
 
 def make_triplet_csv_with_segmentation(df, out_file):
 
+    if df == None:
+        return None
 
-    csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
-    not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name))
+    else:
+        csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
+        not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name))
 
-    not_enough_patches_dict = dict(zip(not_enough_patches_df["image_id"], not_enough_patches_df["count"]))
-
-
-    temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
-    new_image_info = []
-
-    for id, gene in zip(temp_df['image'],temp_df['gene_symbol']):
-
-        id_temp = int(id.split(".")[0])
-        if id_temp in not_enough_patches_dict:
-
-            count = not_enough_patches_dict[id_temp]
-            for patch_index in range(0, count):
-                patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
-                new_image_info += patch_image_list
+        not_enough_patches_dict = dict(zip(not_enough_patches_df["image_id"], not_enough_patches_df["count"]))
 
 
-        else:
+        temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
+        new_image_info = []
 
-            for patch_index in range(0, PATCH_COUNT_PER_IMAGE):
-                patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
-                new_image_info += patch_image_list
+        for id, gene in zip(temp_df['image'],temp_df['gene_symbol']):
 
-    new_df = pd.DataFrame(columns=['gene_symbol', 'image'])
-    new_df['image'] = [item[0] for item in new_image_info]
-    new_df['gene_symbol'] = [item[1] for item in new_image_info]
+            id_temp = int(id.split(".")[0])
+            if id_temp in not_enough_patches_dict:
 
-    new_df = new_df.sort_values(by=['image'])
+                count = not_enough_patches_dict[id_temp]
+                for patch_index in range(0, count):
+                    patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
+                    new_image_info += patch_image_list
 
-    return (new_df.to_csv(out_file, index=False, header=False))
+
+            else:
+
+                for patch_index in range(0, PATCH_COUNT_PER_IMAGE):
+                    patch_image_list = [(id.split(".")[0] + "_" + str(patch_index) + ".jpg", gene)]
+                    new_image_info += patch_image_list
+
+        new_df = pd.DataFrame(columns=['gene_symbol', 'image'])
+        new_df['image'] = [item[0] for item in new_image_info]
+        new_df['gene_symbol'] = [item[1] for item in new_image_info]
+
+        new_df = new_df.sort_values(by=['image'])
+
+        return (new_df.to_csv(out_file, index=False, header=False))
 
 
 
@@ -1000,6 +1041,7 @@ def make_sets():
 
     stats_dict = get_stats(images_info_df)
 
+    # if TRAIN_ON_ALL is set to True, then validation_df, test_df, train_val_df will all be None
     training_df, validation_df, test_df, train_val_df = define_sets_with_no_shared_genes(images_info_df)
     get_stats_on_sets(stats_dict, training_df, validation_df, test_df)
 
