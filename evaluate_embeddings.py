@@ -880,7 +880,7 @@ def concat_all_evaluation_results():
 
     #list_of_folders = get_all_ts_folders()
 
-    list_of_folders = ['1602219076', '1602225390', '1602226166'] #'1596374295', '1596183933', '1596630544', 
+    list_of_folders = ['1602219076', '1602225390', '1602226166', '1602861872'] #'1596374295', '1596183933', '1596630544',
 
     train_eval_df_list = []
     val_eval_df_list = []
@@ -1062,7 +1062,7 @@ def main():
                #"1598189473", "1598190556", "1598202465", "1598208605", "1598225452"]
 
     #ts_list = ["1596374295"]
-    ts_list = ['1602219076', '1602225390', '1602226166']
+    ts_list = ['1602219076', '1602225390', '1602226166', '1602861872']
 
     not_found_list = []
     for ts in ts_list:
@@ -1079,7 +1079,7 @@ def main():
 
 if __name__ == '__main__':
 
-    #main()
+    main()
     concat_all_evaluation_results()
     #disease_embed_evaluate("schizophrenia")
     #concat_disease_evaluation_results("schizophrenia")
