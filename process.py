@@ -234,6 +234,22 @@ def define_sets_with_no_shared_genes(images_info_df):
 
     else:
         training_genes = [x for x in unique_genes]
+
+        # ------- filter SZ genes if necessary -------
+        if INCLUDE_SZ_DATA == False:
+            path_to_SZ_info = os.path.join(DATA_DIR, "schizophrenia", "human_ISH_info.csv")
+            sz_info_df = pd.read_csv(path_to_SZ_info)
+            sz_unique_genes = list(set(list(sz_info_df['gene_symbol'])))
+            print(
+                "There are {} genes in the training set. {} schizophrenia-associated genes will be removed"
+                    .format(len(training_genes), len(sz_unique_genes)))
+
+            training_genes = [x for x in training_genes if x not in sz_unique_genes]
+            print("Number of remaining genes: {}".format(len(training_genes)))
+
+        # --------------------------------------------
+
+
         training_df = images_info_df[images_info_df['gene_symbol'].isin(training_genes)]
         training_df = training_df.sort_values(by=['image_id'])
 
@@ -246,8 +262,11 @@ def define_sets_with_no_shared_genes(images_info_df):
         if (not os.path.exists(sets_path)):
             os.mkdir(sets_path)
 
+        if INCLUDE_SZ_DATA == True:
+            training_df.to_csv(os.path.join(sets_path, "all_training.csv"), index=None)
 
-        training_df.to_csv(os.path.join(sets_path, "all_training.csv"), index=None)
+        else:
+            training_df.to_csv(os.path.join(sets_path, "no_sz_all_training.csv"), index=None)
 
 
     return training_df, validation_df, test_df, train_val_df
@@ -654,17 +673,37 @@ def make_triplet_csvs(dfs):
     out_base = sets_path + "/triplet"
 
     if PATCH_TYPE=="segmentation":
-        if INCLUDE_SZ_DATA == True:
-            return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
-                out_base, ext))
-                         for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
-        else:
-            return tuple(
-                (make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
-                    out_base, ext))
-                for df, ext in zip(dfs, ("no_sz_training", "validation", "test", "no_sz_training_validation")))
 
-    else:
+        if TRAIN_ON_ALL == True:
+            if INCLUDE_SZ_DATA == True:
+
+                # training on everything, and keep sz genes. Validation and test dfs will be None.
+                return tuple((make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                    out_base, ext))
+                             for df, ext in zip(dfs, ("all_training", "validation", "test", "training_validation")))
+
+            else:  # training on everything, but exclude sz genes. Validation and test dfs will be None.
+                return tuple(
+                    (make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                        out_base, ext))
+                    for df, ext in zip(dfs, ("no_sz_all_training", "validation", "test", "training_validation")))
+
+
+        else:  # Not training on everything. So we have validation and test dfs as well.
+            if INCLUDE_SZ_DATA == True:
+                return tuple(
+                    (make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                        out_base, ext))
+                    for df, ext in zip(dfs, ("training", "validation", "test", "no_sz_training_validation")))
+
+            else: # not training on everything, So we have validation and test dfs. but exclude sz genes from training.
+                return tuple(
+                    (make_triplet_csv_with_segmentation(df, "{}_{}.csv".format(out_base, ext)) and "{}_{}.csv".format(
+                        out_base, ext))
+                    for df, ext in zip(dfs, ("no_sz_training", "validation", "test", "no_sz_training_validation")))
+
+    else: # no segmentation
+
         if INCLUDE_SZ_DATA == True:
             return tuple((make_triplet_csv_no_segmentation(df, "{}_{}.csv".format(out_base,ext)) and "{}_{}.csv".format(out_base, ext))
                          for df, ext in zip(dfs, ("training", "validation", "test", "training_validation")))
@@ -738,6 +777,59 @@ def save_embedding_info_into_file(filename):
 
     return filename
 
+
+def merge_embeddings_to_donor_level(filename):
+    """
+    We have an embedding for every patch in the dataset. However, each donor may have more than one image associated to it.
+    This function will take all the images that correspond to a donor, and average over the values of the embedding vector to generate a final embedding for that gene.
+    """
+    embed_file_contents = os.listdir(os.path.join(EMBEDDING_DEST, filename))
+    for item in embed_file_contents:
+        if item.endswith("embeddings.csv"):
+            # if item.endswith("_gene_level.csv") or item.endswith("_image_level.csv"):
+            # pass
+            # else:
+
+            embeddings_file = pd.read_csv(os.path.join(EMBEDDING_DEST, filename, item))
+
+            if "autism" in item:
+                image_root = os.path.join(DATA_DIR, "autism", "segmentation_data",
+                                          "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES), "results",
+                                          "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+            elif "schizophrenia" in item:
+                image_root = os.path.join(DATA_DIR, "schizophrenia", "segmentation_data",
+                                          "trained_on_" + str(SEGMENTATION_TRAINING_SAMPLES), "results",
+                                          "final_patches_" + str(PATCH_COUNT_PER_IMAGE))
+
+            else:
+                image_root = IMAGE_ROOT
+
+            patches_info = pd.read_csv(os.path.join(image_root, "valid_patches_info.csv"))
+
+            embeddings_file = embeddings_file.rename(columns={'image_id': 'patch_id'})
+            # perform left merge on the two dataframes to add gene_symbol to the embeddings.csv
+            merged_df = embeddings_file.merge(patches_info[["patch_id", "donor_id"]], how="left", on="patch_id")
+
+            # reorder the dataframe columns
+            merged_columns = list(merged_df)
+            merged_columns = [merged_columns[0]] + [merged_columns[-1]] + merged_columns[1:-1]
+            merged_df = merged_df[merged_columns]
+
+            # drop the patch_id column
+            merged_df = merged_df.drop(columns=["patch_id"])
+
+            # group by gene_symbol and average over the embedding values
+            grouped_df = merged_df.groupby(['donor_id']).mean()
+
+            print(grouped_df.head())
+
+            print("the number of donors is: {}".format(len(grouped_df)))
+
+            # and then I want to save this file as gene_embddings in the same folder.
+            item_name = item.split(".")[0]
+            save_to_path = os.path.join(EMBEDDING_DEST, filename, item_name + "_donor_level.csv")
+            grouped_df.to_csv(save_to_path)
 
 
 def merge_embeddings_to_gene_level(filename):
