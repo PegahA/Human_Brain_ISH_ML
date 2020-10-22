@@ -62,16 +62,20 @@ if TRAIN_ON_ALL == False:
         TRAIN_SET = os.path.join(SETS_DIR, "triplet_no_sz_training.csv")
         EMBED_SET = os.path.join(SETS_DIR, "triplet_no_sz_training_validation.csv")
 else:
-    TRAIN_SET = os.path.join(SETS_DIR, "triplet_all_training.csv")
-    EMBED_SET = None
+    if INCLUDE_SZ_DATA == True:
+        TRAIN_SET =  os.path.join(SETS_DIR, "triplet_no_sz_all_training.csv")
+        EMBED_SET = None
+    else:
+        TRAIN_SET = os.path.join(SETS_DIR, "triplet_all_training.csv")
+        EMBED_SET = None
 
 INITIAL_CHECKPOINT = os.path.join(DATA_DIR, "resnet_v1_50", "resnet_v1_50.ckpt")
 TRIPLET_DIR = os.path.join(CODE_DIR, "triplet-reid")
 MODEL_NAME = 'resnet_v1_50'
 HEAD_NAME = 'fc1024'
 TRAIN_EMBEDDING_DIM = 128
-TRAIN_BATCH_P = 20
-TRAIN_BATCH_K = 15
+TRAIN_BATCH_P = 17
+TRAIN_BATCH_K = 17
 EMBED_BATCH_SIZE = 128
 NET_INPUT_HEIGHT = PATCH_HEIGHT  # do you want to try 240?
 NET_INPUT_WIDTH = PATCH_WIDTH # do you want to try 240?
@@ -81,12 +85,12 @@ LOADING_THREADS = 20
 MARGIN = 'soft'
 METRIC = 'euclidean'
 LOSS = 'batch_hard'
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 7e-5
 TRAIN_ITERATIONS = 30000
 DECAY_START_ITERATION = 25000
 CHECKPOINT_FREQUENCY = 0
 TRAIN_STANDARDIZE = False
-TRAIN_FLIP_AUGMENT = False
+TRAIN_FLIP_AUGMENT = True
 EMBED_FLIP_AUGMENT = False
 TRAIN_CROP_AUGMENT = False
 EMBED_CROP_AUGMENT = None
