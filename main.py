@@ -202,6 +202,7 @@ def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
 
     process.merge_embeddings_to_gene_level(filename)
     process.merge_embeddings_to_image_level(filename)
+    process.merge_embeddings_to_donor_level(filename)
 
     for root, dirs, files in os.walk(os.path.join(DATA_DIR, STUDY, "experiment_files")):
         for d in dirs:
@@ -231,9 +232,9 @@ if __name__ == "__main__":
 
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    #process.make_sets()
+    process.make_sets()
 
-
+    """
     print ("i am here in main!")
 
     
@@ -327,6 +328,8 @@ if __name__ == "__main__":
 
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
+    
+    """
 
 
 
@@ -352,6 +355,7 @@ if __name__ == "__main__":
     
     """
 
+    """
 
         # -----------
 
@@ -397,14 +401,14 @@ if __name__ == "__main__":
 
     
     process.convert_h5_to_csv()
-    
-
 
     filename = process.save_embedding_info_into_file(TIMESTAMP)
 
 
     process.merge_embeddings_to_gene_level(filename)
     process.merge_embeddings_to_image_level(filename)
+    process.merge_embeddings_to_donor_level(filename)
+
     process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
     #evaluate_embeddings.evaluate(filename)
 
@@ -428,6 +432,9 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
+    
+    
+    """
 
     
     
