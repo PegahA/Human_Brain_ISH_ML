@@ -586,11 +586,10 @@ def make_triplet_csv_no_segmentation(df, out_file):
 
 
 def make_triplet_csv_with_segmentation(df, out_file):
+    print (df)
 
-    if df == None:
-        return None
+    if df:
 
-    else:
         csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
         not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name))
 
@@ -625,6 +624,8 @@ def make_triplet_csv_with_segmentation(df, out_file):
 
         return (new_df.to_csv(out_file, index=False, header=False))
 
+    else:
+        return None
 
 
 def make_custom_triplet_csv(study, df, output_dir, output_name, patch_count_per_image = 50):
