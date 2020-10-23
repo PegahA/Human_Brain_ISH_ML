@@ -13,7 +13,7 @@ CODE_DIR = "/"
 #VOL_CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
-TRAIN_ON_ALL = False
+TRAIN_ON_ALL = True
 
 TEST_SPLIT = 10
 VALIDATION_SPLIT = 10
