@@ -232,9 +232,8 @@ if __name__ == "__main__":
 
     #extract_data.run()
     #crop_and_rotate.create_patches(PATCH_TYPE)
-    process.make_sets()
+    #process.make_sets()
 
-    """
     print ("i am here in main!")
 
     
@@ -328,8 +327,7 @@ if __name__ == "__main__":
 
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
-    
-    """
+
 
 
 
@@ -355,7 +353,7 @@ if __name__ == "__main__":
     
     """
 
-    """
+
 
         # -----------
 
@@ -409,7 +407,6 @@ if __name__ == "__main__":
     process.merge_embeddings_to_image_level(filename)
     process.merge_embeddings_to_donor_level(filename)
 
-    process.get_image_level_embeddings_of_a_target_set(SETS_DIR, filename)
     #evaluate_embeddings.evaluate(filename)
 
    
@@ -434,7 +431,7 @@ if __name__ == "__main__":
     print ("permissions fixed for segmentation embeddings")
     
     
-    """
+
 
     
     
