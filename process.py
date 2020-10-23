@@ -233,6 +233,12 @@ def define_sets_with_no_shared_genes(images_info_df):
 
 
     else:
+
+        print ("-" * 50)
+        print ('TRAINING ON ALL')
+        print("-" * 50)
+
+
         training_genes = [x for x in unique_genes]
 
         # ------- filter SZ genes if necessary -------
@@ -587,7 +593,8 @@ def make_triplet_csv_no_segmentation(df, out_file):
 
 
 def make_triplet_csv_with_segmentation(df, out_file):
-    print (df)
+    print ("_"*50)
+    print ("OUT FILE is: ", out_file)
 
     if df is not None:
 
