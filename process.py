@@ -492,7 +492,7 @@ def get_stats_on_sets(stats_dict, training_df, validation_df, test_df):
 
 
     # ----- validation info -----
-    if validation_df != None:
+    if validation_df is not None:
         validation_images_count = len(set(validation_df['image_id']))
         validation_genes_count = len(set(validation_df['gene_symbol']))
         validation_donor_count = len(set(validation_df['donor_id']))
@@ -507,7 +507,7 @@ def get_stats_on_sets(stats_dict, training_df, validation_df, test_df):
     print("donor count: ", validation_donor_count)
 
     # ----- test info ------
-    if test_df != None:
+    if test_df is not None:
         test_images_count = len(set(test_df['image_id']))
         test_genes_count = len(set(test_df['gene_symbol']))
         test_donor_count = len(set(test_df['donor_id']))
@@ -564,9 +564,7 @@ def make_triplet_csv_no_segmentation(df, out_file):
     """
     Use this function to create input suited for the triplet-reid training scripts
     """
-    if df == None:
-        return None
-    else:
+    if df is not None:
 
         temp_df = df.assign(image=lambda df: df.image_id.apply(lambda row: "{}.jpg".format(row)))[['gene_symbol', 'image']]
         new_image_info= []
@@ -584,11 +582,14 @@ def make_triplet_csv_no_segmentation(df, out_file):
 
         return (new_df.to_csv(out_file, index=False, header=False))
 
+    else:
+        return None
+
 
 def make_triplet_csv_with_segmentation(df, out_file):
     print (df)
 
-    if df:
+    if df is not None:
 
         csv_file_name = "less_than_" + str(PATCH_COUNT_PER_IMAGE) + ".csv"
         not_enough_patches_df = pd.read_csv(os.path.join(DATA_DIR, STUDY, "segmentation_data","trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES) ,"outlier_images", csv_file_name))
