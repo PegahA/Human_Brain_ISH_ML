@@ -398,7 +398,7 @@ if __name__ == "__main__":
  
 
     """
-    ts = "1603427156"
+    ts = "1603427490"
     exp_root = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + ts)
     process.convert_h5_to_csv(exp_root)
 
