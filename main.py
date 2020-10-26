@@ -398,9 +398,11 @@ if __name__ == "__main__":
  
 
     """
-    process.convert_h5_to_csv("1603427156")
+    ts = "1603427156"
+    exp_root = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + ts)
+    process.convert_h5_to_csv(exp_root)
 
-    ts= "1603427156"
+
 
     filename = process.save_embedding_info_into_file(ts)
 
