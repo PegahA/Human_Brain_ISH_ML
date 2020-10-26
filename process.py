@@ -726,7 +726,6 @@ def make_triplet_csvs(dfs):
 
 def convert_h5_to_csv(experiment_root =None):
 
-    sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_"+str(SEGMENTATION_TRAINING_SAMPLES)+"_seg")
 
     if experiment_root == None:
         experiment_root = EXPERIMENT_ROOT
@@ -740,6 +739,8 @@ def convert_h5_to_csv(experiment_root =None):
             print ("set csv file name is: ", set_csv_file_name)
             print ("item is: ", item)
 
+            sets_path = os.path.join(DATA_DIR, STUDY, "sets_" + str(PATCH_COUNT_PER_IMAGE) + "_patches_" + str(
+                SEGMENTATION_TRAINING_SAMPLES) + "_seg")
 
             # ----
             if "autism" in item:
