@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
     print ("i am here in main!")
 
-    
+    """
     args = parser.parse_args()
     print ("\n------- Arguments:")
     print ("experiment root: ", args.experiment_root)
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     os.system(train_command_line_string)
     os.system(embed_command_line_string)
 
-
+    """
 
 
     # -------- adding disease dataset to pipeline --------
@@ -353,7 +353,7 @@ if __name__ == "__main__":
     
     """
 
-
+    """
 
         # -----------
 
@@ -397,15 +397,24 @@ if __name__ == "__main__":
     #---------
  
 
-    
-    process.convert_h5_to_csv()
+    """
+    process.convert_h5_to_csv("1603427156")
 
-    filename = process.save_embedding_info_into_file(TIMESTAMP)
+    ts= "1603427156"
+
+    filename = process.save_embedding_info_into_file(ts)
+
+    process.merge_embeddings_to_gene_level(ts)
+    process.merge_embeddings_to_image_level(ts)
+    process.merge_embeddings_to_donor_level(ts)
 
 
-    process.merge_embeddings_to_gene_level(filename)
-    process.merge_embeddings_to_image_level(filename)
-    process.merge_embeddings_to_donor_level(filename)
+    #filename = process.save_embedding_info_into_file(TIMESTAMP)
+
+
+    #process.merge_embeddings_to_gene_level(filename)
+    #process.merge_embeddings_to_image_level(filename)
+    #process.merge_embeddings_to_donor_level(filename)
 
     #evaluate_embeddings.evaluate(filename)
 
