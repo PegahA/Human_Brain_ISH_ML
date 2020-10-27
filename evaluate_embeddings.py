@@ -550,7 +550,7 @@ def disease_embed_evaluate(study):
 
     #ts_list = ["random", "resnet50_50_patches"]
 
-    ts_list = ["1596374295"]
+    ts_list = ["1603427156", "1603427490"]
 
     for ts in ts_list:
 
@@ -580,8 +580,8 @@ def disease_embed_evaluate(study):
                     image_level_files_list.append(item)
             else:
 
-                #if item.endswith("embeddings_image_level.csv") and study in item:
-                if item.endswith("five.csv"):
+                if item.endswith("embeddings_image_level.csv") and study in item:
+                #if item.endswith("five.csv"):
                     image_level_files_list.append(item)
 
         print (image_level_files_list)
@@ -1079,9 +1079,9 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
-    concat_all_evaluation_results()
-    #disease_embed_evaluate("schizophrenia")
+    #main()
+    #concat_all_evaluation_results()
+    disease_embed_evaluate("schizophrenia")
     #concat_disease_evaluation_results("schizophrenia")
 
 
