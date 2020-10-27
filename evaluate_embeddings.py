@@ -769,10 +769,11 @@ def get_all_ts_folders():
 
 
 def concat_disease_evaluation_results(study):
-    list_of_folders= ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673',
-                      '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
-                      '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729', "random", "resnet50_50_patches"]
+    #list_of_folders= ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673',
+     #                 '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103',
+     #                 '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729', "random", "resnet50_50_patches"]
 
+    list_of_folders = ["1603427156", "1603427490"]
     eval_df_list = []
 
     for item in list_of_folders:
@@ -803,7 +804,8 @@ def concat_disease_evaluation_results(study):
 
     concatenated_df = pd.concat(eval_df_list, sort=False)
     
-    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, study+ "_all_evaluation_result_top_tri.csv"),index=None)
+    #concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, study+ "_all_evaluation_result_top_tri.csv"),index=None)
+    concatenated_df.to_csv(os.path.join(EMBEDDING_DEST, study + "_model_trained_on_all_and_all_minus_sz_evaluation_result_top_tri.csv"), index=None)
 
 
 def concat_all_evaluation_results():
@@ -1081,8 +1083,8 @@ if __name__ == '__main__':
 
     #main()
     #concat_all_evaluation_results()
-    disease_embed_evaluate("schizophrenia")
-    #concat_disease_evaluation_results("schizophrenia")
+    #disease_embed_evaluate("schizophrenia")
+    concat_disease_evaluation_results("schizophrenia")
 
 
 
