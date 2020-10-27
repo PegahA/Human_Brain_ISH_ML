@@ -1174,7 +1174,8 @@ def generate_random_embeddings( embeddings_length):
     :return: None
     """
 
-    set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
+    #set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
+    set_name_list = ["all_training.csv", "no_sz_all_training.csv"]
     for set_name in set_name_list:
 
         print ("set: ", set_name)
