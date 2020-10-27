@@ -396,10 +396,8 @@ if __name__ == "__main__":
             json.dump(args_resumed, f, ensure_ascii=False, indent=2, sort_keys=True)
             f.close()
     #---------
- 
 
-
-
+    process.convert_h5_to_csv()
 
     filename = process.save_embedding_info_into_file(TIMESTAMP)
 
