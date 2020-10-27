@@ -3,12 +3,16 @@ import os
 
 if __name__ == "__main__":
 
-    top_list = [[20, 8e-5, True],
-                [17, 7e-5, True],
-                [18, 7e-5, True],
-                [12, 8e-5, True]]
+    #top_list = [[20, 8e-5, True],
+     #           [17, 7e-5, True],
+      #          [18, 7e-5, True],
+      #          [12, 8e-5, True]]
 
-    training_iterations_list = [30000] #[10000, 15000, 20000]
+
+    top_list= [[17, 7e-5, True, 64],
+               [17, 7e-5, True, 32]]
+
+    training_iterations_list = [30] #[30000] #[10000, 15000, 20000]
 
     main_py_path = os.path.join(CODE_DIR, "main.py")
 
@@ -22,6 +26,7 @@ if __name__ == "__main__":
             batch_p = item[0]
             lr = item[1]
             flip = item[2]
+            dim = item[3]
 
             train_iterations = iter
             decay_start_iteration = decay_start
@@ -32,6 +37,7 @@ if __name__ == "__main__":
                                        " --train_batch_k=" + str(batch_k) + \
                                        " --learning_rate=" + str(lr) + \
                                        " --train_iterations=" + str(train_iterations) + \
+                                       " --train_embedding_dim=" + str(dim) + \
                                        " --decay_start_iteration=" + str(decay_start_iteration) + \
                                        (" --train_flip_augment=1" if flip else " --train_flip_augment=''")
 
