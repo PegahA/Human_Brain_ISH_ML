@@ -640,8 +640,7 @@ def evaluate(ts, not_found_list):
         contents = os.listdir(path_to_embeddings)
         for item in contents:
             #if item.endswith("embeddings_image_level.csv") and 'autism' not in item and 'schizophrenia' not in item:
-            if item == "random_all_training_embeddings_image_level.csv" or \
-                    item == "random_no_sz_all_training_embeddings_image_level.csv":
+            if item == "random_all_training_embeddings_image_level.csv": #or item == "random_no_sz_all_training_embeddings_image_level.csv":
                image_level_files_list.append(item)
 
         for item in image_level_files_list:
