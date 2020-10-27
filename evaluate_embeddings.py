@@ -639,7 +639,9 @@ def evaluate(ts, not_found_list):
 
         contents = os.listdir(path_to_embeddings)
         for item in contents:
-            if item.endswith("embeddings_image_level.csv") and 'autism' not in item and 'schizophrenia' not in item:
+            #if item.endswith("embeddings_image_level.csv") and 'autism' not in item and 'schizophrenia' not in item:
+            if item == "random_all_training_embeddings_image_level.csv" or \
+                    item == "random_no_sz_all_training_embeddings_image_level.csv":
                image_level_files_list.append(item)
 
         for item in image_level_files_list:
@@ -1064,8 +1066,9 @@ def main():
                #"1598189473", "1598190556", "1598202465", "1598208605", "1598225452"]
 
     #ts_list = ["1596374295"]
-    ts_list = ['1602861872']#['1602219076', '1602225390', '1602226166', '1602861872']
+    #ts_list = ['1602861872']#['1602219076', '1602225390', '1602226166', '1602861872']
 
+    ts_list = ["random"]
     not_found_list = []
     for ts in ts_list:
         print ("ts is: ", ts)
@@ -1081,10 +1084,10 @@ def main():
 
 if __name__ == '__main__':
 
-    #main()
+    main()
     #concat_all_evaluation_results()
     #disease_embed_evaluate("schizophrenia")
-    concat_disease_evaluation_results("schizophrenia")
+    #concat_disease_evaluation_results("schizophrenia")
 
 
 
