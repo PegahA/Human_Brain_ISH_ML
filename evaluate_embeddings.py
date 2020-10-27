@@ -550,7 +550,8 @@ def disease_embed_evaluate(study):
 
     #ts_list = ["random", "resnet50_50_patches"]
 
-    ts_list = ["1603427156", "1603427490"]
+    #ts_list = ["1603427156", "1603427490"]
+    ts_list = ["1602225390"]
 
     for ts in ts_list:
 
@@ -1083,9 +1084,9 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
+    #main()
     #concat_all_evaluation_results()
-    #disease_embed_evaluate("schizophrenia")
+    disease_embed_evaluate("schizophrenia")
     #concat_disease_evaluation_results("schizophrenia")
 
 
