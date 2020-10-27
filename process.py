@@ -2391,6 +2391,8 @@ if __name__ == '__main__':
     #get_gene_level_embeddings_of_a_target_set(sets_path, "1596374295", target_sets=["training", "validation"])
     #add_new_columns_to_gene_level_embed_file("1596374295", ["entrez_id"])
 
-    add_new_columns_to_gene_level_embed_file("1602219076", ["entrez_id"])
-    add_new_columns_to_gene_level_embed_file("1602225390", ["entrez_id"])
-    add_new_columns_to_gene_level_embed_file("1602226166", ["entrez_id"])
+    #add_new_columns_to_gene_level_embed_file("1602219076", ["entrez_id"])
+    #add_new_columns_to_gene_level_embed_file("1602225390", ["entrez_id"])
+    #add_new_columns_to_gene_level_embed_file("1602226166", ["entrez_id"])
+
+    generate_random_embeddings(128)
