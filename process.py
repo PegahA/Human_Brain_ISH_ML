@@ -1261,7 +1261,8 @@ def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
 
     print (len(pre_trained_embeddings))
 
-    set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
+    #set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
+    set_name_list = ["all_training.csv", "no_sz_all_training.csv"]
     for set_name in set_name_list:
         print("set: ", set_name)
 
@@ -2395,4 +2396,5 @@ if __name__ == '__main__':
     #add_new_columns_to_gene_level_embed_file("1602225390", ["entrez_id"])
     #add_new_columns_to_gene_level_embed_file("1602226166", ["entrez_id"])
 
-    generate_random_embeddings(128)
+    #generate_random_embeddings(128)
+    get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
