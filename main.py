@@ -226,8 +226,10 @@ if __name__ == "__main__":
 
     # ['1596374295', '1595171169', '1596183933', '1595636690', '1596630544', '1596890418', '1596929673', '1595570961', '1596258245', '1593570490', '1596444832', '1596335814', '1595941978', '1596795103', '1595326272', '1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
     #time_stamps =  ['1596946785', '1596553484', '1595472034', '1593133440', '1595107729']
-    #for ts in time_stamps:
-        #get_disease_embeddings_from_existing_models("schizophrenia", ts)
+
+    time_stamps = ["1603830263", "1603830581"]
+    for ts in time_stamps:
+        get_disease_embeddings_from_existing_models("schizophrenia", ts)
 
 
     #extract_data.run()
@@ -236,6 +238,8 @@ if __name__ == "__main__":
 
     print ("i am here in main!")
 
+
+    """
 
     args = parser.parse_args()
     print ("\n------- Arguments:")
@@ -329,7 +333,7 @@ if __name__ == "__main__":
     os.system(embed_command_line_string)
 
 
-
+    """
 
     # -------- adding disease dataset to pipeline --------
 
@@ -378,6 +382,8 @@ if __name__ == "__main__":
     # ----------------------------------------------------------
     """
 
+
+    """
 
     # to add extra parameters in the args.json file
 
@@ -428,6 +434,8 @@ if __name__ == "__main__":
             os.chmod(os.path.join(root, f), 0o777)
     
     print ("permissions fixed for segmentation embeddings")
+    
+    """
     
     
 
