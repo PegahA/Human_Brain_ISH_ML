@@ -2395,6 +2395,7 @@ if __name__ == '__main__':
     #add_new_columns_to_gene_level_embed_file("1602219076", ["entrez_id"])
     #add_new_columns_to_gene_level_embed_file("1602225390", ["entrez_id"])
     #add_new_columns_to_gene_level_embed_file("1602226166", ["entrez_id"])
+    add_new_columns_to_gene_level_embed_file("1603427490", ["entrez_id"])
 
     #generate_random_embeddings(128)
-    get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
+    #get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
