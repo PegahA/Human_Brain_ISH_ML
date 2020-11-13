@@ -2054,7 +2054,8 @@ def add_new_columns_to_image_level_embed_file(ts, columns, study=None):
     for item in contents:
         if study == None:
             #if item.endswith("training_validation_embeddings_image_level.csv"):
-            if item == "validation_embeddings_image_level.csv":
+            #if item == "validation_embeddings_image_level.csv":
+            if item == "training_embeddings_image_level.csv":
 
                 image_level_file_name = item
                 images_info = pd.read_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"))
@@ -2401,3 +2402,9 @@ if __name__ == '__main__':
     #get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
 
     add_new_columns_to_image_level_embed_file("1596183933", ["donor_id", "gene_symbol", "region", "entrez_id"])
+
+    #general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4"
+    #path_to_embed = os.path.join(general_path, "1596183933_validation_embeddings_image_level_with_info.csv")
+    #merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embed)
+    #with_zeng_info_path = os.path.join(general_path, "1596183933_validation_embeddings_image_level_with_info_with_marker.csv")
+    #convert_to_tsv_meta_and_without_meta(with_zeng_info_path)
