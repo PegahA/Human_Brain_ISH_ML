@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 import math
 import json
 
-
-
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import f1_score
+from sklearn.metrics import roc_auc_score
 
 
 def get_sz_labels_image_and_donor_level():
@@ -193,7 +195,7 @@ def sz_diagnosis_create_training_files(path_to_embeddings, path_to_labels, level
                 print("Could not find a sz embed file at this level")
 
             if level_no_sz_embed_file and level_sz_embed_file:
-            
+
                 no_sz_embed_df = pd.read_csv(os.path.join(path_to_embeddings, level_no_sz_embed_file))
                 no_sz_embed_df = no_sz_embed_df.rename(columns={'gene_symbol': 'ID'})
                 print (len(no_sz_embed_df))
@@ -229,24 +231,149 @@ def sz_diagnosis_create_training_files(path_to_embeddings, path_to_labels, level
 
 
 
+def embeddings_per_gene_per_donor(path_to_embeddings):
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4"
+
+    path_to_sz_info = os.path.join(general_path, "sz", "human_ISH_info.csv")
+    sz_info_df = pd.read_csv(path_to_sz_info)
+
+    embeddings_df = pd.read_csv(os.path.join(path_to_embeddings, "triplet_patches_schizophrenia_embeddings_image_level.csv"))
+
+    # I want to add two extra columns: gene_symbol and donor_id
+
+    left = embeddings_df
+    right = sz_info_df
+    merge_res = pd.merge(left, right[['image_id','gene_symbol', 'donor_id']], how='left', on='image_id')
+    merge_res = merge_res.drop(columns=['image_id'])
+
+    genes = list(merge_res['gene_symbol'].unique())
+
+    """
+    per_gene_per_donor_path = os.path.join(general_path, "sz", "per_gene_per_donor")
+    group_by_gene = merge_res.groupby('gene_symbol')
+    for key, item in group_by_gene:
+        gene_name = key
+        item= item.drop(columns=['gene_symbol'])
+        group_by_donor = item.groupby('donor_id').mean()
+        group_by_donor.to_csv(os.path.join(per_gene_per_donor_path, gene_name+".csv"))
+        
+    """
+
+    return genes
 
 
 
 
 
+def perform_logistic_regression(genes_list, n_splits =5, n_jobs=1):
+
+    """
+    n_splits: number of folds to be used in cross validation
+    n_jobs: int, default=1
+    Number of CPU cores used when parallelizing over classes if multi_class=’ovr’”.
+    """
+
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+
+    invalid_genes_count = 0
+    scores = []
+    skf = StratifiedKFold(n_splits=n_splits)
+    for gene in genes_list:
+
+        print ("Gene is: ", gene)
+        path_to_donor_level_embeds = os.path.join(general_path,"per_gene_per_donor", gene+".csv")
+        embeds = pd.read_csv(path_to_donor_level_embeds)
 
 
+        if len(embeds) < 40:
+            invalid_genes_count +=1
+            pass
+        else:
+
+            number_of_donors = len(embeds)
+            left = embeds
+
+            path_to_labels = os.path.join(general_path, "sz_diagnosis_donor_level.csv")
+            labels = pd.read_csv(path_to_labels)
+            labels = labels.rename(columns={'ID': 'donor_id'})
+            right = labels
+
+            merge_res = pd.merge(left, right, how='left', on='donor_id')
+
+            col_titles =[str(item) for item in range(128)]
+            X = merge_res[col_titles]
+            Y = merge_res['disease_diagnosis']
+
+            y_test_total = pd.Series([])
+            preds_total = []
+            probas_total = pd.DataFrame()
+
+            for i, (train_idx, test_idx) in enumerate(skf.split(X, Y)):
+                model = LogisticRegression(penalty='none', n_jobs=n_jobs, max_iter=500)
+                X_train = X.iloc[train_idx, :]
+                y_train = Y.iloc[train_idx]
+                X_test = X.iloc[test_idx, :]
+                y_test = Y.iloc[test_idx]
+
+                model.fit(X_train, y_train)
+
+                # Extract predictions from fitted model
+                preds = list(model.predict(X_test))
+                # probs for classes ordered in same manner as model.classes_
+                # model.classes_  >>  array([False,  True])
+                probas = pd.DataFrame(model.predict_proba(
+                    X_test), columns=model.classes_)
+
+                y_test_total = y_test_total.append(y_test)
+                preds_total += preds
+                probas_total = probas_total.append(probas)
+
+                print ("Finished fold: ", i+1)
+
+            print ("----" * 20)
 
 
+            preds_total = np.array(preds_total)
+
+            f1 = f1_score(y_test_total, preds_total)
+            auc = roc_auc_score(y_test_total, probas_total[True])
+
+            measures = {'gene_symbol': gene,
+                        'number_of_donors': number_of_donors,
+                        'f1': f1,
+                        'AUC': auc}
+
+            scores.append(measures)
+
+
+    print (invalid_genes_count)
+    return pd.DataFrame(scores,
+                        columns=['gene_symbol', 'number_of_donors', 'AUC', 'f1']).sort_values(by=['AUC'],
+                                                                                       ascending=False).reset_index().drop(columns=['index'])
 
 
 
 if __name__ == "__main__":
 
+    """
     levels = ['gene']
     path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1603427490"
     path_to_labels =  "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
     path_to_save_files = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/binary"
     sz_diagnosis_create_training_files(path_to_embeddings, path_to_labels, levels, path_to_save_files)
+    
+    """
+
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+
+    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1603427490"
+    genes = embeddings_per_gene_per_donor(path_to_embeddings)
+    diagnosis_prediction_res = perform_logistic_regression(genes)
+
+    diagnosis_prediction_res.to_csv(os.path.join(general_path, "per_gene_per_donor_diagnosis_prediction_scores.csv"), index=False)
+
+
+
+
 
 
