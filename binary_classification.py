@@ -264,9 +264,72 @@ def embeddings_per_gene_per_donor(path_to_embeddings):
 
 
 
+def perform_logistic_regression(ts,level, n_splits =5, n_jobs = 1):
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/"
 
-def perform_logistic_regression(genes_list, n_splits =5, n_jobs=1):
+    path_to_embed_file = os.path.join(general_path, "dummy_3", ts, "triplet_patches_schizophrenia_embeddings_"+level+"_level.csv")
+    path_to_labels = os.path.join(general_path, "dummy_4", "sz", "sz_diagnosis_" + level +"_level.csv")
 
+    embeds_df = pd.read_csv(path_to_embed_file)
+    labels = pd.read_csv(path_to_labels)
+    labels = labels.rename(columns={'ID': level+'_id'})
+    left = embeds_df
+    right = labels
+    merge_res = pd.merge(left, right, how='left', on=level+"_id")
+
+    scores = []
+    skf = StratifiedKFold(n_splits=n_splits)
+
+    col_titles = [str(item) for item in range(128)]
+    X = merge_res[col_titles]
+    Y = merge_res['disease_diagnosis']
+
+    y_test_total = pd.Series([])
+    preds_total = []
+    probas_total = pd.DataFrame()
+
+    for i, (train_idx, test_idx) in enumerate(skf.split(X, Y)):
+        model = LogisticRegression(penalty='none', n_jobs=n_jobs, max_iter=1000)
+        X_train = X.iloc[train_idx, :]
+        y_train = Y.iloc[train_idx]
+        X_test = X.iloc[test_idx, :]
+        y_test = Y.iloc[test_idx]
+
+        model.fit(X_train, y_train)
+
+        # Extract predictions from fitted model
+        preds = list(model.predict(X_test))
+        # probs for classes ordered in same manner as model.classes_
+        # model.classes_  >>  array([False,  True])
+        probas = pd.DataFrame(model.predict_proba(
+            X_test), columns=model.classes_)
+
+        y_test_total = y_test_total.append(y_test)
+        preds_total += preds
+        probas_total = probas_total.append(probas)
+
+        print ("Finished fold: ", i+1)
+
+    print ("----" * 20)
+
+
+    preds_total = np.array(preds_total)
+
+    f1 = f1_score(y_test_total, preds_total)
+    auc = roc_auc_score(y_test_total, probas_total[True])
+
+    measures = {'level': level,
+                'f1': f1,
+                'AUC': auc}
+
+
+    scores.append(measures)
+
+    return pd.DataFrame(scores,columns=['level', 'AUC', 'f1']).sort_values(by=['AUC'],ascending=False).reset_index().drop(columns=['index'])
+
+
+
+def perform_logistic_regression_per_gene_per_donor(genes_list, n_splits =5, n_jobs=1):
     """
     n_splits: number of folds to be used in cross validation
     n_jobs: int, default=1
@@ -364,6 +427,7 @@ if __name__ == "__main__":
     
     """
 
+    """
     general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
 
     path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1603427490"
@@ -371,6 +435,23 @@ if __name__ == "__main__":
     diagnosis_prediction_res = perform_logistic_regression(genes)
 
     diagnosis_prediction_res.to_csv(os.path.join(general_path, "per_gene_per_donor_diagnosis_prediction_scores.csv"), index=False)
+    """
+
+
+
+
+    # ---- donor level
+    #general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+    #donor_level_prediction_res=perform_logistic_regression("1603427490", "donor", n_splits=5, n_jobs=1)
+    #donor_level_prediction_res.to_csv(os.path.join(general_path, "per_donor_diagnosis_prediction_scores.csv"),index=False)
+
+
+
+    # ---- image level
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+    image_level_prediction_res=perform_logistic_regression("1603427490", "image", n_splits=5, n_jobs=1)
+    image_level_prediction_res.to_csv(os.path.join(general_path, "per_image_diagnosis_prediction_scores.csv"),index=False)
+
 
 
 
