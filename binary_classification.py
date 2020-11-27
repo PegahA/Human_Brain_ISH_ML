@@ -264,9 +264,9 @@ def sz_diagnosis_create_training_files(path_to_embeddings, path_to_labels, level
 
 
 def embeddings_per_gene_per_donor(path_to_embeddings):
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4"
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
 
-    path_to_sz_info = os.path.join(general_path, "sz", "human_ISH_info.csv")
+    path_to_sz_info = os.path.join(general_path, "human_ISH_info.csv")
     sz_info_df = pd.read_csv(path_to_sz_info)
 
     embeddings_df = pd.read_csv(os.path.join(path_to_embeddings, "triplet_patches_schizophrenia_embeddings_image_level.csv"))
@@ -281,7 +281,7 @@ def embeddings_per_gene_per_donor(path_to_embeddings):
     genes = list(merge_res['gene_symbol'].unique())
 
     """
-    per_gene_per_donor_path = os.path.join(general_path, "sz", "per_gene_per_donor")
+    per_gene_per_donor_path = os.path.join(general_path, "per_gene_per_donor")
     group_by_gene = merge_res.groupby('gene_symbol')
     for key, item in group_by_gene:
         gene_name = key
@@ -292,6 +292,34 @@ def embeddings_per_gene_per_donor(path_to_embeddings):
     """
 
     return genes
+
+def demog_info_as_training(list_of_columns_to_get, ts):
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation"
+
+    path_to_sz_info = os.path.join(general_path, "dummy_4/sz", "human_ISH_info.csv")
+    sz_info_df = pd.read_csv(path_to_sz_info)
+
+    list_of_columns_to_get = ['donor_id'] + list_of_columns_to_get
+    filtered = sz_info_df[list_of_columns_to_get]
+
+    grouped_by_donor = filtered.groupby('donor_id')
+    demog_df = grouped_by_donor.first().reset_index()
+
+    file_name = "demog_info_as_training_donor_level.csv"
+    demog_df.to_csv(os.path.join(general_path, "dummy_4/sz", file_name), index= None)
+
+
+    # ---- merge with embeddings
+
+    donor_level_embeddings_path = os.path.join(general_path, "dummy_3", ts, "triplet_patches_schizophrenia_embeddings_donor_level.csv")
+    embeds_df = pd.read_csv(donor_level_embeddings_path)
+
+    left = embeds_df
+    right = demog_df
+
+    merged_res = pd.merge(left, right, how='left', on='donor_id')
+    file_name = "demog_info_and_embeddings_as_training_donor_level.csv"
+    merged_res.to_csv(os.path.join(general_path, "dummy_4/sz", file_name), index=None)
 
 
 
@@ -486,8 +514,10 @@ if __name__ == "__main__":
 
 
     labels= ['donor_age', 'donor_sex', 'smoker', 'pmi', 'tissue_ph', 'donor_race']
-    for label in labels:
-        get_sz_labels_image_and_donor_level(label)
+    #for label in labels:
+        #get_sz_labels_image_and_donor_level(label)
+
+    demog_info_as_training(labels, "1603427490")
 
 
 
