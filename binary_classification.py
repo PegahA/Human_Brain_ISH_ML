@@ -17,73 +17,105 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
 
 
-def get_sz_labels_image_and_donor_level():
+def get_sz_labels_image_and_donor_level(label):
 
     #path_to_sz_info = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/"
-    path_to_sz_info = os.path.join(general_path, "sz", "human_ISH_info.csv")
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+    path_to_sz_info = os.path.join(general_path, "human_ISH_info.csv")
     sz_info_df = pd.read_csv(path_to_sz_info)
 
-    new_df = pd.DataFrame(columns=['ID', 'disease_diagnosis'])
-
-    # --------------- image level
-    new_df['ID'] = sz_info_df['image_id']
-    diagnosis = list(sz_info_df['description'])
-
-    image_sz_count = 0
-    image_no_sz_count = 0
-    for i in range(len(diagnosis)):
-        if "schizophrenia" in diagnosis[i]:
-            diagnosis[i] = True
-            image_sz_count +=1
-
-        elif "control" in diagnosis[i]:
-            diagnosis[i] = False
-            image_no_sz_count +=1
-        else:
-            diagnosis[i] = None
-
-    new_df['disease_diagnosis'] = diagnosis
-    file_name = "sz_diagnosis_image_level.csv"
-    new_df.to_csv(os.path.join(general_path, file_name), index=None)
-
-    print ("image sz count: ", image_sz_count)
-    print ("image no sz count: ", image_no_sz_count)
-    print ("total: ", image_sz_count + image_no_sz_count)
 
 
-    # --------------- donor level
-    group_by_donor = sz_info_df.groupby('donor_id')
-    donor_list=[]
-    diagnosis_list = []
+    if label == 'disease_diagnosis':
 
-    donor_sz_count = 0
-    donor_no_sz_count = 0
+        new_df = pd.DataFrame(columns=['ID', label])
 
-    for key, item in group_by_donor:
-        donor_list.append(key)
-        diagnosis = list(item['description'])[0]
-        if "schizophrenia" in diagnosis:
-            diagnosis_list.append(True)
-            donor_sz_count +=1
+        # --------------- image level
+        new_df['ID'] = sz_info_df['image_id']
+        diagnosis = list(sz_info_df['description'])
 
-        elif "control" in diagnosis:
-            diagnosis_list.append(False)
-            donor_no_sz_count +=1
-        else:
-            diagnosis_list.append(None)
+        image_sz_count = 0
+        image_no_sz_count = 0
+        for i in range(len(diagnosis)):
+            if "schizophrenia" in diagnosis[i]:
+                diagnosis[i] = True
+                image_sz_count +=1
 
-    new_df = pd.DataFrame(columns=['ID', 'disease_diagnosis'])
-    new_df['ID']= donor_list
-    new_df['disease_diagnosis'] = diagnosis_list
+            elif "control" in diagnosis[i]:
+                diagnosis[i] = False
+                image_no_sz_count +=1
+            else:
+                diagnosis[i] = None
 
-    file_name = "sz_diagnosis_donor_level.csv"
-    new_df.to_csv(os.path.join(general_path, file_name), index=None)
+        new_df[label] = diagnosis
+        file_name = "sz_diagnosis_image_level.csv"
+        new_df.to_csv(os.path.join(general_path, file_name), index=None)
 
-    print ("donor sz count: ", donor_sz_count)
-    print ("donor no sz count: ", donor_no_sz_count)
-    print ("total: ", donor_sz_count + donor_no_sz_count)
+        print ("image sz count: ", image_sz_count)
+        print ("image no sz count: ", image_no_sz_count)
+        print ("total: ", image_sz_count + image_no_sz_count)
 
+
+        # --------------- donor level
+        group_by_donor = sz_info_df.groupby('donor_id')
+        donor_list=[]
+        diagnosis_list = []
+
+        donor_sz_count = 0
+        donor_no_sz_count = 0
+
+        for key, item in group_by_donor:
+            donor_list.append(key)
+            diagnosis = list(item['description'])[0]
+            if "schizophrenia" in diagnosis:
+                diagnosis_list.append(True)
+                donor_sz_count +=1
+
+            elif "control" in diagnosis:
+                diagnosis_list.append(False)
+                donor_no_sz_count +=1
+            else:
+                diagnosis_list.append(None)
+
+        new_df = pd.DataFrame(columns=['ID', label])
+        new_df['ID']= donor_list
+        new_df[label] = diagnosis_list
+
+        file_name = "sz_diagnosis_donor_level.csv"
+        new_df.to_csv(os.path.join(general_path, file_name), index=None)
+
+        print ("donor sz count: ", donor_sz_count)
+        print ("donor no sz count: ", donor_no_sz_count)
+        print ("total: ", donor_sz_count + donor_no_sz_count)
+
+
+
+    elif label in ['donor_age', 'donor_sex', 'smoker', 'pmi', 'tissue_ph', 'donor_race']:
+        new_df = pd.DataFrame(columns=['ID', label])
+
+        # --------------- image level
+        new_df['ID'] = sz_info_df['image_id']
+        new_df[label] = list(sz_info_df[label])
+
+        file_name = label + "_as_label_image_level.csv"
+        new_df.to_csv(os.path.join(general_path, file_name), index=None)
+
+        # --------------- donor level
+        group_by_donor = sz_info_df.groupby('donor_id')
+        donor_list = []
+        label_list = []
+
+
+        for key, item in group_by_donor:
+            donor_list.append(key)
+            label_list.append(list(item[label])[0])
+
+        new_df = pd.DataFrame(columns=['ID', label])
+        new_df['ID'] = donor_list
+        new_df[label] = label_list
+
+        file_name = label + "_as_label_donor_level.csv"
+        new_df.to_csv(os.path.join(general_path, file_name), index=None)
 
 
 def get_sz_labels_gene_level():
@@ -448,12 +480,14 @@ if __name__ == "__main__":
 
 
     # ---- image level
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
-    image_level_prediction_res=perform_logistic_regression("1603427490", "image", n_splits=5, n_jobs=1)
-    image_level_prediction_res.to_csv(os.path.join(general_path, "per_image_diagnosis_prediction_scores.csv"),index=False)
+    #general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+    #image_level_prediction_res=perform_logistic_regression("1603427490", "image", n_splits=5, n_jobs=1)
+    #image_level_prediction_res.to_csv(os.path.join(general_path, "per_image_diagnosis_prediction_scores.csv"),index=False)
 
 
-
+    labels= ['donor_age', 'donor_sex', 'smoker', 'pmi', 'tissue_ph', 'donor_race']
+    for label in labels:
+        get_sz_labels_image_and_donor_level(label)
 
 
 
