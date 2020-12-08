@@ -16,10 +16,11 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
 
+general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/"
+sz_general_path = os.path.join(general_path, "dummy_4/sz")
 
 def get_sz_labels_image_and_donor_level(label):
 
-    #path_to_sz_info = os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv")
     general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
     path_to_sz_info = os.path.join(general_path, "human_ISH_info.csv")
     sz_info_df = pd.read_csv(path_to_sz_info)
@@ -263,25 +264,24 @@ def sz_diagnosis_create_training_files(path_to_embeddings, path_to_labels, level
 
 
 
-def embeddings_per_gene_per_donor(path_to_embeddings):
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+def embeddings_per_gene_per_donor(input_type, ts, embeddings_df):
 
-    path_to_sz_info = os.path.join(general_path, "human_ISH_info.csv")
+    path_to_sz_info = os.path.join(sz_general_path, "human_ISH_info.csv")
     sz_info_df = pd.read_csv(path_to_sz_info)
-
-    embeddings_df = pd.read_csv(os.path.join(path_to_embeddings, "triplet_patches_schizophrenia_embeddings_image_level.csv"))
 
     # I want to add two extra columns: gene_symbol and donor_id
 
     left = embeddings_df
     right = sz_info_df
-    merge_res = pd.merge(left, right[['image_id','gene_symbol', 'donor_id']], how='left', on='image_id')
-    merge_res = merge_res.drop(columns=['image_id'])
+    merge_res = pd.merge(left, right[['gene_symbol', 'donor_id']], how='left', on='donor_id')
 
     genes = list(merge_res['gene_symbol'].unique())
 
-    """
-    per_gene_per_donor_path = os.path.join(general_path, "per_gene_per_donor")
+
+    per_gene_per_donor_path = os.path.join(sz_general_path, ts+ "_" + input_type +"_per_gene_per_donor")
+    if (not os.path.exists(per_gene_per_donor_path)):
+        os.mkdir(per_gene_per_donor_path)
+
     group_by_gene = merge_res.groupby('gene_symbol')
     for key, item in group_by_gene:
         gene_name = key
@@ -289,7 +289,6 @@ def embeddings_per_gene_per_donor(path_to_embeddings):
         group_by_donor = item.groupby('donor_id').mean()
         group_by_donor.to_csv(os.path.join(per_gene_per_donor_path, gene_name+".csv"))
         
-    """
 
     return genes
 
@@ -305,7 +304,24 @@ def demog_info_as_training(list_of_columns_to_get, ts):
     grouped_by_donor = filtered.groupby('donor_id')
     demog_df = grouped_by_donor.first().reset_index()
 
-    file_name = "demog_info_as_training_donor_level.csv"
+    # ------ handle one-hot encoding ------
+
+
+    smoker_one_hot= pd.get_dummies(demog_df['smoker'], prefix='smoker')
+    sex_one_hot = pd.get_dummies(demog_df['donor_sex'], prefix='sex')
+    race_one_hot = pd.get_dummies(demog_df['donor_race'], prefix='race')
+
+
+    demog_df = demog_df.drop(columns=['smoker', 'donor_sex', 'donor_race'])
+
+    demog_df = pd.concat([demog_df, smoker_one_hot], axis=1)
+    demog_df = pd.concat([demog_df, sex_one_hot], axis=1)
+    demog_df = pd.concat([demog_df, race_one_hot], axis=1)
+
+    # -------------------------------------
+
+
+    file_name = ts+"_demog_info_as_training_donor_level.csv"
     demog_df.to_csv(os.path.join(general_path, "dummy_4/sz", file_name), index= None)
 
 
@@ -318,20 +334,17 @@ def demog_info_as_training(list_of_columns_to_get, ts):
     right = demog_df
 
     merged_res = pd.merge(left, right, how='left', on='donor_id')
-    file_name = "demog_info_and_embeddings_as_training_donor_level.csv"
+    file_name = ts+"_demog_info_and_embeddings_as_training_donor_level.csv"
     merged_res.to_csv(os.path.join(general_path, "dummy_4/sz", file_name), index=None)
 
+    # ------
 
 
 
-def perform_logistic_regression(ts,level, n_splits =5, n_jobs = 1):
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/"
-
-    path_to_embed_file = os.path.join(general_path, "dummy_3", ts, "triplet_patches_schizophrenia_embeddings_"+level+"_level.csv")
-    path_to_labels = os.path.join(general_path, "dummy_4", "sz", "sz_diagnosis_" + level +"_level.csv")
+def perform_logistic_regression(path_to_embed_file, path_to_labels_file,level, n_splits =5, n_jobs = 1):
 
     embeds_df = pd.read_csv(path_to_embed_file)
-    labels = pd.read_csv(path_to_labels)
+    labels = pd.read_csv(path_to_labels_file)
     labels = labels.rename(columns={'ID': level+'_id'})
     left = embeds_df
     right = labels
@@ -340,7 +353,8 @@ def perform_logistic_regression(ts,level, n_splits =5, n_jobs = 1):
     scores = []
     skf = StratifiedKFold(n_splits=n_splits)
 
-    col_titles = [str(item) for item in range(128)]
+    col_titles = list(embeds_df)[1:]
+    #col_titles = [str(item) for item in range(128)]
     X = merge_res[col_titles]
     Y = merge_res['disease_diagnosis']
 
@@ -389,14 +403,13 @@ def perform_logistic_regression(ts,level, n_splits =5, n_jobs = 1):
 
 
 
-def perform_logistic_regression_per_gene_per_donor(genes_list, n_splits =5, n_jobs=1):
+def perform_logistic_regression_per_gene_per_donor(input_type, ts,genes_list, n_splits =5, n_jobs=1):
     """
     n_splits: number of folds to be used in cross validation
     n_jobs: int, default=1
     Number of CPU cores used when parallelizing over classes if multi_class=’ovr’”.
     """
 
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
 
     invalid_genes_count = 0
     scores = []
@@ -404,7 +417,7 @@ def perform_logistic_regression_per_gene_per_donor(genes_list, n_splits =5, n_jo
     for gene in genes_list:
 
         print ("Gene is: ", gene)
-        path_to_donor_level_embeds = os.path.join(general_path,"per_gene_per_donor", gene+".csv")
+        path_to_donor_level_embeds = os.path.join(sz_general_path,ts+ "_" + input_type +"_per_gene_per_donor", gene+".csv")
         embeds = pd.read_csv(path_to_donor_level_embeds)
 
 
@@ -416,14 +429,17 @@ def perform_logistic_regression_per_gene_per_donor(genes_list, n_splits =5, n_jo
             number_of_donors = len(embeds)
             left = embeds
 
-            path_to_labels = os.path.join(general_path, "sz_diagnosis_donor_level.csv")
+            path_to_labels = os.path.join(sz_general_path, "sz_diagnosis_donor_level.csv")
             labels = pd.read_csv(path_to_labels)
             labels = labels.rename(columns={'ID': 'donor_id'})
             right = labels
 
             merge_res = pd.merge(left, right, how='left', on='donor_id')
 
-            col_titles =[str(item) for item in range(128)]
+            col_titles = list(embeds)[1:]
+            #col_titles =[str(item) for item in range(128)]
+
+
             X = merge_res[col_titles]
             Y = merge_res['disease_diagnosis']
 
@@ -476,6 +492,61 @@ def perform_logistic_regression_per_gene_per_donor(genes_list, n_splits =5, n_jo
 
 
 
+def check_genes_and_donors():
+    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
+
+    path_to_sz_info = os.path.join(general_path, "human_ISH_info.csv")
+    sz_info_df = pd.read_csv(path_to_sz_info)
+
+    sz_donors_genes = sz_info_df[['donor_id','gene_symbol']]
+
+    # ------
+    group_by_genes = sz_donors_genes.groupby('gene_symbol')['donor_id'].apply(list).to_dict()
+
+
+    potential_genes = {}
+
+    for gene in group_by_genes:
+        donors = group_by_genes[gene]
+        if len(donors) < 40:
+            pass
+
+        else:
+            potential_genes[gene] = donors
+
+
+    print (len(potential_genes))
+
+    donors_list = [potential_genes[genes] for genes  in potential_genes]
+    commons = set.intersection(*map(set, donors_list))
+
+    commons = list(set(commons))
+    print (len(commons))
+
+    # ---------
+    print ("______" *20 +"\n")
+
+    group_by_donors = sz_donors_genes.groupby('donor_id')['gene_symbol'].apply(list).to_dict()
+
+    potential_donors = {}
+
+    for donor in group_by_donors:
+        genes = group_by_donors[donor]
+
+        potential_donors[donor] = genes
+
+    print(len(potential_donors))
+
+    genes_list = [potential_donors[donors] for donors in potential_donors]
+    commons = set.intersection(*map(set, genes_list))
+
+    commons = list(set(commons))
+
+    print (len(commons))
+
+
+
+
 if __name__ == "__main__":
 
     """
@@ -487,37 +558,112 @@ if __name__ == "__main__":
     
     """
 
-    """
-    general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
 
-    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1603427490"
-    genes = embeddings_per_gene_per_donor(path_to_embeddings)
-    diagnosis_prediction_res = perform_logistic_regression(genes)
-
-    diagnosis_prediction_res.to_csv(os.path.join(general_path, "per_gene_per_donor_diagnosis_prediction_scores.csv"), index=False)
-    """
-
-
-
-
-    # ---- donor level
-    #general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
-    #donor_level_prediction_res=perform_logistic_regression("1603427490", "donor", n_splits=5, n_jobs=1)
-    #donor_level_prediction_res.to_csv(os.path.join(general_path, "per_donor_diagnosis_prediction_scores.csv"),index=False)
-
-
-
-    # ---- image level
-    #general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/sz"
-    #image_level_prediction_res=perform_logistic_regression("1603427490", "image", n_splits=5, n_jobs=1)
-    #image_level_prediction_res.to_csv(os.path.join(general_path, "per_image_diagnosis_prediction_scores.csv"),index=False)
-
-
-    labels= ['donor_age', 'donor_sex', 'smoker', 'pmi', 'tissue_ph', 'donor_race']
+    labels = ['donor_age', 'donor_sex', 'smoker', 'pmi', 'tissue_ph', 'donor_race']
     #for label in labels:
         #get_sz_labels_image_and_donor_level(label)
 
-    demog_info_as_training(labels, "1603427490")
+    ts = "1603427156"  # with SZ
+    #demog_info_as_training(labels, ts)
+
+    input_types = ['embed', 'demog' , 'demog_and_embed']
+
+    for input_type in input_types:
+        print ("____" * 50)
+        print (input_type)
+        print("____" * 50)
+
+        input_type_path = os.path.join(sz_general_path, input_type)
+        if (not os.path.exists(input_type_path)):
+            os.mkdir(input_type_path)
+
+        if input_type == 'embed':
+
+
+
+            # ------ per gene per donor ---------------
+            path_to_embeddings = os.path.join(general_path, "dummy_3", ts,  "triplet_patches_schizophrenia_embeddings_donor_level.csv")
+            embeddings_df = pd.read_csv(path_to_embeddings)
+            genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+
+            diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type,ts, genes, n_splits=5, n_jobs=1)
+
+            diagnosis_prediction_res.to_csv(os.path.join(input_type_path,
+                                                         ts + "_"+input_type+"_per_gene_per_donor_diagnosis_prediction_scores.csv"), index=False)
+
+
+            # ------ donor level ---------------------
+
+            path_to_embed_file = os.path.join(general_path, "dummy_3", ts,"triplet_patches_schizophrenia_embeddings_" + "donor" + "_level.csv")
+            path_to_labels_file = os.path.join(sz_general_path, "sz_diagnosis_" + "donor" + "_level.csv")
+
+            donor_level_prediction_res=perform_logistic_regression(path_to_embed_file, path_to_labels_file,  "donor", n_splits=5, n_jobs=1)
+            donor_level_prediction_res.to_csv(os.path.join(input_type_path, ts+"_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
+
+            # ---- image level ---------------------
+
+            path_to_embed_file = os.path.join(general_path, "dummy_3", ts,"triplet_patches_schizophrenia_embeddings_" + "image" + "_level.csv")
+            path_to_labels_file = os.path.join(sz_general_path, "sz_diagnosis_" + "image" + "_level.csv")
+
+            image_level_prediction_res=perform_logistic_regression(path_to_embed_file, path_to_labels_file, "image", n_splits=5, n_jobs=1)
+            image_level_prediction_res.to_csv(os.path.join(input_type_path, ts+ "_" + input_type + "_per_image_diagnosis_prediction_scores.csv"),index=False)
+
+
+
+
+        elif input_type == 'demog':
+            path_to_embeddings = os.path.join(sz_general_path, ts + "_demog_info_as_training_donor_level.csv")
+            embeddings_df = pd.read_csv(path_to_embeddings)
+
+            # ------ per gene per donor ---------------
+            genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+            diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, n_splits=5, n_jobs=1)
+            diagnosis_prediction_res.to_csv(os.path.join(input_type_path,
+                                                         ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores.csv"),
+                                            index=False)
+
+            # ------ donor level ---------------------
+
+            path_to_embed_file = path_to_embeddings
+            path_to_labels_file = os.path.join(sz_general_path, "sz_diagnosis_" + "donor" + "_level.csv")
+
+            donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor",
+                                                                     n_splits=5, n_jobs=1)
+            donor_level_prediction_res.to_csv(
+                os.path.join(input_type_path, ts + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),
+                index=False)
+
+
+        elif input_type == 'demog_and_embed':
+
+                path_to_embeddings = os.path.join(sz_general_path, ts + "_demog_info_and_embeddings_as_training_donor_level.csv")
+                embeddings_df = pd.read_csv(path_to_embeddings)
+
+                # ------ per gene per donor ---------------
+                genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, n_splits=5, n_jobs=1)
+                diagnosis_prediction_res.to_csv(os.path.join(input_type_path,
+                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores.csv"),
+                                                index=False)
+
+                # ------ donor level ---------------------
+
+                path_to_embed_file = path_to_embeddings
+                path_to_labels_file = os.path.join(sz_general_path, "sz_diagnosis_" + "donor" + "_level.csv")
+
+                donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor",
+                                                                         n_splits=5, n_jobs=1)
+                donor_level_prediction_res.to_csv(
+                    os.path.join(input_type_path, ts + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),
+                    index=False)
+
+
+   
+
+
+
+
+    #check_genes_and_donors()
 
 
 
