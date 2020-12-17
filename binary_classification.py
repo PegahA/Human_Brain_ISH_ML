@@ -453,7 +453,7 @@ def perform_logistic_regression(path_to_embed_file, path_to_labels_file,level, n
 
 
 
-def perform_logistic_regression_per_gene_per_donor(input_type, ts,genes_list, n_splits =5, n_jobs=1):
+def perform_logistic_regression_per_gene_per_donor(input_type, ts,genes_list, classifier , n_splits =5, n_jobs=1):
     """
     n_splits: number of folds to be used in cross validation
     n_jobs: int, default=1
@@ -463,7 +463,9 @@ def perform_logistic_regression_per_gene_per_donor(input_type, ts,genes_list, n_
 
     invalid_genes_count = 0
     scores = []
-    skf = StratifiedKFold(n_splits=n_splits)
+
+
+    skf = StratifiedKFold(n_splits=n_splits, random_state=1)
     for gene in genes_list:
 
         print ("Gene is: ", gene)
@@ -508,7 +510,13 @@ def perform_logistic_regression_per_gene_per_donor(input_type, ts,genes_list, n_
 
 
             for i, (train_idx, test_idx) in enumerate(skf.split(X, Y)):
-                model = LogisticRegression(penalty='none', n_jobs=n_jobs, max_iter=500)
+
+                if classifier == 'lr':
+                    model = LogisticRegression(penalty='none', n_jobs=n_jobs, max_iter=500)
+                elif classifier == 'rf':
+                    model = RandomForestClassifier(n_estimators=100,
+                                                   bootstrap=True,
+                                                   max_features='sqrt', random_state=1)
                 X_train = X.iloc[train_idx, :]
                 y_train = Y.iloc[train_idx]
                 X_test = X.iloc[test_idx, :]
@@ -676,7 +684,7 @@ def generate_random_embeddings_for_disease_dataset(embeddings_length):
 
 def perform_random_forest(path_to_embed_file, path_to_labels_file, level):
 
-    random.seed(1)
+    random.seed(10)
     #np.random.RandomState(42)
     print ("____________ RANDOM FOREST _______________")
 
@@ -716,7 +724,7 @@ def perform_random_forest(path_to_embed_file, path_to_labels_file, level):
     # Create the model with 100 trees
     model = RandomForestClassifier(n_estimators=100,
                                    bootstrap=True,
-                                   max_features='sqrt', random_state = 1)
+                                   max_features='sqrt', random_state = 10)
     # Fit on training data
     model.fit(training_input_df.to_numpy(), training_labels_df.values.ravel())
 
@@ -749,7 +757,7 @@ if __name__ == "__main__":
     
     """
 
-    genes_common_in_all = check_genes_and_donors()
+    #genes_common_in_all = check_genes_and_donors()
 
     list_of_columns_to_get = ['donor_age', 'pmi', 'tissue_ph', 'smoker', 'donor_race']
     without = ['donor_sex']
@@ -768,9 +776,9 @@ if __name__ == "__main__":
     ts = "1603427156"  # with SZ
     #demog_info_as_training(labels, ts)
 
-    gene_types =  ['top_20_genes'] #['top_20_genes', 'all_genes']
-    input_types = ['embed' ,'demog' , 'demog_and_embed', 'random', 'plain_resnet', 'demog_without_smoker',
-                   'demog_and_embed_without_smoker', 'demog_without_sex', 'demog_and_embed_without_sex']
+    gene_types =  ['all_genes'] #['top_20_genes', 'all_genes']
+    input_types = ['demog_and_embed']  #['embed','demog' , 'demog_and_embed', 'random', 'plain_resnet']#, 'demog_without_smoker',
+                   #'demog_and_embed_without_smoker', 'demog_without_sex', 'demog_and_embed_without_sex']
 
 
     rf_auc_dict= {}
@@ -797,17 +805,25 @@ if __name__ == "__main__":
             if input_type == 'embed':
 
 
-                """
+
                 # ------ per gene per donor ---------------
                 path_to_embeddings = os.path.join(general_path, "dummy_3", ts,  "triplet_patches_schizophrenia_embeddings_donor_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
-                #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
-                genes = genes_common_in_all
+                genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+                #genes = genes_common_in_all
     
-                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type,ts, genes, n_splits=5, n_jobs=1)
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type,ts, genes,'lr',n_splits=5, n_jobs=1)
     
                 diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
-                                                             ts + "_"+input_type+"_per_gene_per_donor_diagnosis_prediction_scores.csv"), index=False)
+                                                             ts + "_"+input_type+"_per_gene_per_donor_diagnosis_prediction_scores_"+"lr"+".csv"), index=False)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'rf',
+                                                                                          n_splits=5, n_jobs=1)
+
+                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
+                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
+                                                index=False)
+
                 """
 
                 # ------ donor level ---------------------
@@ -818,11 +834,13 @@ if __name__ == "__main__":
                 #donor_level_prediction_res=perform_logistic_regression(path_to_embed_file, path_to_labels_file,  "donor", n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, ts+"_" + gene_type + "_" +input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
-                rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
-                rf_auc_dict[input_type] = rf
+                #rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
+                #rf_auc_dict[input_type] = rf
+                
+                """
 
                 """
                 # ---- image level ---------------------
@@ -841,17 +859,25 @@ if __name__ == "__main__":
                 embeddings_df = pd.read_csv(path_to_embeddings)
 
 
-                """
+
                 # ------ per gene per donor ---------------
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
-                genes = genes_common_in_all
-                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, n_splits=5, n_jobs=1)
-                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
-                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores.csv"),
-                                                index=False)
-                                                
-                """
+                # genes = genes_common_in_all
+                genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
 
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'lr', n_splits=5, n_jobs=1)
+                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
+                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_"+ "lr"+".csv"),
+                                                index=False)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'rf',
+                                                                                          n_splits=5, n_jobs=1)
+
+                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
+                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
+                                                index=False)
+
+                """
                 # ------ donor level ---------------------
 
                 path_to_embed_file = path_to_embeddings
@@ -860,11 +886,12 @@ if __name__ == "__main__":
                 #donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor",n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, ts + "_"  + gene_type + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
+                """
 
             elif input_type == 'demog_and_embed':
 
@@ -872,14 +899,22 @@ if __name__ == "__main__":
                 embeddings_df = pd.read_csv(path_to_embeddings)
 
 
-                """
 
                 # ------ per gene per donor ---------------
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
-                genes= genes_common_in_all
-                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, n_splits=5, n_jobs=1)
+                #genes= genes_common_in_all
+                genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'lr', n_splits=5, n_jobs=1)
                 diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
-                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores.csv"),
+                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "lr"+ ".csv"),
+                                                index=False)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'rf',
+                                                                                          n_splits=5, n_jobs=1)
+
+                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
+                                                             ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
                                                 index=False)
 
                 """
@@ -892,28 +927,36 @@ if __name__ == "__main__":
                 #donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor",n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, ts +  "_" + gene_type + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
+                """
 
             elif input_type == 'random':
 
-                """
+
                 # ------ per gene per donor ---------------
                 path_to_embeddings = os.path.join(sz_general_path, 'random',  "random_embeddings_donor_level_2.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
-                genes = genes_common_in_all
+                #genes = genes_common_in_all
 
-                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, n_splits=5, n_jobs=1)
+                genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'lr', n_splits=5, n_jobs=1)
 
                 diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
-                                                              input_type+"_per_gene_per_donor_diagnosis_prediction_scores_2.csv"), index=False)
-                
-                
-                
+                                                              input_type+"_per_gene_per_donor_diagnosis_prediction_scores_" + "lr" + ".csv"), index=False)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'rf',
+                                                                                          n_splits=5, n_jobs=1)
+
+                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
+                                                             input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
+                                                index=False)
+
                 """
                 # ------ donor level ---------------------
 
@@ -923,11 +966,14 @@ if __name__ == "__main__":
                 #donor_level_prediction_res=perform_logistic_regression(path_to_embed_file, path_to_labels_file,  "donor", n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, gene_type + "_" + input_type + "_per_donor_diagnosis_prediction_scores_2.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
+                
+                
+                """
 
                 """
                 # ---- image level ---------------------
@@ -944,19 +990,28 @@ if __name__ == "__main__":
             elif input_type == 'plain_resnet':
 
 
-                """
+
                 # ------ per gene per donor ---------------
                 path_to_embeddings = os.path.join(sz_general_path, 'plain_resnet', "resnet50_embeddings_donor_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
 
-                genes= genes_common_in_all
+                #genes= genes_common_in_all
 
-                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, n_splits=5,
+                genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes,'lr', n_splits=5,
                                                                                           n_jobs=1)
 
                 diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
-                                                             input_type + "_per_gene_per_donor_diagnosis_prediction_scores.csv"),
+                                                             input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "lr" + ".csv"),
+                                                index=False)
+
+                diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'rf',
+                                                                                          n_splits=5, n_jobs=1)
+
+                diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
+                                                             input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
                                                 index=False)
 
                 """
@@ -968,12 +1023,13 @@ if __name__ == "__main__":
                 #donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor",n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, gene_type + "_" +input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
 
+                """
 
                 """
                 # ---- image level ---------------------
@@ -1017,8 +1073,8 @@ if __name__ == "__main__":
 
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path,ts + "_" + gene_type + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
@@ -1055,8 +1111,8 @@ if __name__ == "__main__":
                 lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
                 lr_auc_dict[input_type] = lr
 
-                rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
-                rf_auc_dict[input_type] = rf
+                #rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
+                #rf_auc_dict[input_type] = rf
 
 
 
@@ -1085,8 +1141,8 @@ if __name__ == "__main__":
 
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path,ts + "_" + gene_type + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
@@ -1118,8 +1174,8 @@ if __name__ == "__main__":
                 #donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file,"donor",n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path,ts + "_" + gene_type + "_" + input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
 
-                lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
-                lr_auc_dict[input_type] = lr
+                #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
+                #lr_auc_dict[input_type] = lr
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
