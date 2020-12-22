@@ -816,6 +816,20 @@ def compare_scores(gene_type, input_type_1, input_type_2, classifier):
 
 
 def get_patches_that_activate_neuron_the_most_and_the_least(ts, top_gene, path_to_labels_file, path_to_patch_level_embeddings):
+    """
+    First, get the donor level embeddings of the top gene (embeddings of the images that assay the top gene, aggregated to donor-level).
+    This files is used as the data to get feature importance.
+    
+    Then, identify the most important feature by comparing the coefficients for a logistic regression model that has been mapped to the data.
+    Next, for all the patches that assay the top gene, see which 2 patches have the highest value and which 2 patches have the lowest values
+    for that features
+
+    :param ts: str. Timestamp to indicate which set of embeddings to use.
+    :param top_gene: str. The gene with the highest AUC score from the logistic regression binary classifier that predicts case vs control
+    :param path_to_labels_file: str. Path to the labels csv file. Labels are True/False (case/control) on a donor level.
+    :param path_to_patch_level_embeddings: str. Path to the patch level sz embeddings
+    :return: None
+    """
     path_to_per_gene_per_donor_file = os.path.join(sz_general_path, ts + "_embed_per_gene_per_donor", top_gene + ".csv")
     max_feature, max_score = feature_importance_with_lr(path_to_per_gene_per_donor_file, path_to_labels_file)
 
