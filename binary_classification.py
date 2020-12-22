@@ -10,6 +10,8 @@ import operator
 import matplotlib.pyplot as plt
 import math
 import json
+import sklearn
+
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
@@ -17,6 +19,8 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
 
 from sklearn.ensemble import RandomForestClassifier
+
+print(sklearn.__version__)
 
 
 general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/"
@@ -743,6 +747,260 @@ def perform_random_forest(path_to_embed_file, path_to_labels_file, level):
 
 
 
+def get_avg_AUCs(gene_type, input_type_list):
+
+    for input_type in input_type_list:
+        path_to_scores = os.path.join(sz_general_path ,gene_type ,input_type)
+
+        files = os.listdir(path_to_scores)
+        for file in files:
+            path_to_file = os.path.join(path_to_scores , file)
+            score_df = pd.read_csv(path_to_file)
+            auc_col = list(score_df['AUC'])
+
+            print (path_to_file)
+            print (np.mean(auc_col))
+
+
+def compare_scores(gene_type, input_type_1, input_type_2, classifier):
+
+    path_to_input_1_scores = os.path.join(sz_general_path, gene_type, input_type_1)
+    path_to_input_2_scores =  os.path.join(sz_general_path, gene_type, input_type_2)
+
+    input_1_files = os.listdir(path_to_input_1_scores)
+    input_2_files = os.listdir(path_to_input_2_scores)
+
+
+    for file in input_1_files:
+        if classifier in file:
+            score_1_path = os.path.join(path_to_input_1_scores, file)
+            score_1_df = pd.read_csv(score_1_path)
+
+    for file in input_2_files:
+        if classifier in file:
+            score_2_path = os.path.join(path_to_input_2_scores, file)
+            score_2_df = pd.read_csv(score_2_path)
+
+
+
+    genes_1 = list(score_1_df['gene_symbol'])
+    auc_1 = (score_1_df['AUC'])
+
+    dict_1 = {}
+    for i in range(len(genes_1)):
+        dict_1[genes_1[i]] = auc_1[i]
+
+
+    genes_2 = list(score_2_df['gene_symbol'])
+    auc_2 = (score_2_df['AUC'])
+
+    dict_2 = {}
+    for i in range(len(genes_2)):
+        dict_2[genes_2[i]] = auc_2[i]
+
+
+
+
+    first_greater_than_second = []
+
+
+    for gene in dict_1:
+        auc_1 = dict_1[gene]
+        auc_2 = dict_2[gene]
+
+        if auc_1 > auc_2:
+            first_greater_than_second.append(gene)
+
+
+    print (first_greater_than_second)
+
+
+def get_patches_that_activate_neuron_the_most_and_the_least(ts, top_gene, path_to_labels_file, path_to_patch_level_embeddings):
+    path_to_per_gene_per_donor_file = os.path.join(sz_general_path, ts + "_embed_per_gene_per_donor", top_gene + ".csv")
+    max_feature, max_score = feature_importance_with_lr(path_to_per_gene_per_donor_file, path_to_labels_file)
+
+    path_to_info_file = os.path.join(sz_general_path, "human_ISH_info.csv")
+    get_feature_value_from_patch_level(path_to_info_file,path_to_patch_level_embeddings, top_gene, max_feature)
+
+
+
+def feature_importance_with_lr(path_to_embed_file, path_to_labels_file):
+    embed_df = pd.read_csv(path_to_embed_file)
+    label_df = pd.read_csv(path_to_labels_file)
+
+    label_df = label_df.rename(columns={'ID': 'donor_id'})
+    print(embed_df.head())
+    print(label_df.head())
+
+    left = embed_df
+    right = label_df
+
+    label_df =  pd.merge(left, right, how='left', on='donor_id')[['donor_id','disease_diagnosis']]
+
+    embed_df = embed_df.drop(columns=['donor_id'])
+    label_df = label_df.drop(columns=['donor_id'])
+
+
+
+    X = embed_df
+    Y = label_df
+
+    print (embed_df.head())
+    print (label_df.head())
+
+    model = LogisticRegression()
+    # fit the model
+    model.fit(X, Y)
+    # get importance
+    importance = model.coef_[0]
+    # summarize feature importance
+
+    max_score = math.inf * -1
+    max_feature = None
+
+    for i, v in enumerate(importance):
+        #print('Feature: {}, Score: {}'.format(i, v))
+        if v >max_score:
+            max_score = v
+            max_feature = i
+
+    print ("----")
+    print ("Max:" , max_feature, max_score)
+
+    return (max_feature, max_score)
+
+
+
+def get_feature_value_from_patch_level(path_to_info_file, path_to_patch_level_embeddings, top_gene, max_feature):
+
+    patch_level_embed_df = pd.read_csv(path_to_patch_level_embeddings)
+    info_df = pd.read_csv(path_to_info_file)
+
+    # ---- among all patches --------
+
+    info_of_top_gene_df = info_df[info_df['gene_symbol']==top_gene]
+    images_of_top_gene = list(info_of_top_gene_df['image_id'])
+    images_of_top_gene = {str(item):None for item in images_of_top_gene}
+
+
+    all_patches = list(patch_level_embed_df['image_id'])
+
+    patches_of_top_gene = []
+    for patch in all_patches:
+        image_segment = patch.split("_")[0]
+        if image_segment in images_of_top_gene:
+            patches_of_top_gene.append(patch)
+
+    patch_level_embed_of_top_gene = patch_level_embed_df[patch_level_embed_df['image_id'].isin(patches_of_top_gene)]
+
+
+
+    max_feature_col_df = patch_level_embed_of_top_gene[['image_id', str(max_feature)]]
+
+    patch_and_max_feature_df = max_feature_col_df.sort_values(by=[str(max_feature)], ascending=False)
+
+    print("------ ALL -------")
+
+    print (patch_and_max_feature_df.head())
+    print (patch_and_max_feature_df.iloc[0])
+    print(patch_and_max_feature_df.iloc[1])
+
+    print(patch_and_max_feature_df.iloc[-1])
+    print(patch_and_max_feature_df.iloc[-2])
+
+
+    """
+    image_id    81190250_34    -0.0061599
+
+    image_id    81172875_45    -0.00637248
+
+    image_id    81056889_25    -0.0142271
+
+    image_id    81336208_43    -0.0138924
+    
+    """
+
+    # ---- filter case and control --------
+
+    info_of_top_gene_df = info_df[info_df['gene_symbol'] == top_gene]
+    info_of_top_gene_df_case = info_of_top_gene_df[info_of_top_gene_df['description'] == 'disease categories - schizophrenia']
+    info_of_top_gene_df_control = info_of_top_gene_df[info_of_top_gene_df['description'] == 'disease categories - control']
+
+    images_of_top_gene_case = list(info_of_top_gene_df_case['image_id'])
+    images_of_top_gene_case = {str(item): None for item in images_of_top_gene_case}
+
+    images_of_top_gene_control = list(info_of_top_gene_df_control['image_id'])
+    images_of_top_gene_control = {str(item): None for item in images_of_top_gene_control}
+
+    all_patches = list(patch_level_embed_df['image_id'])
+
+    patches_of_top_gene_case = []
+    patches_of_top_gene_control = []
+
+    for patch in all_patches:
+        image_segment = patch.split("_")[0]
+        if image_segment in images_of_top_gene_case:
+            patches_of_top_gene_case.append(patch)
+
+        if image_segment in images_of_top_gene_control:
+            patches_of_top_gene_control.append(patch)
+
+
+    patch_level_embed_of_top_gene_case = patch_level_embed_df[patch_level_embed_df['image_id'].isin(patches_of_top_gene_case)]
+
+    patch_level_embed_of_top_gene_control = patch_level_embed_df[
+        patch_level_embed_df['image_id'].isin(patches_of_top_gene_control)]
+
+    max_feature_col_df_case = patch_level_embed_of_top_gene_case[['image_id', str(max_feature)]]
+    max_feature_col_df_control = patch_level_embed_of_top_gene_control[['image_id', str(max_feature)]]
+
+    patch_and_max_feature_df_case = max_feature_col_df_case.sort_values(by=[str(max_feature)], ascending=False)
+    patch_and_max_feature_df_control = max_feature_col_df_control.sort_values(by=[str(max_feature)], ascending=False)
+
+    print ("------ CASE -------")
+
+    print(patch_and_max_feature_df_case.head())
+    print(patch_and_max_feature_df_case.iloc[0])
+    print(patch_and_max_feature_df_case.iloc[1])
+
+    print(patch_and_max_feature_df_case.iloc[-1])
+    print(patch_and_max_feature_df_case.iloc[-2])
+
+
+    """
+    
+    image_id    81190250_34    -0.0061599
+
+    image_id    81240092_47    -0.00650813
+
+    image_id    81056889_25    -0.0142271
+
+    image_id    81056889_17    -0.0137816
+    
+    """
+
+    print("------ CONTROL -------")
+
+    print(patch_and_max_feature_df_control.head())
+    print(patch_and_max_feature_df_control.iloc[0])
+    print(patch_and_max_feature_df_control.iloc[1])
+
+    print(patch_and_max_feature_df_control.iloc[-1])
+    print(patch_and_max_feature_df_control.iloc[-2])
+
+    """
+    
+    image_id    81172875_45    -0.00637248
+
+    image_id    81172875_32    -0.00637972
+
+    image_id    81336208_43    -0.0138924
+
+    image_id    81313427_31    -0.0137106
+    
+    """
+
+
 if __name__ == "__main__":
 
     #generate_random_embeddings_for_disease_dataset(128)
@@ -757,12 +1015,27 @@ if __name__ == "__main__":
     
     """
 
+    gene_type = "all_genes"
+    input_type_list = ['embed','demog' , 'demog_and_embed', 'random', 'plain_resnet']
+    #get_avg_AUCs(gene_type, input_type_list)
+
+    #compare_scores(gene_type,'plain_resnet', 'embed', 'lr')
+    print ("----")
+
+    #compare_scores(gene_type, 'plain_resnet', 'demog', 'lr')
+    print("----")
+
+    #compare_scores(gene_type, 'plain_resnet', 'demog_and_embed', 'lr')
+    print("----")
+
+
+
     #genes_common_in_all = check_genes_and_donors()
 
     list_of_columns_to_get = ['donor_age', 'pmi', 'tissue_ph', 'smoker', 'donor_race']
     without = ['donor_sex']
     ts = "1603427156"  # with SZ
-    demog_info_as_training(list_of_columns_to_get, ts, without)
+    #demog_info_as_training(list_of_columns_to_get, ts, without)
 
 
 
@@ -777,7 +1050,7 @@ if __name__ == "__main__":
     #demog_info_as_training(labels, ts)
 
     gene_types =  ['all_genes'] #['top_20_genes', 'all_genes']
-    input_types = ['demog_and_embed']  #['embed','demog' , 'demog_and_embed', 'random', 'plain_resnet']#, 'demog_without_smoker',
+    input_types = ['embed'] #['embed','demog' , 'demog_and_embed', 'random', 'plain_resnet']#, 'demog_without_smoker',
                    #'demog_and_embed_without_smoker', 'demog_without_sex', 'demog_and_embed_without_sex']
 
 
@@ -798,14 +1071,10 @@ if __name__ == "__main__":
             if (not os.path.exists(input_type_path)):
                 os.mkdir(input_type_path)
 
-            #input_type_path = os.path.join(sz_general_path, "top_20", input_type)
-            #if (not os.path.exists(input_type_path)):
-                #os.mkdir(input_type_path)
-
             if input_type == 'embed':
 
 
-
+                """
                 # ------ per gene per donor ---------------
                 path_to_embeddings = os.path.join(general_path, "dummy_3", ts,  "triplet_patches_schizophrenia_embeddings_donor_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
@@ -830,6 +1099,7 @@ if __name__ == "__main__":
 
                 path_to_embed_file = os.path.join(general_path, "dummy_3", ts,"triplet_patches_schizophrenia_embeddings_" + "donor" + "_level.csv")
                 path_to_labels_file = os.path.join(sz_general_path, "sz_diagnosis_" + "donor" + "_level.csv")
+                path_to_patch_level_embeddings = os.path.join(general_path, "dummy_3", ts, "triplet_patches_schizophrenia_embeddings.csv")
 
                 #donor_level_prediction_res=perform_logistic_regression(path_to_embed_file, path_to_labels_file,  "donor", n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, ts+"_" + gene_type + "_" +input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
@@ -839,8 +1109,10 @@ if __name__ == "__main__":
 
                 #rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 #rf_auc_dict[input_type] = rf
-                
-                """
+
+                get_patches_that_activate_neuron_the_most_and_the_least(ts, 'SLC12A2', path_to_labels_file,
+                                                                        path_to_patch_level_embeddings)
+
 
                 """
                 # ---- image level ---------------------
@@ -858,7 +1130,7 @@ if __name__ == "__main__":
                 path_to_embeddings = os.path.join(sz_general_path, ts + "_demog_info_as_training_donor_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
 
-
+                """
 
                 # ------ per gene per donor ---------------
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
@@ -875,7 +1147,10 @@ if __name__ == "__main__":
 
                 diagnosis_prediction_res.to_csv(os.path.join(gene_type, input_type_path,
                                                              ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
-                                                index=False)
+                                              index=False)
+                                              
+                                              
+                """
 
                 """
                 # ------ donor level ---------------------
@@ -898,7 +1173,7 @@ if __name__ == "__main__":
                 path_to_embeddings = os.path.join(sz_general_path, ts + "_demog_info_and_embeddings_as_training_donor_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
 
-
+                """
 
                 # ------ per gene per donor ---------------
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
@@ -917,6 +1192,7 @@ if __name__ == "__main__":
                                                              ts + "_" + input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
                                                 index=False)
 
+                """
                 """
 
                 # ------ donor level ---------------------
@@ -943,6 +1219,8 @@ if __name__ == "__main__":
                 #genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
                 #genes = genes_common_in_all
 
+
+                """
                 genes = embeddings_per_gene_per_donor(input_type, ts, embeddings_df)
 
                 diagnosis_prediction_res = perform_logistic_regression_per_gene_per_donor(input_type, ts, genes, 'lr', n_splits=5, n_jobs=1)
@@ -957,6 +1235,7 @@ if __name__ == "__main__":
                                                              input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
                                                 index=False)
 
+                """
                 """
                 # ------ donor level ---------------------
 
@@ -990,7 +1269,7 @@ if __name__ == "__main__":
             elif input_type == 'plain_resnet':
 
 
-
+                """
                 # ------ per gene per donor ---------------
                 path_to_embeddings = os.path.join(sz_general_path, 'plain_resnet', "resnet50_embeddings_donor_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
@@ -1014,6 +1293,7 @@ if __name__ == "__main__":
                                                              input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + ".csv"),
                                                 index=False)
 
+                """
                 """
                 # ------ donor level ---------------------
 
@@ -1061,7 +1341,7 @@ if __name__ == "__main__":
                                                 index=False)
 
                 """
-
+                """
                 # ------ donor level ---------------------
 
                 print ("HEREEEE")
@@ -1080,7 +1360,7 @@ if __name__ == "__main__":
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
 
-
+                """
 
 
             elif input_type ==  'demog_and_embed_without_smoker':
@@ -1100,6 +1380,8 @@ if __name__ == "__main__":
 
                 """
 
+
+                """
                 # ------ donor level ---------------------
 
                 path_to_embed_file = path_to_embeddings
@@ -1113,6 +1395,8 @@ if __name__ == "__main__":
 
                 #rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 #rf_auc_dict[input_type] = rf
+                
+                """
 
 
 
@@ -1130,7 +1414,7 @@ if __name__ == "__main__":
                                                 index=False)
 
                 """
-
+                """
                 # ------ donor level ---------------------
 
 
@@ -1146,7 +1430,7 @@ if __name__ == "__main__":
 
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
-
+                """
 
 
             elif input_type ==  'demog_and_embed_without_sex':
@@ -1166,6 +1450,8 @@ if __name__ == "__main__":
 
                 """
 
+                """
+
                 # ------ donor level ---------------------
 
                 path_to_embed_file = path_to_embeddings
@@ -1180,7 +1466,7 @@ if __name__ == "__main__":
                 rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 rf_auc_dict[input_type] = rf
 
-
+                """
 
 
     print (rf_auc_dict)
