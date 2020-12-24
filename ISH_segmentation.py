@@ -294,7 +294,7 @@ def rotate_horizontal_to_vertical():
 def use_trained_model(model_name, predict_new_masks=True):
     """
     Assuming that we have a trained model at this point, this function loads the model and runs all the images through
-    it to get a predicted mask for each.
+    it to get a predicted mask for each. This model was built by fastCell code using masks in the data folder ( https://github.com/Mouse-Imaging-Centre/fastCell/ )
 
     :return:
     """
