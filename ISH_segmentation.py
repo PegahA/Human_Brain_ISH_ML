@@ -1,3 +1,4 @@
+#based directly on code from FastCell - https://github.com/Mouse-Imaging-Centre/fastCell/
 import fastai
 from fastai.vision import *
 from fastai.callbacks.hooks import *
