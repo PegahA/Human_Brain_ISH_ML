@@ -1097,6 +1097,7 @@ def feature_importance_with_lr(path_to_embed_file, path_to_labels_file, standard
 def get_feature_value_from_patch_level(path_to_info_file, path_to_patch_level_embeddings, top_gene, max_feature):
 
     patch_level_embed_df = pd.read_csv(path_to_patch_level_embeddings)
+
     info_df = pd.read_csv(path_to_info_file)
 
     # ---- among all patches --------
@@ -1127,9 +1128,16 @@ def get_feature_value_from_patch_level(path_to_info_file, path_to_patch_level_em
     print (patch_and_max_feature_df.head())
     print (patch_and_max_feature_df.iloc[0])
     print(patch_and_max_feature_df.iloc[1])
+    print(patch_and_max_feature_df.iloc[2])
+    print(patch_and_max_feature_df.iloc[3])
+    print(patch_and_max_feature_df.iloc[4])
+
 
     print(patch_and_max_feature_df.iloc[-1])
     print(patch_and_max_feature_df.iloc[-2])
+    print(patch_and_max_feature_df.iloc[-3])
+    print(patch_and_max_feature_df.iloc[-4])
+    print(patch_and_max_feature_df.iloc[-5])
 
     """
     
@@ -1189,9 +1197,15 @@ def get_feature_value_from_patch_level(path_to_info_file, path_to_patch_level_em
     print(patch_and_max_feature_df_case.head())
     print(patch_and_max_feature_df_case.iloc[0])
     print(patch_and_max_feature_df_case.iloc[1])
+    print(patch_and_max_feature_df_case.iloc[2])
+    print(patch_and_max_feature_df_case.iloc[3])
+    print(patch_and_max_feature_df_case.iloc[4])
 
     print(patch_and_max_feature_df_case.iloc[-1])
     print(patch_and_max_feature_df_case.iloc[-2])
+    print(patch_and_max_feature_df_case.iloc[-3])
+    print(patch_and_max_feature_df_case.iloc[-4])
+    print(patch_and_max_feature_df_case.iloc[-5])
 
 
     """
@@ -1209,9 +1223,15 @@ def get_feature_value_from_patch_level(path_to_info_file, path_to_patch_level_em
     print(patch_and_max_feature_df_control.head())
     print(patch_and_max_feature_df_control.iloc[0])
     print(patch_and_max_feature_df_control.iloc[1])
+    print(patch_and_max_feature_df_control.iloc[2])
+    print(patch_and_max_feature_df_control.iloc[3])
+    print(patch_and_max_feature_df_control.iloc[4])
 
     print(patch_and_max_feature_df_control.iloc[-1])
     print(patch_and_max_feature_df_control.iloc[-2])
+    print(patch_and_max_feature_df_control.iloc[-3])
+    print(patch_and_max_feature_df_control.iloc[-4])
+    print(patch_and_max_feature_df_control.iloc[-5])
 
     """
     image_id    81335473_21    0.00129161
@@ -1222,9 +1242,42 @@ def get_feature_value_from_patch_level(path_to_info_file, path_to_patch_level_em
     """
 
 
+def get_feature_value_from_patch_level_all_genes(path_to_patch_level_embeddings, max_feature):
+    patch_level_embed_df = pd.read_csv(path_to_patch_level_embeddings)
+    print ("000" *20)
+    print (patch_level_embed_df.head())
+    print (len(patch_level_embed_df))
+    print("000" * 20)
+
+    # ---- among all patches --------
+
+    max_feature_col_df = patch_level_embed_df[['image_id', str(max_feature)]]
+
+    patch_and_max_feature_df = max_feature_col_df.sort_values(by=[str(max_feature)], ascending=False)
+
+    print ("MAX FEATURE: ", max_feature)
+    print("------ ALL -------")
+
+    print(patch_and_max_feature_df.head())
+    print(patch_and_max_feature_df.iloc[0])
+    print(patch_and_max_feature_df.iloc[1])
+    print(patch_and_max_feature_df.iloc[2])
+    print(patch_and_max_feature_df.iloc[3])
+    print(patch_and_max_feature_df.iloc[4])
+
+    print(patch_and_max_feature_df.iloc[-1])
+    print(patch_and_max_feature_df.iloc[-2])
+    print(patch_and_max_feature_df.iloc[-3])
+    print(patch_and_max_feature_df.iloc[-4])
+    print(patch_and_max_feature_df.iloc[-5])
+
+
+
+
 
 
 if __name__ == "__main__":
+
 
     #generate_random_embeddings_for_disease_dataset(128)
     #temp_function()
@@ -1253,16 +1306,20 @@ if __name__ == "__main__":
 
 
 
-    genes_common_in_all = check_genes_and_donors()
+    #genes_common_in_all = check_genes_and_donors()
 
     list_of_columns_to_get = ['donor_age', 'pmi', 'tissue_ph', 'smoker', 'donor_race','donor_sex']
     without = []
     ts = "1603427156"  # with SZ
 
-    demog_info_as_training(list_of_columns_to_get, ts)
+    #demog_info_as_training(list_of_columns_to_get, ts)
 
 
-
+    #--------- Cortex embeddings patch activation ---------------
+    path_to_patch_level_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1603427156",
+                                                 "triplet_all_training_embeddings.csv" )
+    max_feature = 116
+    get_feature_value_from_patch_level_all_genes(path_to_patch_level_embeddings, max_feature)
 
 
 
@@ -1273,8 +1330,8 @@ if __name__ == "__main__":
     ts = "1603427156"  # with SZ
     #demog_info_as_training(labels, ts)
 
-    gene_types =  ['all_genes'] #,'top_20_genes']
-    input_types = ['embed' ,'demog' , 'demog_and_embed' , 'random', 'plain_resnet']#, 'demog_without_smoker',
+    gene_types =  []#['all_genes'] #,'top_20_genes']
+    input_types = []#['embed' ,'demog' , 'demog_and_embed' , 'random', 'plain_resnet']#, 'demog_without_smoker',
                    #'demog_and_embed_without_smoker', 'demog_without_sex', 'demog_and_embed_without_sex']
 
     rnd_state = 6
@@ -1303,6 +1360,8 @@ if __name__ == "__main__":
 
                 # ------ per gene per donor ---------------
 
+                """
+
                 path_to_embeddings = os.path.join(general_path, "dummy_3", ts,
                                                   "triplet_patches_schizophrenia_embeddings_image_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
@@ -1327,9 +1386,9 @@ if __name__ == "__main__":
                                                 index=False)
                                                 
 
-
-
                 """
+
+
 
                 # ------ donor level ---------------------
 
@@ -1346,11 +1405,11 @@ if __name__ == "__main__":
                 #rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
                 #rf_auc_dict[input_type] = rf
 
-                get_patches_that_activate_neuron_the_most_and_the_least(ts, 'CUX2', path_to_labels_file,
+                get_patches_that_activate_neuron_the_most_and_the_least(ts, 'SCN4B', path_to_labels_file,
                                                                         path_to_patch_level_embeddings)
                 
                 
-                """
+
 
 
 
@@ -1520,7 +1579,7 @@ if __name__ == "__main__":
             elif input_type == 'plain_resnet':
 
 
-
+                """
                 # ------ per gene per donor ---------------
                 path_to_embeddings = os.path.join(sz_general_path, 'plain_resnet', "resnet50_embeddings_image_level.csv")
                 embeddings_df = pd.read_csv(path_to_embeddings)
@@ -1544,12 +1603,15 @@ if __name__ == "__main__":
                                                              input_type + "_per_gene_per_donor_diagnosis_prediction_scores_" + "rf" + "_rnd_state_" + str(rnd_state)+ ".csv"),
                                                 index=False)
 
-
                 """
+
+
                 # ------ donor level ---------------------
 
                 path_to_embed_file = os.path.join(sz_general_path, 'plain_resnet', "resnet50_embeddings_donor_level.csv")
                 path_to_labels_file = os.path.join(sz_general_path, "sz_diagnosis_" + "donor" + "_level.csv")
+                path_to_patch_level_embeddings = os.path.join("/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/patch_max_feature/sz",
+                                                              "resnet50_embeddings.csv")
 
                 #donor_level_prediction_res = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor",n_splits=5, n_jobs=1)
                 #donor_level_prediction_res.to_csv(os.path.join(input_type_path, gene_type + "_" +input_type + "_per_donor_diagnosis_prediction_scores.csv"),index=False)
@@ -1557,10 +1619,12 @@ if __name__ == "__main__":
                 #lr = perform_logistic_regression(path_to_embed_file, path_to_labels_file, "donor", n_splits=5, n_jobs=1)
                 #lr_auc_dict[input_type] = lr
 
-                rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
-                rf_auc_dict[input_type] = rf
+                #rf = perform_random_forest(path_to_embed_file, path_to_labels_file, 'donor')
+                #rf_auc_dict[input_type] = rf
 
-                """
+                get_patches_that_activate_neuron_the_most_and_the_least(ts, 'NEFH', path_to_labels_file,
+                                                                        path_to_patch_level_embeddings)
+
 
                 """
                 # ---- image level ---------------------
