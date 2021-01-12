@@ -7,8 +7,9 @@ LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", 
 STUDY = "cortex"
 #DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
 #DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
-#DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
-DATA_DIR = "/human_ISH/human_ish_data"
+DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
+
+#DATA_DIR = "/human_ISH/human_ish_data"
 CODE_DIR = "/"
 #VOL_CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
