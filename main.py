@@ -227,16 +227,24 @@ def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
 
 
 def get_test_set_embeddings_from_existing_models(trained_model_ts):
+    
+    
+    print ("getting embeddings for the test set")
+
     args = parser.parse_args()
 
     experiment_root = os.path.join(DATA_DIR, "cortex", "experiment_files", "experiment_" + trained_model_ts)
+
+    print ("experiment root is: ", experiment_root)
 
     if (not os.path.exists(experiment_root)):
         print("experiment root does not exist")
 
     embed_py_path = os.path.join(TRIPLET_DIR, "embed.py")
+    
+    print ("embed_py_path: ", embed_py_path)
 
-    disease_command_line_string = "python " + embed_py_path + \
+    embed_command_line_string = "python " + embed_py_path + \
                                   " --experiment_root=" + "'" + experiment_root + "'" + \
                                   " --dataset=" + "'" + args.test_dataset + "'" + \
                                   " --image_root=" + "'" + args.image_root + "'" + \
@@ -246,8 +254,8 @@ def get_test_set_embeddings_from_existing_models(trained_model_ts):
                                   (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                   (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
-    os.system(disease_command_line_string)
-
+    os.system(embed_command_line_string)
+    """
     process.convert_h5_to_csv(experiment_root)
     filename = process.save_embedding_info_into_file(trained_model_ts)
 
@@ -270,6 +278,8 @@ def get_test_set_embeddings_from_existing_models(trained_model_ts):
             os.chmod(os.path.join(root, f), 0o777)
 
     print("permissions fixed for segmentation embeddings")
+    """
+
 
 if __name__ == "__main__":
 

@@ -9,10 +9,10 @@ if __name__ == "__main__":
       #          [12, 8e-5, True]]
 
 
-    top_list= [[17, 7e-5, True, 64],
-               [17, 7e-5, True, 32]]
+    top_list= [[17, 7e-5, True, 32]] #[[17, 7e-5, True, 64],
+               #[17, 7e-5, True, 32]]
 
-    training_iterations_list = [30] #[30000] #[10000, 15000, 20000]
+    training_iterations_list = [30000] #[10000, 15000, 20000]
 
     main_py_path = os.path.join(CODE_DIR, "main.py")
 
