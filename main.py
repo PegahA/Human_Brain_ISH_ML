@@ -254,8 +254,8 @@ def get_test_set_embeddings_from_existing_models(trained_model_ts):
                                   (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
                                   (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
 
-    os.system(embed_command_line_string)
-    """
+    #os.system(embed_command_line_string)
+
     process.convert_h5_to_csv(experiment_root)
     filename = process.save_embedding_info_into_file(trained_model_ts)
 
@@ -278,7 +278,7 @@ def get_test_set_embeddings_from_existing_models(trained_model_ts):
             os.chmod(os.path.join(root, f), 0o777)
 
     print("permissions fixed for segmentation embeddings")
-    """
+    
 
 
 if __name__ == "__main__":
