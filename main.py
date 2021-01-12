@@ -279,7 +279,8 @@ if __name__ == "__main__":
 
     time_stamps = ["1603830263", "1603830581"]
     for ts in time_stamps:
-        get_disease_embeddings_from_existing_models("schizophrenia", ts)
+        #get_disease_embeddings_from_existing_models("schizophrenia", ts)
+        get_test_set_embeddings_from_existing_models(ts)
 
 
     #extract_data.run()
