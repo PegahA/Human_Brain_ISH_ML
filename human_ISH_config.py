@@ -10,7 +10,8 @@ STUDY = "cortex"
 DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
 
 #DATA_DIR = "/human_ISH/human_ish_data"
-CODE_DIR = "/"
+#CODE_DIR = "/"
+CODE_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_code"
 #VOL_CODE_DIR = "/human_ISH/human_ish_code"
 PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
 
