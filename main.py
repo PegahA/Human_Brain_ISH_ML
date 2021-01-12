@@ -165,6 +165,11 @@ parser.add_argument(
     help='The type of aggregation used to combine the different embeddings '
          'after augmentation.')
 
+# ------ for test ------
+
+parser.add_argument(
+    '--test_dataset', default=TEST_SET, type= str,
+    help='Location used to store checkpoints and dumped data.')
 
 # --------------
 
@@ -220,6 +225,51 @@ def get_disease_embeddings_from_existing_models(disease, trained_model_ts):
 
     print("permissions fixed for segmentation embeddings")
 
+
+def get_test_set_embeddings_from_existing_models(trained_model_ts):
+    args = parser.parse_args()
+
+    experiment_root = os.path.join(DATA_DIR, "cortex", "experiment_files", "experiment_" + trained_model_ts)
+
+    if (not os.path.exists(experiment_root)):
+        print("experiment root does not exist")
+
+    embed_py_path = os.path.join(TRIPLET_DIR, "embed.py")
+
+    disease_command_line_string = "python " + embed_py_path + \
+                                  " --experiment_root=" + "'" + experiment_root + "'" + \
+                                  " --dataset=" + "'" + args.test_dataset + "'" + \
+                                  " --image_root=" + "'" + args.image_root + "'" + \
+                                  " --loading_threads=" + str(args.loading_threads) + \
+                                  " --batch_size=" + str(args.embed_batch_size) + \
+                                  (" --flip_augment" if args.embed_flip_augment else "") + \
+                                  (" --crop_augment=" + args.embed_crop_augment if args.embed_crop_augment else "") + \
+                                  (" --aggregator=" + args.embed_aggregator if args.embed_aggregator else "")
+
+    os.system(disease_command_line_string)
+
+    process.convert_h5_to_csv(experiment_root)
+    filename = process.save_embedding_info_into_file(trained_model_ts)
+
+    process.merge_embeddings_to_gene_level(filename)
+    process.merge_embeddings_to_image_level(filename)
+    process.merge_embeddings_to_donor_level(filename)
+
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR, STUDY, "experiment_files")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
+
+    print("permisssions fixed for experiment files")
+
+    for root, dirs, files in os.walk(os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")):
+        for d in dirs:
+            os.chmod(os.path.join(root, d), 0o777)
+        for f in files:
+            os.chmod(os.path.join(root, f), 0o777)
+
+    print("permissions fixed for segmentation embeddings")
 
 if __name__ == "__main__":
 
