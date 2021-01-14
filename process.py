@@ -1264,7 +1264,7 @@ def get_embeddings_from_pre_trained_model_for_each_set(model_name ="resnet50"):
 
     #set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
     #set_name_list = ["all_training.csv", "no_sz_all_training.csv"]
-    set_name_list = ["test"]
+    set_name_list = ["test.csv"]
 
     for set_name in set_name_list:
         print("set: ", set_name)
