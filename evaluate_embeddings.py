@@ -1072,7 +1072,7 @@ def main():
     #ts_list = ["1603830263", "1603830581"]
 
     #ts_list = ["1596183933"]
-    ts_list= ['random']
+    ts_list= ["resnet50_50_patches"]
 
 
     not_found_list = []
