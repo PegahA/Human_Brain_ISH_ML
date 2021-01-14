@@ -1175,7 +1175,8 @@ def generate_random_embeddings( embeddings_length):
     """
 
     #set_name_list = ["training.csv", "training_validation.csv", "validation.csv"]
-    set_name_list = ["all_training.csv", "no_sz_all_training.csv"]
+    #set_name_list = ["all_training.csv", "no_sz_all_training.csv"]
+    set_name_list = ["test.csv"]
     for set_name in set_name_list:
 
         print ("set: ", set_name)
@@ -2398,13 +2399,13 @@ if __name__ == '__main__':
     #add_new_columns_to_gene_level_embed_file("1602226166", ["entrez_id"])
     #add_new_columns_to_gene_level_embed_file("1603427156", ["entrez_id"])
 
-    #generate_random_embeddings(128)
+    generate_random_embeddings(128)
     #get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
 
-    add_new_columns_to_image_level_embed_file("1596183933", ["donor_id", "gene_symbol", "region", "entrez_id"])
+    #add_new_columns_to_image_level_embed_file("1596183933", ["donor_id", "gene_symbol", "region", "entrez_id"])
 
     #general_path = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4"
-    #path_to_embed = os.path.join(general_path, "1596183933_validation_embeddings_image_level_with_info.csv")
+    #path_to_embed = os.path.join(general_path, "1596183933_training_embeddings_image_level_with_info.csv")
     #merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embed)
-    #with_zeng_info_path = os.path.join(general_path, "1596183933_validation_embeddings_image_level_with_info_with_marker.csv")
+    #with_zeng_info_path = os.path.join(general_path, "1596183933_training_embeddings_image_level_with_info_with_marker.csv")
     #convert_to_tsv_meta_and_without_meta(with_zeng_info_path)
