@@ -2198,7 +2198,7 @@ def get_among_other_donors_gene_info():
 
 
 
-def separate_set_based_on_region(path_to_info, path_to_embeddings , sets):
+def separate_set_based_on_region(path_to_info, path_to_embeddings , sets, get_random_resnet = False):
     """
     This will be performed on image level.
     :param sets:
@@ -2207,22 +2207,38 @@ def separate_set_based_on_region(path_to_info, path_to_embeddings , sets):
 
     info_df = pd.read_csv(os.path.join(path_to_info, "human_ISH_info.csv"))
     print ("number of rows in info: ", len(info_df))
+
+    type = ""
     for set in sets:
-        path_to_set_image_level_embeds = os.path.join(path_to_embeddings, set + "_embeddings_image_level.csv")
-        set_embed_df = pd.read_csv(path_to_set_image_level_embeds)
+        if "random" in path_to_embeddings:
+            type = "random_"
+            path_to_set_image_level_embeds = os.path.join(path_to_embeddings, "random_" + set + "_embeddings_image_level.csv")
+            set_embed_df = pd.read_csv(path_to_set_image_level_embeds)
+            set_embed_df = set_embed_df.rename(columns={'id':'image_id'})
+
+        elif "plain_resnet" in path_to_embeddings:
+            type = "resnet50_"
+            path_to_set_image_level_embeds = os.path.join(path_to_embeddings, "resnet50_"+
+                                                          set + "_embeddings_image_level.csv")
+            set_embed_df = pd.read_csv(path_to_set_image_level_embeds)
+        else:
+            path_to_set_image_level_embeds = os.path.join(path_to_embeddings, set + "_embeddings_image_level.csv")
+            set_embed_df = pd.read_csv(path_to_set_image_level_embeds)
+
+
         tmp_df = pd.merge(set_embed_df, info_df[['image_id', 'region']], how='left', on='image_id')
 
-
         temporal_df = tmp_df[tmp_df['region'] == 'Temporal cortex']
-        temporal_df=temporal_df.drop(columns =['region'])
-        temporal_file_name = set + "_embeddings_image_level_temporal.csv"
-        temporal_df.to_csv(os.path.join(path_to_embeddings, temporal_file_name), index = None)
+        temporal_df = temporal_df.drop(columns=['region'])
+        temporal_file_name = type+ set + "_embeddings_image_level_temporal.csv"
+        temporal_df.to_csv(os.path.join(path_to_embeddings, temporal_file_name), index=None)
 
-
-        visual_df = tmp_df[tmp_df['region']=='Visual cortex']
+        visual_df = tmp_df[tmp_df['region'] == 'Visual cortex']
         visual_df = visual_df.drop(columns=['region'])
-        visual_file_name =  set + "_embeddings_image_level_visual.csv"
+        visual_file_name = type + set + "_embeddings_image_level_visual.csv"
         visual_df.to_csv(os.path.join(path_to_embeddings, visual_file_name), index=None)
+
+
 
 
 
@@ -2448,6 +2464,6 @@ if __name__ == '__main__':
 
     # ------- TEMPORAL VS VISUAL
     path_to_info = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/cortex"
-    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1596183933"
+    path_to_embeddings = "/Users/pegah_abed/Documents/human_brains_final_files/final/final_files_and_folders/cortex_study/plain_resnet"
     sets = ['test','validation']
-    separate_set_based_on_region(path_to_info, path_to_embeddings, sets)
+    separate_set_based_on_region(path_to_info, path_to_embeddings, sets, get_random_resnet=True)
