@@ -646,7 +646,6 @@ def evaluate(ts, not_found_list):
                    image_level_files_list.append(item)
                 if item.endswith("embeddings_image_level_temporal.csv") and 'autism' not in item and 'schizophrenia' not in item:
                    image_level_files_list.append(item)
-                    
             if "validation" in item:
                 if item.endswith(
                         "embeddings_image_level_visual.csv") and 'autism' not in item and 'schizophrenia' not in item:
@@ -1081,8 +1080,8 @@ def main():
 
     #ts_list = ["1603830263", "1603830581"]
 
-    ts_list = ["1596183933"]
-    #ts_list= ["resnet50_50_patches"]
+    #ts_list = ["1596183933"]
+    ts_list= ["resnet50_50_patches", "random"]
 
 
     not_found_list = []
