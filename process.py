@@ -2198,6 +2198,37 @@ def get_among_other_donors_gene_info():
 
 
 
+def separate_set_based_on_region(path_to_info, path_to_embeddings , sets):
+    """
+    This will be performed on image level.
+    :param sets:
+    :return:
+    """
+
+    info_df = pd.read_csv(os.path.join(path_to_info, "human_ISH_info.csv"))
+    print ("number of rows in info: ", len(info_df))
+    for set in sets:
+        path_to_set_image_level_embeds = os.path.join(path_to_embeddings, set + "_embeddings_image_level.csv")
+        set_embed_df = pd.read_csv(path_to_set_image_level_embeds)
+        tmp_df = pd.merge(set_embed_df, info_df[['image_id', 'region']], how='left', on='image_id')
+
+
+        temporal_df = tmp_df[tmp_df['region'] == 'Temporal cortex']
+        temporal_df=temporal_df.drop(columns =['region'])
+        temporal_file_name = set + "_embeddings_image_level_temporal.csv"
+        temporal_df.to_csv(os.path.join(path_to_embeddings, temporal_file_name), index = None)
+
+
+        visual_df = tmp_df[tmp_df['region']=='Visual cortex']
+        visual_df = visual_df.drop(columns=['region'])
+        visual_file_name =  set + "_embeddings_image_level_visual.csv"
+        visual_df.to_csv(os.path.join(path_to_embeddings, visual_file_name), index=None)
+
+
+
+
+
+
 
 
 
@@ -2402,7 +2433,7 @@ if __name__ == '__main__':
     #add_new_columns_to_gene_level_embed_file("1603427156", ["entrez_id"])
 
     #generate_random_embeddings(128)
-    get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
+    #get_embeddings_from_pre_trained_model_for_each_set(model_name="resnet50")
 
     #add_new_columns_to_image_level_embed_file("1596183933", ["donor_id", "gene_symbol", "region", "entrez_id"])
 
@@ -2411,3 +2442,12 @@ if __name__ == '__main__':
     #merge_with_zeng_layer_marker_and_expression(path_to_zeng, path_to_embed)
     #with_zeng_info_path = os.path.join(general_path, "1596183933_training_embeddings_image_level_with_info_with_marker.csv")
     #convert_to_tsv_meta_and_without_meta(with_zeng_info_path)
+
+
+
+
+    # ------- TEMPORAL VS VISUAL
+    path_to_info = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_4/cortex"
+    path_to_embeddings = "/Users/pegah_abed/Documents/old_Human_ISH/after_segmentation/dummy_3/1596183933"
+    sets = ['test','validation']
+    separate_set_based_on_region(path_to_info, path_to_embeddings, sets)
