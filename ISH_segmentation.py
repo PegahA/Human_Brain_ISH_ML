@@ -667,11 +667,11 @@ def create_valid_patches_info_csv_file():
 
 def main():
 
-    preprocess()
-    create_valid_patches_info_csv_file()
+
 
     rotate_horizontal_to_vertical()
     use_trained_model("training_example_apr_17.pkl", predict_new_masks=True)
+    create_valid_patches_info_csv_file()
 
     check_masks_and_patches_info()
     check_genes_in_images_with_not_enough_patches("less_than_" + PATCH_COUNT_PER_IMAGE + ".csv")
