@@ -57,12 +57,15 @@ The ```redownload_small_images()``` function will redownload the images that hav
 
 
 **ISH_segmentation.py**
-Once we have downloaded the images, we want to take random patches from each image. The number of patches to be taken from each image can be set through human_ISH_config.py. In our set up, we take 50 random patches. We are interested in patches that contain tissue and not the margins or backgrounds of an image. To ensure this, we perform foreground-background segmentation using a U-Net architecture. The code for this step can be access throught this repo: 
 
 
+Once we have downloaded the images, we want to take random patches from each image. The number of patches to be taken from each image can be set through ```human_ISH_config.py```. In our set up, we take 50 random patches. We are interested in patches that contain tissue and not the margins or backgrounds of an image. To ensure this, we perform foreground-background segmentation using a U-Net architecture. The code for this step can be access throught this repo: 
+
+Once we have a trained model, we can then use the ```use_trained_model()``` function to use that model and generate masks for images.
 
 
 **process.py**   
+
 
 After downlading the images and creating the patches, the next thing to do is to create the training, validation, and test sets. In this project, we want to create sets in a way that there are no shared genes between the sets. The ```define_sets_with_no_shared_genes``` function does this and returns the 3 resulted files as pandas dataframes.  
 
