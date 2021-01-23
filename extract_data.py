@@ -18,24 +18,19 @@ if (not os.path.exists(os.path.join(DATA_DIR , STUDY))):
     os.mkdir(os.path.join(DATA_DIR , STUDY))
 
 
-if (os.path.exists(os.path.join(DATA_DIR , STUDY , "xml_files"))):
+XML_DIR = os.path.join(DATA_DIR , STUDY , "xml_files")
+if (os.path.exists(XML_DIR)):
     print ("xml_files folder already exists.")
 else:
-    os.mkdir(os.path.join(DATA_DIR , STUDY , "xml_files"))
-
-XML_DIR = os.path.join(DATA_DIR , STUDY , "xml_files")
+    os.mkdir(XML_DIR)
 
 
-
-if (os.path.exists(os.path.join(DATA_DIR, STUDY, "images"))):
+IMAGES_DIR = os.path.join(DATA_DIR, STUDY, "images")
+if (os.path.exists(IMAGES_DIR)):
     print ("images folder already exists.")
 else:
-    os.mkdir(os.path.join(DATA_DIR, STUDY, "images"))
-IMAGES_DIR = os.path.join(DATA_DIR, STUDY, "images")
+    os.mkdir(IMAGES_DIR)
 
-
-#IMAGES_DIR = "/genome/scratch/Neuroinformatics/pabed/human_ish_images"
-#HUMAN_DIR = "/genome/scratch/Neuroinformatics/pabed/human_ish"
 
 
 def progressbar(it, prefix="", size=60, file=sys.stdout):
@@ -411,17 +406,17 @@ def run():
 
             print("finished processing image IDs for " + specimen_id)
 
-            # total_invalid_experiments = dict(total_invalid_experiments.items() + invalid_experiments.items())
-            #total_invalid_experiments.update(invalid_experiments)
+            total_invalid_experiments = dict(total_invalid_experiments.items() + invalid_experiments.items())
+            total_invalid_experiments.update(invalid_experiments)
 
-        #download_images(image_list_to_download)
-        #redownload_small_images()
+        download_images(image_list_to_download)
+        redownload_small_images()
 
-        # image_info_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "human_ISH_info.csv"), index=None)
+
         image_info_df.to_csv(os.path.join(DATA_DIR, STUDY, "human_ISH_info.csv"), index=None)
         print("finished creating image_info csv file ...")
 
-        """
+
         invalids_df = pd.DataFrame(columns=['specimen_id', 'experiment_id'])
         for k in total_invalid_experiments.keys():
             for v in total_invalid_experiments[k]:
@@ -429,10 +424,10 @@ def run():
 
                 invalids_df = invalids_df.append(new_row, ignore_index=True)
 
-        #invalids_df.to_csv(os.path.join(HUMAN_DIR, STUDY, "invalids.csv"), index=None)
+        
         invalids_df.to_csv(os.path.join(DATA_DIR, STUDY, "invalids.csv"), index=None)
         print ("finished creating invalid images csv file ...")
-        """
+
 
 if __name__ == "__main__":
 
