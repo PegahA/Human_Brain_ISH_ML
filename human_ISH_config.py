@@ -5,15 +5,14 @@ import time
 
 LIST_OF_STUDIES = ["neurotransmitter", "cortex" , "subcortex", "schizophrenia", "autism"]
 STUDY = "cortex"
-#DATA_DIR = "/external/mgmt3/genome/scratch/Neuroinformatics/pabed/human_ish_data"
-#DATA_DIR = "/Users/pegah_abed/Documents/old_Human_ISH"
-DATA_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_data"
 
-#DATA_DIR = "/human_ISH/human_ish_data"
-#CODE_DIR = "/"
-CODE_DIR = "/external/rprshnas01/netdata_kcni/lflab/SiameseAllenData/human_ISH/human_ish_code"
-#VOL_CODE_DIR = "/human_ISH/human_ish_code"
-PATCH_TYPE = 'segmentation'    # options: 'r_per_image' and 'r_overall' and 'segmentation'
+cwd = os.getcwd()
+DATA_DIR = os.path.join(cwd, "human_ish_data")
+if (not os.path.exists(DATA_DIR)):
+    os.mkdir(DATA_DIR)
+
+CODE_DIR = cwd
+PATCH_TYPE = 'segmentation'
 
 TRAIN_ON_ALL = False
 
@@ -35,20 +34,11 @@ SEGMENTATION_TRAINING_SAMPLES = 40
 current_time  = int(time.time())
 TIMESTAMP = str(current_time)
 
-if PATCH_TYPE == 'r_per_image':
-    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "per_image_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
-    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "per_image_r_embeddings")
 
-elif  PATCH_TYPE == 'r_overall' :
-    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "overall_r_patches")
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
-    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "overall_r_embeddings")
 
-elif PATCH_TYPE == 'segmentation':
-    IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
-    EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
-    EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
+IMAGE_ROOT = os.path.join(DATA_DIR, STUDY, "segmentation_data" ,"trained_on_"+str(SEGMENTATION_TRAINING_SAMPLES), "results" , "final_patches_"+str(PATCH_COUNT_PER_IMAGE))
+EXPERIMENT_ROOT = os.path.join(DATA_DIR, STUDY, "experiment_files", "experiment_" + TIMESTAMP)
+EMBEDDING_DEST = os.path.join(DATA_DIR, STUDY, "segmentation_embeddings")
 
 
 
@@ -82,8 +72,8 @@ TRAIN_EMBEDDING_DIM = 128
 TRAIN_BATCH_P = 17
 TRAIN_BATCH_K = 17
 EMBED_BATCH_SIZE = 128
-NET_INPUT_HEIGHT = PATCH_HEIGHT  # do you want to try 240?
-NET_INPUT_WIDTH = PATCH_WIDTH # do you want to try 240?
+NET_INPUT_HEIGHT = PATCH_HEIGHT
+NET_INPUT_WIDTH = PATCH_WIDTH
 PRE_CROP_HEIGHT = PATCH_HEIGHT
 PRE_CROP_WIDTH = PATCH_WIDTH
 LOADING_THREADS = 20
