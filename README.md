@@ -59,9 +59,11 @@ The ```redownload_small_images()``` function will redownload the images that hav
 **ISH_segmentation.py**
 
 
-Once we have downloaded the images, we want to take random patches from each image. The number of patches to be taken from each image can be set through ```human_ISH_config.py```. In our set up, we take 50 random patches. We are interested in patches that contain tissue and not the margins or backgrounds of an image. To ensure this, we perform foreground-background segmentation using a U-Net architecture. The code for this step can be access throught this repo: 
+Once we have downloaded the images, we want to take random patches from each image. The number of patches to be taken from each image can be set through ```human_ISH_config.py```. In our set up, we take 50 random patches. We are interested in patches that contain tissue and not the margins or backgrounds of an image. To ensure this, we perform foreground-background segmentation using a U-Net architecture. The code for this step can be access through the [FastCell](https://github.com/Mouse-Imaging-Centre/fastCell) repository. 
 
-Once we have a trained model, we can then use the ```use_trained_model()``` function to use that model and generate masks for images.
+In order to train the U-Net model, we need to manually prepare black and white masks that segment the foreground and background. We generated 40 masks using 40 random images of the cortex study.
+
+Once we have a trained model, we can then use the ```use_trained_model()``` function to use that model and generate masks for new images. The ```use_trained_model()``` function call another function, ```create_patches()``` which will take random patches out of the black and white mask. The number of patches is indicated in the ```human_ISH_config.py``` and is set to 50 by default. For each random patch taken from the mask, we first check to see if it is valid. For a mask patch to be considered valid, at least 90% of its pixels need to be marked as foreground. We keep taking patches out of the mask image and check to see if they are valid until one of the two conditions are met: We find 50 valid patches, or the max number of iterations (set to be 500) is reached. Once the valid mask patches are found, we then take the corresponding patches from the original image as our final patches and store them. 
 
 
 **process.py**   
